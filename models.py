@@ -10,6 +10,15 @@ from django.contrib.auth.models import User
 from rapidsms.messages import IncomingMessage
 import datetime
 
+class DeliveryGroup(models.Model):
+    name = models.CharField(max_length=100)
+    
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)  
+    
 class NodeType(models.Model):
     name = models.CharField(max_length=100, blank=True)
     parent_node_type = models.ForeignKey("self", null=True, blank=True)
@@ -33,6 +42,7 @@ class NodeBase(models.Model):
     name = models.CharField(max_length=100, blank=True)
     active = models.BooleanField(default=True)
     node_location = models.ForeignKey(NodeLocation, null=True, blank=True)
+    delivery_group = models.ForeignKey(DeliveryGroup, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def node_type_name(self):

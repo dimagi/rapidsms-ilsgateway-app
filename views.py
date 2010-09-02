@@ -23,7 +23,9 @@ def dashboard(request):
 
 def facilities_index(request):
     facilities = Node.objects.filter(node_type__name="Facility")
-    return render_to_response("facilities_list.html", {"facilities": facilities })
+    return render_to_response("facilities_list.html", 
+                              {"facilities": facilities },
+                              context_instance=RequestContext(request),)
 
 def facilities_detail(request, facility_id):
     try:
@@ -31,12 +33,14 @@ def facilities_detail(request, facility_id):
     except Node.DoesNotExist:
         raise Http404
     
-    return render_to_response('facilities_detail.html', {'facility': f,})
+    return render_to_response('facilities_detail.html', {'facility': f,},
+                              context_instance=RequestContext(request),)
     
 def districts_index(request):
     #TODO filter
     districts = Node.objects.filter(node_type__name="District")
-    return render_to_response("districts_list.html", {"districts": districts })
+    return render_to_response("districts_list.html", {"districts": districts },
+                              context_instance=RequestContext(request),)
 
 def districts_detail(request, district_id):
     try:
@@ -48,7 +52,8 @@ def districts_detail(request, district_id):
     products = Product.objects.all()
     return render_to_response('districts_detail.html', {'district': d,
                                                         'facilities': facilities, 
-                                                        'products' : products,})
+                                                        'products' : products,},
+                                                        context_instance=RequestContext(request),)
         
 
 def gdata_required(f):

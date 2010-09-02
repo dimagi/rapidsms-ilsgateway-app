@@ -1,11 +1,12 @@
 {% extends "layout.html" %}
+
 {% block title %}Dashboard{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
 <style type="text/css">
     #inner {
-        margin: 4em 25%;
+        #margin: 4em 25%;
     }
 
     div.module div {
@@ -27,27 +28,40 @@
         padding: 1em;
         margin: 0;
     }
+    
+    /* only a single h1 per view */
+    #inner h1 {
+        color: #ccc;
+        font-size: 2em;
+        line-height: 1;
+        font-weight: normal;
+        margin: 0.5em 0 1em 0;
+        text-shadow: #eee 2px 2px 2px;
+    }
+
+    #inner h1 a {
+        color: #000;
+        text-decoration: none;
+    }    
 </style>
 {% endblock %}
 
 {% block content %}
-
-<a href="">Home</a> | <a href="">Nation</a> | <a href="">Zones</a> | <a href="">Regions</a> | <a href="">Districts</a> | <a href="">Facilities</a> | 
-
 <h1>
     <a href="">ILSGateway</a>
     / <a href="">Dashboard</a>
 </h1>
-<h2>Welcome, username</h2>
-<h3>Mtwara District</h3>
-
-<h4>Alerts</h4> (click the links for more details or to send reminders to these facilities)
-<ul>
-    <li><a href="">6 Facilities</a> have reported not submitting their R &amp; R form as of June 6.</li>
-    <li><a href="">5 Facilities</a> did not respond to the SMS on June 6 asking if they had submitted their R&amp;R form.</li>
-    <li><a href="">6 Facilities</a> have not reported their stock levels for June 1.</li>
-</ul>
-
-<h4>R &amp; R Submission Summary</h4>
-<h4>Product Availability Summary</h4>
+<h2>Welcome, {{ user.username }}</h2>
+<div class="module">
+    <h3>Mtwara District</h3>
+    
+    <h4>Alerts</h4> (click the links for more details or to send reminders to these facilities)
+    <ul>
+        <li><a href="">6 Facilities</a> have reported not submitting their R &amp; R form as of June 6.</li>
+        <li><a href="">5 Facilities</a> did not respond to the SMS on June 6 asking if they had submitted their R&amp;R form.</li>
+        <li><a href="">6 Facilities</a> have not reported their stock levels for June 1.</li>
+    </ul>
+    
+    <img src="/static/ilsgateway/images/reports-mock-up-district-page.jpg">
+</div>
 {% endblock %}

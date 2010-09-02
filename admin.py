@@ -48,6 +48,9 @@ class PointAdmin(admin.ModelAdmin):
 
 class NodeLocationAdmin(admin.ModelAdmin):
     model = NodeLocation
+
+class DeliveryGroupAdmin(admin.ModelAdmin):
+    model = DeliveryGroup
     
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductReportType, ProductReportTypeAdmin)
@@ -60,6 +63,6 @@ admin.site.register(NodeStatus, NodeStatusAdmin)
 admin.site.register(NodeStatusType, NodeStatusTypeAdmin)
 admin.site.register(Point, PointAdmin)
 admin.site.register(NodeLocation, NodeLocationAdmin)
-
+admin.site.register(DeliveryGroup, DeliveryGroupAdmin)
 
 

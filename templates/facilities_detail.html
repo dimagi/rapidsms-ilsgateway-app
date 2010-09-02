@@ -1,17 +1,22 @@
-{{ facility.name }} 
-<table>
-    <thead>
-        <th>Product</th>
-        <th>Months of Stock</th>
-        <th>Last SMS Received</th>
-    </thead>
-    <tbody>
-        {% for product in facility.get_products %}
-        <tr>
-            <td>{{ product.name }}</td><td>3</td><td>2/1/2010<td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% extends "layout.html" %}
 
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <h3>{{ facility.name }}</h3> 
+    <table>
+        <thead>
+            <th>Product</th>
+            <th>Months of Stock</th>
+            <th>Last SMS Received</th>
+        </thead>
+        <tbody>
+            {% for product in facility.get_products %}
+            <tr>
+                <td>{{ product.name }}</td><td>3</td><td>2/1/2010</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
 

@@ -1,12 +1,21 @@
-<table>
-    <thead>
-        <th>Name</th>
-    </thead>
-    <tbody>
-        {% for facility in facilities %}
-        <tr>
-            <td>{{ facility.name }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h3><a href="">Mtwara Region</a> / <a href="/districts">Mtwara District</a> / <a href="/facilities">Facilities</a></h3>
+    <table>
+        <thead>
+            <th>Name</th>
+        </thead>
+        <tbody>
+            {% for facility in facilities %}
+            <tr>
+                <td>{{ facility.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
