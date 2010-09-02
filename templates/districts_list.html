@@ -1,0 +1,12 @@
+<table>
+    <thead>
+        <th>Name</th>
+    </thead>
+    <tbody>
+        {% for district in districts %}
+        <tr>
+            <td>{{ district.name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

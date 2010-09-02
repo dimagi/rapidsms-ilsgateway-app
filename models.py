@@ -4,7 +4,7 @@
 
 from django.db import models
 from rapidsms.models import ExtensibleModelBase
-from rapidsms.contrib.locations.models import Point
+from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact, Connection
 from django.contrib.auth.models import User
 from rapidsms.messages import IncomingMessage
@@ -12,20 +12,27 @@ import datetime
 
 class NodeType(models.Model):
     name = models.CharField(max_length=100, blank=True)
-    child_node_types = models.ManyToManyField("self", symmetrical=False, null=True, blank=True)
+    parent_node_type = models.ForeignKey("self", null=True, blank=True)
     
     def __unicode__(self):
         return self.name
     
     class Meta:
         verbose_name = "ILS Level"  
+
+class NodeLocation(Location):
+    def __unicode__(self):
+        """
+        """
+        
+        return getattr(self, "name", "# is %d" % self.pk)
     
 class NodeBase(models.Model):
     node_type = models.ForeignKey(NodeType, null=True, blank=True)
-    child_node = models.ManyToManyField("self", symmetrical=True, null=True, blank=True)
+    parent_node = models.ForeignKey("self", null=True, blank=True)
     name = models.CharField(max_length=100, blank=True)
     active = models.BooleanField(default=True)
-    location = models.ForeignKey(Point, null=True, blank=True)
+    node_location = models.ForeignKey(NodeLocation, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def node_type_name(self):
@@ -41,7 +48,7 @@ class NodeBase(models.Model):
 #        return "<Person #%r>" % (
 #            self.pk or "??")
 
-    def lookup(self, location=None):
+    def lookup(self, node_location=None):
         pass
     
 class Product(models.Model):
@@ -57,6 +64,7 @@ class Product(models.Model):
 class Node(NodeBase):
     __metaclass__ = ExtensibleModelBase
     products = models.ManyToManyField(Product, through='NodeProductReport')
+    msd_code = models.CharField(max_length=100)
 
     class Meta:
         verbose_name = "System Node"
@@ -68,6 +76,18 @@ class Node(NodeBase):
     def current_status(self):
         #TODO catch when no status exists
         return self.nodestatus_set.latest()
+    
+    def get_products(self):
+        return Product.objects.filter(node__id=self.id).distinct()
+    
+    def months_of_stock(self, product):
+        return 4
+    
+    def last_reported_quantity(self, product):
+        return NodeProductReport.objects.filter(node__id=self.id,
+                                                product__id=product.id,
+                                                report_type__id=1)[0:1].get()
+        #return NodeProductReport.objects.all()[0].quantity
     
 class ContactRole(models.Model):
     name = models.CharField(max_length=100, blank=True)
@@ -136,6 +156,7 @@ class NodeProductReport(models.Model):
 
     class Meta:
         verbose_name = "Inventory Status Report" 
+        ordering = ('-report_date',)
         
 class NodeStatusType(models.Model):
     name = models.CharField(max_length=100)
@@ -166,4 +187,4 @@ class NodeStatus(models.Model):
         verbose_name = "Facility Status"
         verbose_name_plural = "Facility Statuses"  
         get_latest_by = "status_date"  
-        ordering = ('-status_date',)
+        ordering = ('-status_date',)    

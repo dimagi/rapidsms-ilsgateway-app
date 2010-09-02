@@ -1,0 +1,12 @@
+<table>
+    <thead>
+        <th>Name</th>
+    </thead>
+    <tbody>
+        {% for facility in facilities %}
+        <tr>
+            <td>{{ facility.name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

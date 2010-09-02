@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style type="text/css">
+    #inner {
+        margin: 4em 25%;
+    }
+
+    div.module div {
+        border: 1px solid #ddd;
+        border-top-color: #636363;
+        margin-top: -1px;
+    }
+
+    div.module p {
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+    code, pre {
+        background: #ffe;
+    }
+
+    pre {
+        padding: 1em;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<a href="">Home</a> | <a href="">Nation</a> | <a href="">Zones</a> | <a href="">Regions</a> | <a href="">Districts</a> | <a href="">Facilities</a> | 
+
+<h1>
+    <a href="">ILSGateway</a>
+    / <a href="">Dashboard</a>
+</h1>
+<h2>Welcome, username</h2>
+<h3>Mtwara District</h3>
+
+<h4>Alerts</h4> (click the links for more details or to send reminders to these facilities)
+<ul>
+    <li><a href="">6 Facilities</a> have reported not submitting their R &amp; R form as of June 6.</li>
+    <li><a href="">5 Facilities</a> did not respond to the SMS on June 6 asking if they had submitted their R&amp;R form.</li>
+    <li><a href="">6 Facilities</a> have not reported their stock levels for June 1.</li>
+</ul>
+
+<h4>R &amp; R Submission Summary</h4>
+<h4>Product Availability Summary</h4>
+{% endblock %}

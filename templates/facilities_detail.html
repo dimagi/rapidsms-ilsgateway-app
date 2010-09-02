@@ -1,0 +1,17 @@
+{{ facility.name }} 
+<table>
+    <thead>
+        <th>Product</th>
+        <th>Months of Stock</th>
+        <th>Last SMS Received</th>
+    </thead>
+    <tbody>
+        {% for product in facility.get_products %}
+        <tr>
+            <td>{{ product.name }}</td><td>3</td><td>2/1/2010<td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+

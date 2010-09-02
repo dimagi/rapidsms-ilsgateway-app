@@ -4,15 +4,10 @@
 from django.contrib import admin
 from ilsgateway.models import *
 from rapidsms.models import Connection
-
-class LevelInline(admin.TabularInline):
-    model = Node
+from rapidsms.contrib.locations.models import Point
 
 class NodeTypeAdmin(admin.ModelAdmin):
     model = NodeType
-    inlines = [
-         LevelInline
-    ]
 
 class ContactInline(admin.ModelAdmin):
     model = Contact
@@ -48,6 +43,12 @@ class NodeStatusTypeAdmin(admin.ModelAdmin):
     model = NodeStatusType
     list_display = ('name', 'short_name')
     
+class PointAdmin(admin.ModelAdmin):
+    model = Point    
+
+class NodeLocationAdmin(admin.ModelAdmin):
+    model = NodeLocation
+    
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductReportType, ProductReportTypeAdmin)
 admin.site.register(NodeProductReport, NodeProductReportAdmin)
@@ -57,5 +58,8 @@ admin.site.register(ContactDetail, ContactDetailAdmin)
 admin.site.register(Node, NodeAdmin)
 admin.site.register(NodeStatus, NodeStatusAdmin)
 admin.site.register(NodeStatusType, NodeStatusTypeAdmin)
+admin.site.register(Point, PointAdmin)
+admin.site.register(NodeLocation, NodeLocationAdmin)
+
 
 
