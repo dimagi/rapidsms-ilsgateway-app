@@ -60,7 +60,7 @@ def gdata_required(f):
             # no token at all, request one-time-token
             # next: where to redirect
             # scope: what service you want to get access to
-            return HttpResponseRedirect("https://www.google.com/accounts/AuthSubRequest?next=http://ilsgateway.dimagi.com/&scope=http://docs.google.com/feeds/documents&session=1")
+            return HttpResponseRedirect("https://www.google.com/accounts/AuthSubRequest?next=http://ilsgateway.dimagi.com/scanning_query&scope=http://docs.google.com/feeds/documents&session=1")
         elif 'token' not in request.session and 'token' in request.GET:
             # request session token using one-time-token
             conn = HTTPSConnection("www.google.com")
