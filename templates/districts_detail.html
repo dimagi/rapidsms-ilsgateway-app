@@ -1,17 +1,24 @@
-{{ district.name }} 
-<table>
-    <thead>
-        <th>MSD Code</th>
-        <th>Name</th>
-        {% for product in products %}
-        <th>{{ product.name }}</th>
-        {% endfor %}
-    </thead>
-    <tbody>
-        {% for facility in facilities %}
-        <tr>
-            <td>{{ facility.msd_code }}</td><td>{{ facility.name }}</td><td>2/1/2010</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %} 
+
+{% block content %}
+<div class="module">
+    <h3>Mtwara Region / <a href="{% url ilsgateway.views.districts_detail district.id %}">{{ district.name }}</a> / <a href="/facilities">Facilities</a></h3>
+    <table>
+        <thead>
+            <th>MSD Code</th>
+            <th>Name</th>
+            {% for facility in facilities %}
+            <th>{{ product.name }}</th>
+        </thead>
+        <tbody>
+            {% for facility in facilities %}
+            <tr>
+                <td><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

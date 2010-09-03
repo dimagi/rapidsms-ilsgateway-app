@@ -7,8 +7,7 @@ import datetime
         
 class ConfirmDeliveryReceived(KeywordHandler):
     """
-    Handle any message prefixed ``echo``, responding with the remainder
-    of the text. Useful for remotely testing internationalization.
+    for reporting delivery confirmation, products and amounts
     """
 
     keyword = "dlvd"
@@ -18,7 +17,7 @@ class ConfirmDeliveryReceived(KeywordHandler):
         st = NodeStatusType.objects.filter(short_name="delivery_received")[0:1].get()
         ns = NodeStatus(node=self.msg.contact.contactdetail.node, status_type=st, status_date=datetime.datetime.now())
         ns.save()
-        self.respond("To record a delivery, respond with DLVD product amt...")
+        self.respond("To record a delivery, respond with DLVD product amount.  For example, dlvd con 500.")
 
     def handle(self, text):
         st = NodeStatusType.objects.filter(short_name="delivery_quantities_reported")[0:1].get()

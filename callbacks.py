@@ -21,7 +21,6 @@ def facility_randr_reminder(router):
         st = NodeStatusType.objects.filter(short_name="r_and_r_reminder_sent")[0:1].get()
         ns = NodeStatus(node=fic_cd.node, status_type=st, status_date=datetime.datetime.now())
         ns.save()
-        logging.info(fic_cd.node.name)
         logging.info("R&R reminder message sent to all PRIMARY facility in-charges")
         
 def facility_delivery_reminder(router):
@@ -34,5 +33,4 @@ def facility_delivery_reminder(router):
         st = NodeStatusType.objects.filter(short_name="delivery_received_reminder_sent")[0:1].get()
         ns = NodeStatus(node=fic_cd.node, status_type=st, status_date=datetime.datetime.now())
         ns.save()
-        logging.info(fic_cd.node.name)
         logging.info("Delivery reminder message sent to all PRIMARY facility in-charges")                  

@@ -45,7 +45,7 @@
     }    
 </style>
 
-<h1>Current Stock Status | <a href="/facilities/ordering">Ordering Status</a></h1>
+<h1><a href="/facilities">Current Stock Status</a> | Ordering Status</h1>
 
 <div class="module">
     <h3>Mtwara Region / <a href="/facilities">Masasi</a> / <a href="/facilities">Facilities</a></h3>
@@ -54,9 +54,10 @@
             <th>MSD Code</th>
             <th>Delivery Group</th>
             <th>Name</th>
-          {% for product in products %}
-            <th>{{ product.name }}</th>
-          {% endfor %}            
+            <th>R&amp;R Status</th>
+            <th>Date</th>
+            <th>Delivery Status</th>
+            <th>Date</th>
         </thead>
         <tbody>
             {% for facility in facilities %}
@@ -64,11 +65,10 @@
                 <td>{{ facility.msd_code }}</td>
                 <td>{{ facility.delivery_group.name }}</td>
                 <td><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a></td>
-                <td>122</td>
-                <td>242</td>
-                <td>544</td>
-                <td>454</td>
-                <td>333</td>
+                <td>{{ facility.randr_status.status_type.name }}</td>
+                <td>{{ facility.randr_status.status_date }}</td>
+                <td>{{ facility.delivery_status.status_type.name }}</td>
+                <td>{{ facility.delivery_status.status_date }}</td>
             </tr>
             {% endfor %}
         </tbody>

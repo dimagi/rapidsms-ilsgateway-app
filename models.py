@@ -27,21 +27,13 @@ class NodeType(models.Model):
         return self.name
     
     class Meta:
-        verbose_name = "ILS Level"  
-
-class NodeLocation(Location):
-    def __unicode__(self):
-        """
-        """
-        
-        return getattr(self, "name", "# is %d" % self.pk)
+        verbose_name = "ILS Level"      
     
 class NodeBase(models.Model):
     node_type = models.ForeignKey(NodeType, null=True, blank=True)
     parent_node = models.ForeignKey("self", null=True, blank=True)
     name = models.CharField(max_length=100, blank=True)
     active = models.BooleanField(default=True)
-    node_location = models.ForeignKey(NodeLocation, null=True, blank=True)
     delivery_group = models.ForeignKey(DeliveryGroup, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -82,6 +74,12 @@ class Node(NodeBase):
     def report_product_status(self, **kwargs):
         npr = NodeProductReport(node = self,  **kwargs)
         npr.save()
+        
+    def randr_status(self):
+        return self.nodestatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
+    
+    def delivery_status(self):
+        return self.nodestatus_set.filter(status_type__short_name__startswith='delivery').latest()  
         
     def current_status(self):
         #TODO catch when no status exists
@@ -183,7 +181,7 @@ class NodeStatus(models.Model):
     #message = models.ForeignKey(Message)
     status_date = models.DateTimeField()
     node = models.ForeignKey(Node) 
-    
+        
     def status_type_name(self):
         return self.status_type.name
     
@@ -197,4 +195,12 @@ class NodeStatus(models.Model):
         verbose_name = "Facility Status"
         verbose_name_plural = "Facility Statuses"  
         get_latest_by = "status_date"  
-        ordering = ('-status_date',)    
+        ordering = ('-status_date',) 
+        
+class NodeLocation(Location):
+    node = models.ForeignKey(Node, null=True, blank=True)
+    
+    def __unicode__(self):
+        """
+        """
+        return getattr(self, "name", "%s" % self.node.name)

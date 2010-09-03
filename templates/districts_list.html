@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="module">
-    <h3><a href="">Mtwara Region</a> / <a href="/districts">Mtwara District</a></h3>
+    <h3>Mtwara Region / <a href="/districts">Districts</a></h3>
     <table>
         <thead>
             <th>Name</th>
@@ -12,7 +12,7 @@
         <tbody>
             {% for district in districts %}
             <tr>
-                <td>{{ district.name }}</td>
+                <td><a href="{% url ilsgateway.views.districts_detail district.id %}">{{ district.name }}</a></td>
             </tr>
             {% endfor %}
         </tbody>

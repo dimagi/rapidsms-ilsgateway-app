@@ -16,15 +16,32 @@ from django.conf import settings
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 
+#xml test
+from xml.etree import ElementTree
+
 
 def dashboard(request):
+    district_name = Node.objects.filter(contactdetail__user__id='2')[0]
     return render_to_response('ilsgateway_dashboard.html',
+                              {'district_name': district_name,},
                               context_instance=RequestContext(request))
 
 def facilities_index(request):
-    facilities = Node.objects.filter(node_type__name="Facility")
+    #TODO remove hardcoded default district
+    facilities = Node.objects.filter(node_type__name="Facility", parent_node__id=9)
+    products = Product.objects.all()
     return render_to_response("facilities_list.html", 
-                              {"facilities": facilities },
+                              {"facilities": facilities,
+                               "products": products, },
+                              context_instance=RequestContext(request),)
+
+def facilities_ordering(request):
+    #TODO remove hardcoded default district
+    facilities = Node.objects.filter(node_type__name="Facility", parent_node__id=9)
+    products = Product.objects.all()
+    return render_to_response("facilities_ordering.html", 
+                              {"facilities": facilities,
+                               "products": products, },
                               context_instance=RequestContext(request),)
 
 def facilities_detail(request, facility_id):
@@ -114,7 +131,7 @@ def scanning_query(request):
         else:
             q=''
         con = HTTPConnection("docs.google.com")
-        con.putrequest('GET', '/feeds/documents/private/full/?q=%s' % q)
+        con.putrequest('GET', '/feeds/documents/private/full/-/pdf?q=%s' % q)
         con.putheader('Authorization', 'AuthSub token="%s"' % request.session['token'])
         con.endheaders()
         con.send('')
@@ -125,3 +142,16 @@ def scanning_query(request):
         return render_to_response('b.html', {'dane':dane}, context_instance=RequestContext(request))
     else:
         return render_to_response('b.html', {'dane':'bad bad'}, context_instance=RequestContext(request))    
+
+def xml_test(request):
+    with open('podcasts.opml', 'rt') as f:
+        tree = ElementTree.parse(f)
+
+    response = {}
+    for node in tree.getiterator():
+        print node.tag, node.attrib
+        response[node.tag] = node.attrib
+
+    return HttpResponse(response)
+
+    
