@@ -58,7 +58,7 @@ class Product(models.Model):
     units = models.CharField(max_length=100)
     sms_code = models.CharField(max_length=10)
     description = models.CharField(max_length=255)
-    product_code = models.CharField(max_length=100, null=True, blank=True)\
+    product_code = models.CharField(max_length=100, null=True, blank=True)
     
     def __unicode__(self):
         return self.name

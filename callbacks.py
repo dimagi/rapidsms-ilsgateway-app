@@ -16,7 +16,7 @@ def facility_randr_reminder(router):
     facility_in_charge_contact_details = facility_in_charge_contact_details.filter(primary=True)
     for fic_cd in facility_in_charge_contact_details:
         c = fic_cd.connection()
-        m = OutgoingMessage(c, "%s: Please send in your R&R form by Sep 1 2010 and reply \"submitted\"" % (fic_cd.contact.name))
+        m = OutgoingMessage(c, "%s: Please send in your R&R form by Sep 15 2010 and reply \"submitted\"" % (fic_cd.contact.name))
         m.send() 
         st = NodeStatusType.objects.filter(short_name="r_and_r_reminder_sent_facility")[0:1].get()
         ns = NodeStatus(node=fic_cd.node, status_type=st, status_date=datetime.datetime.now())
