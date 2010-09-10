@@ -4,7 +4,7 @@
 import logging
 from rapidsms.models import Connection 
 from rapidsms.messages import OutgoingMessage
-from ilsgateway.models import ContactDetail, NodeStatusType, NodeStatus
+from ilsgateway.models import ContactDetail, ServiceDeliveryPointStatusType, ServiceDeliveryPointStatus
 import datetime
 
 ######################
@@ -18,8 +18,8 @@ def facility_randr_reminder(router):
         c = fic_cd.connection()
         m = OutgoingMessage(c, "%s: Please send in your R&R form by Sep 15 2010 and reply \"submitted\"" % (fic_cd.contact.name))
         m.send() 
-        st = NodeStatusType.objects.filter(short_name="r_and_r_reminder_sent_facility")[0:1].get()
-        ns = NodeStatus(node=fic_cd.node, status_type=st, status_date=datetime.datetime.now())
+        st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_reminder_sent_facility")[0:1].get()
+        ns = ServiceDeliveryPointStatus(service_delivery_point=fic_cd.service_delivery_point, status_type=st, status_date=datetime.datetime.now())
         ns.save()
 
     logging.info("R&R reminder message sent to all PRIMARY facility in-charges")
@@ -31,8 +31,8 @@ def district_randr_reminder(router):
         c = dmo_cd.connection()
         m = OutgoingMessage(c, "%s: Please send in your R&R forms by Sep 15 2010 and reply \"submitted\"" % (dmo_cd.contact.name))
         m.send() 
-        st = NodeStatusType.objects.filter(short_name="r_and_r_reminder_sent_district")[0:1].get()
-        ns = NodeStatus(node=dmo_cd.node, status_type=st, status_date=datetime.datetime.now())
+        st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_reminder_sent_district")[0:1].get()
+        ns = ServiceDeliveryPointStatus(service_delivery_point=dmo_cd.service_delivery_point, status_type=st, status_date=datetime.datetime.now())
         ns.save()
     
     logging.info("R&R reminder message sent to all PRIMARY district in-charges")        
@@ -44,8 +44,8 @@ def facility_delivery_reminder(router):
         c = fic_cd.connection()
         m = OutgoingMessage(c, "%s: Did you receive your delivery yet?  Please reply \"dlvd\"" % (fic_cd.contact.name))
         m.send() 
-        st = NodeStatusType.objects.filter(short_name="delivery_received_reminder_sent_facility")[0:1].get()
-        ns = NodeStatus(node=fic_cd.node, status_type=st, status_date=datetime.datetime.now())
+        st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received_reminder_sent_facility")[0:1].get()
+        ns = ServiceDeliveryPointStatus(service_delivery_point=fic_cd.service_delivery_point, status_type=st, status_date=datetime.datetime.now())
         ns.save()
     
     logging.info("Delivery reminder message sent to all PRIMARY facility in-charges")                  

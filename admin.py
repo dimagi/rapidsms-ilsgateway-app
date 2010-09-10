@@ -2,23 +2,22 @@
 # vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
 from django.contrib import admin
+from rapidsms.admin import *
 from ilsgateway.models import *
 from rapidsms.models import Connection
 from rapidsms.contrib.locations.models import Point
 
-class NodeTypeAdmin(admin.ModelAdmin):
-    model = NodeType
+class ServiceDeliveryPointTypeAdmin(admin.ModelAdmin):
+    model = ServiceDeliveryPointType
 
-class ContactInline(admin.ModelAdmin):
-    model = Contact
-
-class NodeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'node_type_name')
+class ServiceDeliveryPointAdmin(admin.ModelAdmin):
+    list_display = ('name', 'service_delivery_point_type_name')
     ordering = ['name']
     
 class ContactDetailAdmin(admin.ModelAdmin):
     model = ContactDetail
-    list_display = ('name', 'role_name', 'node_name', 'primary')
+    list_display = ('name', 'role_name', 'service_delivery_point_name', 'primary')
+    list_select_related = True
 
 class ContactRoleAdmin(admin.ModelAdmin):
     model = ContactRole
@@ -31,38 +30,39 @@ class ProductReportTypeAdmin(admin.ModelAdmin):
     model = ProductReportType
     list_display = ('name', 'sms_code')
     
-class NodeProductReportAdmin(admin.ModelAdmin):
-    model = NodeProductReport
-    list_display = ('product_name', 'report_type_name', 'node_name', 'quantity', 'report_date')
+class ServiceDeliveryPointProductReportAdmin(admin.ModelAdmin):
+    model = ServiceDeliveryPointProductReport
+    list_display = ('product_name', 'report_type_name', 'service_delivery_point_name', 'quantity', 'report_date')
     
-class NodeStatusAdmin(admin.ModelAdmin):
-    model = NodeStatus
-    list_display = ('status_type_name', 'node_name', 'status_date')
+class ServiceDeliveryPointStatusAdmin(admin.ModelAdmin):
+    model = ServiceDeliveryPointStatus
+    list_display = ('status_type_name', 'service_delivery_point_name', 'status_date')
 
-class NodeStatusTypeAdmin(admin.ModelAdmin):
-    model = NodeStatusType
+class ServiceDeliveryPointStatusTypeAdmin(admin.ModelAdmin):
+    model = ServiceDeliveryPointStatusType
     list_display = ('name', 'short_name')
     
 class PointAdmin(admin.ModelAdmin):
     model = Point    
 
-class NodeLocationAdmin(admin.ModelAdmin):
-    model = NodeLocation
+class ServiceDeliveryPointLocationAdmin(admin.ModelAdmin):
+    model = ServiceDeliveryPointLocation
 
 class DeliveryGroupAdmin(admin.ModelAdmin):
     model = DeliveryGroup
     
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductReportType, ProductReportTypeAdmin)
-admin.site.register(NodeProductReport, NodeProductReportAdmin)
-admin.site.register(NodeType, NodeTypeAdmin)
+admin.site.register(ServiceDeliveryPointProductReport, ServiceDeliveryPointProductReportAdmin)
+admin.site.register(ServiceDeliveryPointType, ServiceDeliveryPointTypeAdmin)
 admin.site.register(ContactRole, ContactRoleAdmin)
+admin.site.unregister(Contact)
 admin.site.register(ContactDetail, ContactDetailAdmin)
-admin.site.register(Node, NodeAdmin)
-admin.site.register(NodeStatus, NodeStatusAdmin)
-admin.site.register(NodeStatusType, NodeStatusTypeAdmin)
+admin.site.register(ServiceDeliveryPoint, ServiceDeliveryPointAdmin)
+admin.site.register(ServiceDeliveryPointStatus, ServiceDeliveryPointStatusAdmin)
+admin.site.register(ServiceDeliveryPointStatusType, ServiceDeliveryPointStatusTypeAdmin)
 admin.site.register(Point, PointAdmin)
-admin.site.register(NodeLocation, NodeLocationAdmin)
+admin.site.register(ServiceDeliveryPointLocation, ServiceDeliveryPointLocationAdmin)
 admin.site.register(DeliveryGroup, DeliveryGroupAdmin)
 
 

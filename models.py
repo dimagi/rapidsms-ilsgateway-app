@@ -19,40 +19,16 @@ class DeliveryGroup(models.Model):
     class Meta:
         ordering = ('name',)  
     
-class NodeType(models.Model):
+class ServiceDeliveryPointType(models.Model):
     name = models.CharField(max_length=100, blank=True)
-    parent_node_type = models.ForeignKey("self", null=True, blank=True)
+    parent_service_delivery_point_type = models.ForeignKey("self", null=True, blank=True)
     
     def __unicode__(self):
         return self.name
     
     class Meta:
         verbose_name = "ILS Level"      
-    
-class NodeBase(models.Model):
-    node_type = models.ForeignKey(NodeType, null=True, blank=True)
-    parent_node = models.ForeignKey("self", null=True, blank=True)
-    name = models.CharField(max_length=100, blank=True)
-    active = models.BooleanField(default=True)
-    delivery_group = models.ForeignKey(DeliveryGroup, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    def node_type_name(self):
-        return self.node_type
-
-    class Meta:
-        abstract = True
-
-    def __unicode__(self):
-        return self.name
-
-#    def __repr__(self):
-#        return "<Person #%r>" % (
-#            self.pk or "??")
-
-    def lookup(self, node_location=None):
-        pass
-    
+        
 class Product(models.Model):
     name = models.CharField(max_length=100)
     units = models.CharField(max_length=100)
@@ -63,39 +39,47 @@ class Product(models.Model):
     def __unicode__(self):
         return self.name
     
-class Node(NodeBase):
-    __metaclass__ = ExtensibleModelBase
-    products = models.ManyToManyField(Product, through='NodeProductReport')
-    msd_code = models.CharField(max_length=100)
+class ServiceDeliveryPoint(models.Model):
 
-    class Meta:
-        verbose_name = "System Node"
+    service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType, null=True, blank=True)
+    parent_service_delivery_point = models.ForeignKey("self", null=True, blank=True)
+    name = models.CharField(max_length=100, blank=True)
+    active = models.BooleanField(default=True)
+    delivery_group = models.ForeignKey(DeliveryGroup, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    products = models.ManyToManyField(Product, through='ServiceDeliveryPointProductReport')
+    msd_code = models.CharField(max_length=100, blank=True, null=True)
+
+    def service_delivery_point_type_name(self):
+        return self.service_delivery_point_type
     
     def report_product_status(self, **kwargs):
-        npr = NodeProductReport(node = self,  **kwargs)
+        npr = ServiceDeliveryPointProductReport(service_delivery_point = self,  **kwargs)
         npr.save()
         
     def randr_status(self):
-        return self.nodestatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
+        return self.service_delivery_pointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
     
     def delivery_status(self):
-        return self.nodestatus_set.filter(status_type__short_name__startswith='delivery').latest()  
+        return self.service_delivery_pointstatus_set.filter(status_type__short_name__startswith='delivery').latest()  
         
     def current_status(self):
         #TODO catch when no status exists
-        return self.nodestatus_set.latest()
+        return self.service_delivery_pointstatus_set.latest()
     
     def get_products(self):
-        return Product.objects.filter(node__id=self.id).distinct()
+        return Product.objects.filter(service_delivery_point__id=self.id).distinct()
     
     def months_of_stock(self, product):
         return 4
     
     def last_reported_quantity(self, product):
-        return NodeProductReport.objects.filter(node__id=self.id,
+        return ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
                                                 product__id=product.id,
                                                 report_type__id=1)[0:1].get()
-        #return NodeProductReport.objects.all()[0].quantity
+
+    def __unicode__(self):
+        return self.name
     
 class ContactRole(models.Model):
     name = models.CharField(max_length=100, blank=True)
@@ -106,12 +90,11 @@ class ContactRole(models.Model):
     def __unicode__(self):
         return self.name
 
-class ContactDetail(models.Model):
+class ContactDetail(Contact):
     user = models.OneToOneField(User, null=True, blank=True)
     role = models.ForeignKey(ContactRole, null=True, blank=True)
     #TODO validate only one primary can exist (or auto change all others to non-primary when new primary selected)
-    node = models.ForeignKey(Node,null=True)
-    contact = models.OneToOneField(Contact)
+    service_delivery_point = models.ForeignKey(ServiceDeliveryPoint,null=True,blank=True)
     primary = models.BooleanField(default=False)
     
     def name(self):
@@ -120,18 +103,15 @@ class ContactDetail(models.Model):
     def role_name(self):
         return self.role.name
 
-    def node_name(self):
-        return self.node.name
+    def service_delivery_point_name(self):
+        return self.service_delivery_point.name
     
     class Meta:
         verbose_name = "Contact Detail"
     
     def __unicode__(self):
-        return self.contact.name
-    
-    def connection(self):
-        return Connection.objects.filter(contact__id__exact=self.contact.id)[0]
-    
+        return self.name
+        
 class ProductReportType(models.Model):
     name = models.CharField(max_length=100)
     sms_code = models.CharField(max_length=10)
@@ -142,9 +122,9 @@ class ProductReportType(models.Model):
     class Meta:
         verbose_name = "Inventory Status Type" 
     
-class NodeProductReport(models.Model):
+class ServiceDeliveryPointProductReport(models.Model):
     product = models.ForeignKey(Product)
-    node = models.ForeignKey(Node)
+    service_delivery_point = models.ForeignKey(ServiceDeliveryPoint)
     report_type = models.ForeignKey(ProductReportType)
     quantity = models.IntegerField()  
     report_date = models.DateTimeField(auto_now_add=True, default=datetime.datetime.now())
@@ -153,20 +133,20 @@ class NodeProductReport(models.Model):
     def product_name(self):
         return self.product.name
     
-    def node_name(self):
-        return self.node.name
+    def service_delivery_point_name(self):
+        return self.service_delivery_point.name
 
     def report_type_name(self):
         return self.report_type.name
 
     def __unicode__(self):
-        return self.node.name + '-' + self.product.name + '-' + self.report_type.name
+        return self.service_delivery_point.name + '-' + self.product.name + '-' + self.report_type.name
 
     class Meta:
         verbose_name = "Inventory Status Report" 
         ordering = ('-report_date',)
         
-class NodeStatusType(models.Model):
+class ServiceDeliveryPointStatusType(models.Model):
     name = models.CharField(max_length=100)
     short_name = models.CharField(max_length=100)
 
@@ -176,17 +156,17 @@ class NodeStatusType(models.Model):
     def __unicode__(self):
         return self.name    
 
-class NodeStatus(models.Model):
-    status_type = models.ForeignKey(NodeStatusType)
+class ServiceDeliveryPointStatus(models.Model):
+    status_type = models.ForeignKey(ServiceDeliveryPointStatusType)
     #message = models.ForeignKey(Message)
     status_date = models.DateTimeField()
-    node = models.ForeignKey(Node) 
+    service_delivery_point = models.ForeignKey(ServiceDeliveryPoint) 
         
     def status_type_name(self):
         return self.status_type.name
     
-    def node_name(self):
-        return self.node.name
+    def service_delivery_point_name(self):
+        return self.service_delivery_point.name
     
     def __unicode__(self):
         return self.status_type.name
@@ -197,10 +177,10 @@ class NodeStatus(models.Model):
         get_latest_by = "status_date"  
         ordering = ('-status_date',) 
         
-class NodeLocation(Location):
-    node = models.ForeignKey(Node, null=True, blank=True)
+class ServiceDeliveryPointLocation(Location):
+    service_delivery_point = models.ForeignKey(ServiceDeliveryPoint, null=True, blank=True)
     
     def __unicode__(self):
         """
         """
-        return getattr(self, "name", "%s" % self.node.name)
+        return getattr(self, "name", "%s" % self.service_delivery_point.name)

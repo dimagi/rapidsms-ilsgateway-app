@@ -2,7 +2,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from rapidsms.contrib.handlers.handlers.pattern import PatternHandler
-from ilsgateway.models import Node, Product, ProductReportType, ContactDetail
+from ilsgateway.models import ServiceDeliveryPoint, Product, ProductReportType, ContactDetail
 
 class StockOnHandHandler(PatternHandler):
     pattern = r'^(\w+) (\w+) (\d+)$'
@@ -12,7 +12,7 @@ class StockOnHandHandler(PatternHandler):
         if not report_types:
             self.respond_error
         else:
-            n = self.msg.contact.contactdetail.node
+            n = self.msg.contact.contactdetail.service_delivery_point
             products = Product.objects.filter(sms_code=b) 
             if not products:
                 self.respond_error

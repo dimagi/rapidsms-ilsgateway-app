@@ -4,7 +4,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 import datetime
-from ilsgateway.models import Node, Product
+from ilsgateway.models import ServiceDeliveryPoint, Product
 from django.http import Http404
 from django.template import RequestContext
 
@@ -21,14 +21,15 @@ from xml.etree import ElementTree
 
 
 def dashboard(request):
-    district_name = Node.objects.filter(contactdetail__user__id='2')[0]
+    #todo: needs to be scoped to current user
+    district_name = ServiceDeliveryPoint.objects.filter(contactdetail__user__id='1')[0]
     return render_to_response('ilsgateway_dashboard.html',
                               {'district_name': district_name,},
                               context_instance=RequestContext(request))
 
 def facilities_index(request):
     #TODO remove hardcoded default district
-    facilities = Node.objects.filter(node_type__name="Facility", parent_node__id=9)
+    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="Facility", parent_service_delivery_point__id=9)
     products = Product.objects.all()
     return render_to_response("facilities_list.html", 
                               {"facilities": facilities,
@@ -37,7 +38,7 @@ def facilities_index(request):
 
 def facilities_ordering(request):
     #TODO remove hardcoded default district
-    facilities = Node.objects.filter(node_type__name="Facility", parent_node__id=9)
+    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="Facility", parent_service_delivery_point__id=9)
     products = Product.objects.all()
     return render_to_response("facilities_ordering.html", 
                               {"facilities": facilities,
@@ -46,8 +47,8 @@ def facilities_ordering(request):
 
 def facilities_detail(request, facility_id):
     try:
-        f = Node.objects.get(pk=facility_id)
-    except Node.DoesNotExist:
+        f = ServiceDeliveryPoint.objects.get(pk=facility_id)
+    except ServiceDeliveryPoint.DoesNotExist:
         raise Http404
     
     return render_to_response('facilities_detail.html', {'facility': f,},
@@ -55,17 +56,17 @@ def facilities_detail(request, facility_id):
     
 def districts_index(request):
     #TODO filter
-    districts = Node.objects.filter(node_type__name="District")
+    districts = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="District")
     return render_to_response("districts_list.html", {"districts": districts },
                               context_instance=RequestContext(request),)
 
 def districts_detail(request, district_id):
     try:
-        d = Node.objects.get(pk=district_id)
-    except Node.DoesNotExist:
+        d = ServiceDeliveryPoint.objects.get(pk=district_id)
+    except ServiceDeliveryPoint.DoesNotExist:
         raise Http404
     
-    facilities = Node.objects.filter(parent_node__id=district_id)
+    facilities = ServiceDeliveryPoint.objects.filter(parent_service_delivery_point__id=district_id)
     products = Product.objects.all()
     return render_to_response('districts_detail.html', {'district': d,
                                                         'facilities': facilities, 
@@ -148,9 +149,9 @@ def xml_test(request):
         tree = ElementTree.parse(f)
 
     response = {}
-    for node in tree.getiterator():
-        print node.tag, node.attrib
-        response[node.tag] = node.attrib
+    for service_delivery_point in tree.getiterator():
+        print service_delivery_point.tag, service_delivery_point.attrib
+        response[service_delivery_point.tag] = service_delivery_point.attrib
 
     return HttpResponse(response)
 
