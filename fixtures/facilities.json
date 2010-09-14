@@ -1,0 +1,79 @@
+[
+    {
+        "pk": 34, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 28, 
+            "delivery_group": 2, 
+            "msd_code": "D30793", 
+            "name": "CHIWALE H/C", 
+            "service_delivery_point_type": 4
+        }
+    }, 
+    {
+        "pk": 35, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 28, 
+            "delivery_group": 2, 
+            "msd_code": "D30794", 
+            "name": "NANYINDWA DISP.", 
+            "service_delivery_point_type": 4
+        }
+    }, 
+    {
+        "pk": 36, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 28, 
+            "delivery_group": 2, 
+            "msd_code": "D30795", 
+            "name": "MIHIMA DISP", 
+            "service_delivery_point_type": 4
+        }
+    }, 
+    {
+        "pk": 37, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 28, 
+            "delivery_group": 1, 
+            "msd_code": "D30796", 
+            "name": "MBEMBA DISP", 
+            "service_delivery_point_type": 4
+        }
+    }, 
+    {
+        "pk": 38, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 28, 
+            "delivery_group": 1, 
+            "msd_code": "D30797", 
+            "name": "NANGANGA DISP", 
+            "service_delivery_point_type": 4
+        }
+    }, 
+    {
+        "pk": 39, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 28, 
+            "delivery_group": 1, 
+            "msd_code": "D30798", 
+            "name": "MKUTI DISP-", 
+            "service_delivery_point_type": 4
+        }
+    }, 
+    {
+        "pk": 40, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 28, 
+            "delivery_group": 1, 
+            "msd_code": "D30799", 
+            "name": "CHISEGU DISP", 
+            "service_delivery_point_type": 4
+        }
+    }
+]

@@ -14,10 +14,16 @@ class ServiceDeliveryPointAdmin(admin.ModelAdmin):
     list_display = ('name', 'service_delivery_point_type_name')
     ordering = ['name']
     
+class ConnectionInline(admin.TabularInline):
+    model = Connection
+    extra = 1
+    
 class ContactDetailAdmin(admin.ModelAdmin):
     model = ContactDetail
     list_display = ('name', 'role_name', 'service_delivery_point_name', 'primary')
-    list_select_related = True
+    inlines = [
+        ConnectionInline,
+    ]
 
 class ContactRoleAdmin(admin.ModelAdmin):
     model = ContactRole

@@ -31,7 +31,7 @@
     
     /* only a single h1 per view */
     #inner h1 {
-        color: #ccc;
+        color: #000;
         font-size: 2em;
         line-height: 1;
         font-weight: normal;
@@ -40,7 +40,7 @@
     }
 
     #inner h1 a {
-        color: #000;
+        color: #ccc;
         #text-decoration: none;
     }    
 </style>
@@ -48,7 +48,7 @@
 <h1>Current Stock Status | <a href="/facilities/ordering">Ordering Status</a></h1>
 
 <div class="module">
-    <h3>Mtwara Region / <a href="/facilities">Masasi</a> / <a href="/facilities">Facilities</a></h3>
+    <h3>{{ sdp.parent_service_delivery_point.name }} / <a href="/facilities">{{ sdp.name }}</a> / <a href="/facilities">FACILITIES</a></h3>
     <table>
         <thead>
             <th>MSD Code</th>
@@ -64,12 +64,12 @@
                 <td>{{ facility.msd_code }}</td>
                 <td>{{ facility.delivery_group.name }}</td>
                 <td><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a></td>
-                <td>122</td>
-                <td>242</td>
-                <td>544</td>
-                <td>454</td>
-                <td>333</td>
-                <td>3</td>
+                <td>{{ facility.stock_on_hand_imp }}</td>
+                <td>{{ facility.stock_on_hand_pop }}</td>
+                <td>{{ facility.stock_on_hand_con}}</td>
+                <td>{{ facility.stock_on_hand_inj }}</td>
+                <td>{{ facility.stock_on_hand_coc }}</td>
+                <td>{{ facility.stock_on_hand_iud }}</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -7,6 +7,7 @@ import datetime
 from ilsgateway.models import ServiceDeliveryPoint, Product
 from django.http import Http404
 from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
 
 #test
 from httplib import HTTPSConnection, HTTPConnection
@@ -19,47 +20,55 @@ from django.http import HttpResponseRedirect, HttpResponse
 #xml test
 from xml.etree import ElementTree
 
-
+@login_required
 def dashboard(request):
-    #todo: needs to be scoped to current user
-    district_name = ServiceDeliveryPoint.objects.filter(contactdetail__user__id='1')[0]
+    sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     return render_to_response('ilsgateway_dashboard.html',
-                              {'district_name': district_name,},
+                              {'sdp': sdp,},
                               context_instance=RequestContext(request))
 
+@login_required
 def facilities_index(request):
-    #TODO remove hardcoded default district
-    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="Facility", parent_service_delivery_point__id=9)
+    sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp)
     products = Product.objects.all()
     return render_to_response("facilities_list.html", 
                               {"facilities": facilities,
-                               "products": products, },
+                               "products": products,
+                               "sdp": sdp },
                               context_instance=RequestContext(request),)
 
+@login_required
 def facilities_ordering(request):
-    #TODO remove hardcoded default district
-    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="Facility", parent_service_delivery_point__id=9)
+    sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp)
     products = Product.objects.all()
     return render_to_response("facilities_ordering.html", 
                               {"facilities": facilities,
-                               "products": products, },
+                               "products": products,
+                               "sdp": sdp},
                               context_instance=RequestContext(request),)
 
+@login_required
 def facilities_detail(request, facility_id):
     try:
         f = ServiceDeliveryPoint.objects.get(pk=facility_id)
     except ServiceDeliveryPoint.DoesNotExist:
         raise Http404
-    
-    return render_to_response('facilities_detail.html', {'facility': f,},
+
+    products = Product.objects.all()
+    return render_to_response('facilities_detail.html', {'facility': f,
+                                                         'products': products},
                               context_instance=RequestContext(request),)
-    
+
+@login_required    
 def districts_index(request):
     #TODO filter
-    districts = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="District")
+    districts = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="District", order_by="delivery_group_id")
     return render_to_response("districts_list.html", {"districts": districts },
                               context_instance=RequestContext(request),)
 
+@login_required
 def districts_detail(request, district_id):
     try:
         d = ServiceDeliveryPoint.objects.get(pk=district_id)
@@ -73,7 +82,6 @@ def districts_detail(request, district_id):
                                                         'products' : products,},
                                                         context_instance=RequestContext(request),)
         
-
 def gdata_required(f):
     """
     Authenticate against Google GData service
@@ -83,7 +91,7 @@ def gdata_required(f):
             # no token at all, request one-time-token
             # next: where to redirect
             # scope: what service you want to get access to
-            return HttpResponseRedirect("https://www.google.com/accounts/AuthSubRequest?next=http://ilsgateway.dimagi.com/scanning_query&scope=http://docs.google.com/feeds/documents&session=1")
+            return HttpResponseRedirect("https://www.google.com/accounts/AuthSubRequest?next=http://ilsgateway.dimagi.com/scanning_query&scope=scope=https://docs.google.com/feeds/%20http://spreadsheets.google.com/feeds/%20https://docs.googleusercontent.com/&session=1")
         elif 'token' not in request.session and 'token' in request.GET:
             # request session token using one-time-token
             conn = HTTPSConnection("www.google.com")
@@ -154,5 +162,3 @@ def xml_test(request):
         response[service_delivery_point.tag] = service_delivery_point.attrib
 
     return HttpResponse(response)
-
-    

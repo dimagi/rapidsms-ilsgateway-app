@@ -1,0 +1,56 @@
+[
+    {
+        "pk": 28, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 20, 
+            "name": "MASASI", 
+            "service_delivery_point_type": 3
+        }
+    }, 
+    {
+        "pk": 29, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 20, 
+            "name": "NANYUMBU", 
+            "service_delivery_point_type": 3
+        }
+    }, 
+    {
+        "pk": 30, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 20, 
+            "name": "NEWALA", 
+            "service_delivery_point_type": 3
+        }
+    }, 
+    {
+        "pk": 31, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 20, 
+            "name": "TANDAHIMBA", 
+            "service_delivery_point_type": 3
+        }
+    }, 
+    {
+        "pk": 32, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 20, 
+            "name": "MTWARA URBAN", 
+            "service_delivery_point_type": 3
+        }
+    }, 
+    {
+        "pk": 33, 
+        "model": "ilsgateway.servicedeliverypoint", 
+        "fields": {
+            "parent_service_delivery_point": 20, 
+            "name": "MTWARA RURAL", 
+            "service_delivery_point_type": 3
+        }
+    }
+]

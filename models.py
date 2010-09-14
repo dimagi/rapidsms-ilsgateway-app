@@ -38,12 +38,17 @@ class Product(models.Model):
     
     def __unicode__(self):
         return self.name
+
+class ServiceDeliveryPointManager(models.Manager):    
+    def get_by_natural_key(self, name):
+        return self.get(name=name)    
     
 class ServiceDeliveryPoint(models.Model):
+    objects = ServiceDeliveryPointManager()
 
     service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType, null=True, blank=True)
     parent_service_delivery_point = models.ForeignKey("self", null=True, blank=True)
-    name = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=100, blank=True, unique=True)
     active = models.BooleanField(default=True)
     delivery_group = models.ForeignKey(DeliveryGroup, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -58,25 +63,59 @@ class ServiceDeliveryPoint(models.Model):
         npr.save()
         
     def randr_status(self):
-        return self.service_delivery_pointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
+        return self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
     
     def delivery_status(self):
-        return self.service_delivery_pointstatus_set.filter(status_type__short_name__startswith='delivery').latest()  
+        return self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='delivery').latest()  
         
     def current_status(self):
         #TODO catch when no status exists
-        return self.service_delivery_pointstatus_set.latest()
+        return self.servicedeliverypointstatus_set.latest()
     
     def get_products(self):
-        return Product.objects.filter(service_delivery_point__id=self.id).distinct()
+        return Product.objects.filter(servicedeliverypoint=self.id).distinct()
     
     def months_of_stock(self, product):
         return 4
     
-    def last_reported_quantity(self, product):
-        return ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
-                                                product__id=product.id,
-                                                report_type__id=1)[0:1].get()
+    def last_submitted_randr_date(self):
+        return "2010-10-1"
+    
+    #As soon as I learn how to create dynamic methods these are gone    
+    def stock_on_hand(self, sms_code):
+        reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
+                                                product__sms_code=sms_code,
+                                                report_type__id=1) 
+        if reports:
+            return reports[0].quantity                                 
+        else:
+            return "(not reported)"        
+    
+    def stock_on_hand_last_reported(self):
+        reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
+                                                report_type__id=1) 
+        if reports:
+            return reports[0].report_date                                 
+        else:
+            return "(not reported)"                  
+    
+    def stock_on_hand_inj(self):
+        return self.stock_on_hand('inj')
+
+    def stock_on_hand_pop(self):
+        return self.stock_on_hand('pop')
+
+    def stock_on_hand_coc(self):
+        return self.stock_on_hand('coc')
+
+    def stock_on_hand_imp(self):
+        return self.stock_on_hand('imp')
+
+    def stock_on_hand_con(self):
+        return self.stock_on_hand('con')
+
+    def stock_on_hand_iud(self):
+        return self.stock_on_hand('iud')
 
     def __unicode__(self):
         return self.name

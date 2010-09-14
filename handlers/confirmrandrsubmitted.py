@@ -12,7 +12,7 @@ class ConfirmRandRSubmitted(PatternHandler):
     pattern = r'^subm.*$'
     def handle(self):
         service_delivery_point=self.msg.contact.contactdetail.service_delivery_point
-        if service_delivery_point.service_delivery_point_type.name == "District":
+        if service_delivery_point.service_delivery_point_type.name == "DISTRICT":
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_submitted_district_to_msd")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=service_delivery_point, status_type=st, status_date=datetime.datetime.now())
             ns.save()
@@ -23,7 +23,7 @@ class ConfirmRandRSubmitted(PatternHandler):
                 m.send() 
             
             return
-        elif service_delivery_point.service_delivery_point_type.name == "Facility":
+        elif service_delivery_point.service_delivery_point_type.name == "FACILITY":
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_submitted_facility_to_district")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=service_delivery_point, status_type=st, status_date=datetime.datetime.now())
             ns.save()

@@ -3,20 +3,21 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <h3>{{ facility.name }}</h3> 
+    <h3>{{ facility.name }}</h3>
+    <a href="">Last submitted R&R {{ sdp.last_submitted_randr_date }}</a>
     <table>
         <thead>
             <th>Product</th>
             <th>Months of Stock</th>
             <th>Last SMS Received</th>
-            <th>Last scanned R&amp;R</th>
         </thead>
         <tbody>
-            {% for product in facility.get_products %}
-            <tr>
-                <td>{{ product.name }}</td><td>3</td><td><a href="">2/1/2010</a></td><td><a href="/static/ilsgateway/images/randr-sample.pdf">Scanned 02/09/2010</a></td>
-            </tr>
-            {% endfor %}
+            <tr><td>Implants</td><td>{{ facility.stock_on_hand_imp }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
+            <tr><td>Progesterone only Pills</td><td>{{ facility.stock_on_hand_pop }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
+            <tr><td>Condoms</td><td>{{ facility.stock_on_hand_con }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
+            <tr><td>Injectables</td><td>{{ facility.stock_on_hand_inj }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
+            <tr><td>Combined Oral Contraceptives</td><td>{{ facility.stock_on_hand_coc }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
+            <tr><td>IUD</td><td>{{ facility.stock_on_hand_iud }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
         </tbody>
     </table>
 {% endblock %}
