@@ -46,7 +46,7 @@
 </style>
 
 <h1>Current Stock Status | <a href="/facilities/ordering">Ordering Status</a></h1>
-
+<h2>{% if view_type == 'inventory' %}<a href="/facilities/months_of_stock/">Show months of stock</a>{% else %}<a href="/facilities/inventory/">Show inventory{% endif %}</></h2>
 <div class="module">
     <h3>{{ sdp.parent_service_delivery_point.name }} / <a href="/facilities">{{ sdp.name }}</a> / <a href="/facilities">FACILITIES</a></h3>
     <table>
@@ -64,12 +64,21 @@
                 <td>{{ facility.msd_code }}</td>
                 <td>{{ facility.delivery_group.name }}</td>
                 <td><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a></td>
+            {% if view_type == 'inventory' %}
                 <td>{{ facility.stock_on_hand_imp }}</td>
                 <td>{{ facility.stock_on_hand_pop }}</td>
                 <td>{{ facility.stock_on_hand_con}}</td>
                 <td>{{ facility.stock_on_hand_inj }}</td>
                 <td>{{ facility.stock_on_hand_coc }}</td>
                 <td>{{ facility.stock_on_hand_iud }}</td>
+            {% else %}
+                <td>{{ facility.months_of_stock_imp }}</td>
+                <td>{{ facility.months_of_stock_pop }}</td>
+                <td>{{ facility.months_of_stock_con}}</td>
+                <td>{{ facility.months_of_stock_inj }}</td>
+                <td>{{ facility.months_of_stock_coc }}</td>
+                <td>{{ facility.months_of_stock_iud }}</td>            
+            {% endif%}
             </tr>
             {% endfor %}
         </tbody>

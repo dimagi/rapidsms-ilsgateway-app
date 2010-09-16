@@ -1,0 +1,17 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-09-15 16:39-0700\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\views.py:32
+msgid "hello"
+msgstr "hola"
+
+#~ msgid "Log out"
+#~ msgstr "Terminar"
+
+#~ msgid "Sorry, %(project_name)s could not understand your message."
+#~ msgstr "Que lastima!"

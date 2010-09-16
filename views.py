@@ -8,6 +8,7 @@ from ilsgateway.models import ServiceDeliveryPoint, Product
 from django.http import Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
+from django.utils.translation import ugettext as _
 
 #test
 from httplib import HTTPSConnection, HTTPConnection
@@ -20,22 +21,46 @@ from django.http import HttpResponseRedirect, HttpResponse
 #xml test
 from xml.etree import ElementTree
 
+def change_language(request):
+    language = ''
+    if request.LANGUAGE_CODE == 'en':
+        language = 'English'
+    elif request.LANGUAGE_CODE == 'sw':
+        language = 'Swahili'
+    elif request.LANGUAGE_CODE == 'es':
+        language = 'Spanish'        
+    
+    return render_to_response('change_language.html',
+                              {'test_phrase': _('hello'),
+                               'language': language},
+                              context_instance=RequestContext(request))
+    
 @login_required
 def dashboard(request):
+    language = ''
+    if request.LANGUAGE_CODE == 'en':
+        language = 'English'
+    elif request.LANGUAGE_CODE == 'sw':
+        language = 'Swahili'
+    elif request.LANGUAGE_CODE == 'es':
+        language = 'Spanish'        
+    
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     return render_to_response('ilsgateway_dashboard.html',
-                              {'sdp': sdp,},
+                              {'sdp': sdp,
+                               'language': language},
                               context_instance=RequestContext(request))
 
 @login_required
-def facilities_index(request):
+def facilities_index(request, view_type='inventory'):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp)
     products = Product.objects.all()
     return render_to_response("facilities_list.html", 
                               {"facilities": facilities,
                                "products": products,
-                               "sdp": sdp },
+                               "sdp": sdp,
+                               "view_type": view_type },
                               context_instance=RequestContext(request),)
 
 @login_required

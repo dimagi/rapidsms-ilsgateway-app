@@ -52,7 +52,8 @@
     <a href="">ILSGateway</a>
     / <a href="">Dashboard</a>
 </h1>
-<h2>Welcome, {{ user.username }} - {% trans "hello" %}</h2>
+<h2>Welcome, {{ user.username }}</h2>
+<div>Current Language: {{ language }} <a href="/change_language">change language</a></div>
 <div class="module">
     <h3>{{ sdp.name }} District</h3>
     

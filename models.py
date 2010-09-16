@@ -76,12 +76,30 @@ class ServiceDeliveryPoint(models.Model):
         return Product.objects.filter(servicedeliverypoint=self.id).distinct()
     
     def months_of_stock(self, product):
-        return 4
+        return 10
+
+    #As soon as I learn how to create dynamic methods these are gone        
+    def months_of_stock_inj(self):
+        return self.months_of_stock('inj')
+
+    def months_of_stock_pop(self):
+        return self.months_of_stock('pop')
+
+    def months_of_stock_coc(self):
+        return self.months_of_stock('coc')
+
+    def months_of_stock_imp(self):
+        return self.months_of_stock('imp')
+
+    def months_of_stock_con(self):
+        return self.months_of_stock('con')
+
+    def months_of_stock_iud(self):
+        return self.months_of_stock('iud')
     
     def last_submitted_randr_date(self):
         return "2010-10-1"
     
-    #As soon as I learn how to create dynamic methods these are gone    
     def stock_on_hand(self, sms_code):
         reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
                                                 product__sms_code=sms_code,
@@ -89,7 +107,7 @@ class ServiceDeliveryPoint(models.Model):
         if reports:
             return reports[0].quantity                                 
         else:
-            return "(not reported)"        
+            return "Waiting for reply"        
     
     def stock_on_hand_last_reported(self):
         reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
@@ -97,8 +115,9 @@ class ServiceDeliveryPoint(models.Model):
         if reports:
             return reports[0].report_date                                 
         else:
-            return "(not reported)"                  
+            return "Waiting for reply"                  
     
+    #As soon as I learn how to create dynamic methods these are gone        
     def stock_on_hand_inj(self):
         return self.stock_on_hand('inj')
 
@@ -135,9 +154,6 @@ class ContactDetail(Contact):
     #TODO validate only one primary can exist (or auto change all others to non-primary when new primary selected)
     service_delivery_point = models.ForeignKey(ServiceDeliveryPoint,null=True,blank=True)
     primary = models.BooleanField(default=False)
-    
-    def name(self):
-        return self.contact.name
     
     def role_name(self):
         return self.role.name
