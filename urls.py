@@ -6,9 +6,9 @@ from django.conf.urls.defaults import *
 
 urlpatterns = patterns('',
     url(r'^$', 'ilsgateway.views.dashboard'),                       
+    (r'^facilities/(?P<facility_id>\d+)/$', 'ilsgateway.views.facilities_detail'),
     ('^facilities/(?P<view_type>\w+)/$', 'ilsgateway.views.facilities_index'),
     ('^facilities/ordering$', 'ilsgateway.views.facilities_ordering'),
-    (r'^facilities/(?P<facility_id>\d+)/$', 'ilsgateway.views.facilities_detail'),
     ('^districts$', 'ilsgateway.views.districts_index'),
     #(r'^districts/(?P<district_id>\d+)/$', 'ilsgateway.views.districts_detail'),
     (r'^scanning$', 'ilsgateway.views.scanning_test'),
