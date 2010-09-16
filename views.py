@@ -54,7 +54,7 @@ def dashboard(request):
 @login_required
 def facilities_index(request, view_type='inventory'):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
-    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp)
+    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp).order_by("delivery_group")
     products = Product.objects.all()
     return render_to_response("facilities_list.html", 
                               {"facilities": facilities,
