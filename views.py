@@ -21,6 +21,11 @@ from django.http import HttpResponseRedirect, HttpResponse
 #xml test
 from xml.etree import ElementTree
 
+#gdata
+import gdata.docs.data
+import gdata.docs.client
+import gdata.gauth
+
 def change_language(request):
     language = ''
     if request.LANGUAGE_CODE == 'en':
@@ -116,7 +121,7 @@ def gdata_required(f):
             # no token at all, request one-time-token
             # next: where to redirect
             # scope: what service you want to get access to
-            return HttpResponseRedirect("https://www.google.com/accounts/AuthSubRequest?next=http://ilsgateway.dimagi.com/scanning_query&scope=scope=https://docs.google.com/feeds/%20http://spreadsheets.google.com/feeds/%20https://docs.googleusercontent.com/&session=1")
+            return HttpResponseRedirect("https://www.google.com/accounts/AuthSubRequest?next=http://ilsgateway.dimagi.com/doclist&scope=https://docs.google.com/feeds/%20https://docs.googleusercontent.com/&session=1")
         elif 'token' not in request.session and 'token' in request.GET:
             # request session token using one-time-token
             conn = HTTPSConnection("www.google.com")
@@ -136,54 +141,60 @@ def gdata_required(f):
     return wrap
 
 @gdata_required
-def scanning_test(request):
+def doclist(request):
     """
     Simple example - list google docs documents
     """
     if 'token' in request.session:
-        con = HTTPConnection("docs.google.com")
-        con.putrequest('GET', '/feeds/documents/private/full/')
-        con.putheader('Authorization', 'AuthSub token="%s"' % request.session['token'])
-        con.endheaders()
-        con.send('')
-        r2 = con.getresponse()
-        dane = r2.read()
-        soup = BeautifulStoneSoup(dane)
-        dane = soup.prettify()
-        return render_to_response('a.html', {'dane':dane}, context_instance=RequestContext(request))
-    else:
-        return render_to_response('a.html', {'dane':'bad bad'}, context_instance=RequestContext(request))
+	client = gdata.docs.client.DocsClient()
+	client.ssl = True  # Force all API requests through HTTPS
+	client.http_client.debug = False  # Set to True for debugging HTTP requests
+	client.auth_token = gdata.gauth.AuthSubToken(request.session['token'])
+	feed = client.GetDocList()
+
+	print '\n'
+	if not feed.entry:
+    		print 'No entries in feed.\n'
+  	for entry in feed.entry:
+    		print entry.title.text.encode('UTF-8'), entry.GetDocumentType(), entry.resource_id.text
+
+    	# List folders the document is in.
+    	for folder in entry.InFolders():
+      		print folder.title
+
+        return render_to_response('a.html', {}, context_instance=RequestContext(request))
 
 @gdata_required
-def scanning_query(request):
+def docdownload(request):
     """
-    Search in documents
+    Simple example - download google docs document
     """
     if 'token' in request.session:
-        if 'q' in request.GET:
-            q = request.GET['q']
-        else:
-            q=''
-        con = HTTPConnection("docs.google.com")
-        con.putrequest('GET', '/feeds/documents/private/full/-/pdf?q=%s' % q)
-        con.putheader('Authorization', 'AuthSub token="%s"' % request.session['token'])
-        con.endheaders()
-        con.send('')
-        r2 = con.getresponse()
-        dane = r2.read()
-        soup = BeautifulStoneSoup(dane)
-        dane = soup.prettify()
-        return render_to_response('b.html', {'dane':dane}, context_instance=RequestContext(request))
-    else:
-        return render_to_response('b.html', {'dane':'bad bad'}, context_instance=RequestContext(request))    
+	#should be able to make this global
+        client = gdata.docs.client.DocsClient()
+        client.ssl = True  # Force all API requests through HTTPS
+        client.http_client.debug = False  # Set to True for debugging HTTP requests
+        client.auth_token = gdata.gauth.AuthSubToken(request.session['token'])
+        feed = client.GetDocList()
 
-def xml_test(request):
-    with open('podcasts.opml', 'rt') as f:
-        tree = ElementTree.parse(f)
+        print '\n'
+	lastdoc = None
+        if not feed.entry:
+                print 'No entries in feed.\n'
+        for entry in feed.entry:
+                print entry.title.text.encode('UTF-8'), entry.GetDocumentType(), entry.resource_id.text
+		#client.Download(entry, '/home/dimagivm/projects/%s.pdf' % entry.title.text)
+		last_doc = entry
 
-    response = {}
-    for service_delivery_point in tree.getiterator():
-        print service_delivery_point.tag, service_delivery_point.attrib
-        response[service_delivery_point.tag] = service_delivery_point.attrib
-
-    return HttpResponse(response)
+        # List folders the document is in.
+        for folder in entry.InFolders():
+                print folder.title
+	
+	exportFormat = '&exportFormat=pdf'
+	content = client.GetFileContent(uri=last_doc.content.src + exportFormat)
+        response = HttpResponse(content, mimetype='application/pdf')
+#	response['Content-Type'] = 'application/pdf'
+#	response['mimetype']=
+	response['Content-Disposition'] = 'inline; filename=%s' % last_doc.title.text
+#	response.write(content)
+        return HttpResponse(response)

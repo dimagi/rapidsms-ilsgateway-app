@@ -13,7 +13,6 @@ class ConfirmDeliveryReceived(KeywordHandler):
     keyword = "dlvd"
 
     def help(self):
-        #TODO needs some work on this message
         st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received")[0:1].get()
         ns = ServiceDeliveryPointStatus(service_delivery_point=self.msg.contact.contactdetail.service_delivery_point, status_type=st, status_date=datetime.datetime.now())
         ns.save()

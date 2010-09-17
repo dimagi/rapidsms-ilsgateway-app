@@ -1,25 +1,33 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-from rapidsms.contrib.handlers.handlers.pattern import PatternHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from ilsgateway.models import ServiceDeliveryPoint, Product, ProductReportType, ContactDetail
 
-class StockOnHandHandler(PatternHandler):
-    pattern = r'^(\w+) (\w+) (\d+)$'
-    # TODO: better handling of non-registered senders - currently just fails
-    def handle(self, a, b, c):
-        report_types = ProductReportType.objects.filter(sms_code=a)
-        if not report_types:
-            self.respond_error
-        else:
-            n = self.msg.contact.contactdetail.service_delivery_point
-            products = Product.objects.filter(sms_code=b) 
-            if not products:
-                self.respond_error
-            else:            
-                p = products[0]
-                rt = report_types[0]
-                q = int(c)
-                n.report_product_status(product=p,report_type=rt,quantity=q)
+class StockOnHandHandler(KeywordHandler):
+    """
+    """
+    keyword = "soh"
+    def help(self):
+        self.respond("To report stock on hand, respond with \"soh product amount\".  For example, \"soh con 500\".")
+
+    def handle(self, text):
+        product_list = text.split()
+        if len(product_list) > 0 and len(product_list) % 2 != 0:
+             self.respond("Sorry, invalid format.  The message should be in the format 'soh inj 200 con 344 imp 20'")
+             return
+        else:    
+            sdp = self.msg.contact.contactdetail.service_delivery_point
+            while len(product_list) >= 2:
+                product_code = product_list.pop(0)
+                quantity = product_list.pop(0)
+                report_type = ProductReportType.objects.filter(sms_code='soh')[0:1].get()
+                try:
+                    product = Product.objects.filter(sms_code__iexact=product_code)[0:1].get()   
+                except Product.DoesNotExist:
+                    self.respond('Sorry, invalid product code %s!' % product_code)
+                    return
                 
-                self.respond('%s recorded: %s %s by %s' % (rt.name, p.sms_code, c, self.msg.contact.name))       
+                sdp.report_product_status(product=product,report_type=report_type,quantity=quantity)
+            
+            self.respond('Thank you %s for reporting your stock on hand for %s!' % (self.msg.contact.name, sdp.name))              
