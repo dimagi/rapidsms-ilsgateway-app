@@ -8,7 +8,7 @@ msgstr "N j, Y"
 
 #: utils/translation/trans_real.py:521
 msgid "TIME_FORMAT"
-msgstr "Pxx"x
+msgstr "Pxx"
 
 #: utils/translation/trans_real.py:542
 msgid "YEAR_MONTH_FORMAT"

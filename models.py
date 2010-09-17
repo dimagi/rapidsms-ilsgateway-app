@@ -7,7 +7,7 @@ from rapidsms.models import ExtensibleModelBase
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact, Connection
 from django.contrib.auth.models import User
-from rapidsms.messages import IncomingMessage
+from rapidsms.contrib.messagelog.models import Message
 import datetime
 
 class DeliveryGroup(models.Model):
@@ -63,7 +63,11 @@ class ServiceDeliveryPoint(models.Model):
         npr.save()
         
     def randr_status(self):
-        return self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
+        status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
+        if status:
+            return "%s on %s" % (status, status.status_date)
+        else:
+            return "No R&R status reported"
     
     def delivery_status(self):
         return self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='delivery').latest()  
@@ -76,7 +80,7 @@ class ServiceDeliveryPoint(models.Model):
         return Product.objects.filter(servicedeliverypoint=self.id).distinct()
     
     def months_of_stock(self, product):
-        return 10
+        return "Insufficient data"
 
     #As soon as I learn how to create dynamic methods these are gone        
     def months_of_stock_inj(self):
@@ -97,9 +101,11 @@ class ServiceDeliveryPoint(models.Model):
     def months_of_stock_iud(self):
         return self.months_of_stock('iud')
     
-    def last_submitted_randr_date(self):
-        return "2010-10-1"
-    
+    def last_message_received(self):
+        reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id, report_type__id=1).order_by('-report_date')
+        if reports:
+            return reports[0].message
+        
     def stock_on_hand(self, sms_code):
         reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
                                                 product__sms_code=sms_code,
@@ -183,7 +189,7 @@ class ServiceDeliveryPointProductReport(models.Model):
     report_type = models.ForeignKey(ProductReportType)
     quantity = models.IntegerField()  
     report_date = models.DateTimeField(auto_now_add=True, default=datetime.datetime.now())
-    #message = models.ForeignKey(IncomingMessage)  
+    message = models.ForeignKey(Message)  
     
     def product_name(self):
         return self.product.name

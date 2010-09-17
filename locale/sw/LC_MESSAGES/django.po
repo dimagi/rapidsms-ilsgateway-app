@@ -2,13 +2,39 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-15 16:39-0700\n"
+"POT-Creation-Date: 2010-09-16 18:57-0700\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\views.py:32
+#: .\views.py:39
 msgid "hello"
 msgstr "jambo"
 
+#: .\templates\ilsgateway_dashboard.html.py:55
+msgid "Welcome"
+msgstr "Karibu"
+
+#: .\templates\ilsgateway_dashboard.html.py:56
+msgid "Language"
+msgstr "Lugha"
+
+#: .\templates\ilsgateway_dashboard.html.py:58
+msgid "District"
+msgstr "Wilaya"
+
+#: .\templates\ilsgateway_dashboard.html.py:60
+msgid "Alerts"
+msgstr "Rapporteringar"
+
+msgid "Last submitted"
+msgstr ""
+
 #~ msgid "Sorry, %(project_name)s could not understand your message."
 #~ msgstr "!"
+
+#~ msgid "Log out"
+#~ msgstr "Kuondoka"
+
+#~ msgid "DATETIME_FORMAT"
+#~ msgstr "P j, Y, N"
+

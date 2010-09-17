@@ -35,7 +35,7 @@ class ConfirmDeliveryReceived(KeywordHandler):
                     self.respond('Sorry, invalid product code %s!' % product_code)
                     return
                 
-                sdp.report_product_status(product=product,report_type=report_type,quantity=quantity)
+                sdp.report_product_status(product=product,report_type=report_type,quantity=quantity, message=self.msg.logger_msg)
             
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_quantities_reported")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=sdp, status_type=st, status_date=datetime.datetime.now())

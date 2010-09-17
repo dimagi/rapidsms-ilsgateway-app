@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<style type="text/css">
+    #inner {
+        #margin: 4em 25%;
+    }
+
+    div.module div {
+        border: 1px solid #ddd;
+        border-top-color: #636363;
+        margin-top: -1px;
+    }
+
+    div.module p {
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+    code, pre {
+        background: #ffe;
+    }
+
+    pre {
+        padding: 1em;
+        margin: 0;
+    }
+    
+    /* only a single h1 per view */
+    #inner h1 {
+        color: #000;
+        font-size: 2em;
+        line-height: 1;
+        font-weight: normal;
+        margin: 0.5em 0 1em 0;
+        text-shadow: #eee 2px 2px 2px;
+    }
+
+    #inner h1 a {
+        color: #ccc;
+        #text-decoration: none;
+    }    
+</style>
+
+<h1>Message History</h1>
+<div class="module">
+    <h3>{{ sdp.parent_service_delivery_point.name }} / <a href="/facilities/{{ sdp.id }}/inventory/">{{ sdp.name }}</a> / Message History</h3>
+    <table>
+        <thead>
+            <th>Sender</th>
+            <th>Role</th>
+            <th>Date</th>
+            <th>Text</th>
+        </thead>
+        <tbody>
+            {% for msg in messages %}
+            <tr>            
+                <td>{{ msg.who }}</td>
+                <td>{{ msg.contact.contactdetail.role }}</td>
+                <td>{{ msg.date }}</td>
+                <td>{{ msg.text }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -28,6 +28,6 @@ class StockOnHandHandler(KeywordHandler):
                     self.respond('Sorry, invalid product code %s!' % product_code)
                     return
                 
-                sdp.report_product_status(product=product,report_type=report_type,quantity=quantity)
+                sdp.report_product_status(product=product,report_type=report_type,quantity=quantity, message=self.msg.logger_msg)
             
             self.respond('Thank you %s for reporting your stock on hand for %s!' % (self.msg.contact.name, sdp.name))              

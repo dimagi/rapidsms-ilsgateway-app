@@ -3,22 +3,49 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <h3>{{ facility.name }}</h3>
-    <div style="padding-bottom:7px;"><a href="">Last submitted R&amp;R {{ sdp.last_submitted_randr_date }}</a></div>
-    <table>
-        <thead>
-            <th>Product</th>
-            <th>Months of Stock</th>
-            <th>Last SMS Received</th>
-        </thead>
-        <tbody>
-            <tr><td>Implants</td><td>{{ facility.stock_on_hand_imp }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
-            <tr><td>Progesterone only Pills</td><td>{{ facility.stock_on_hand_pop }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
-            <tr><td>Condoms</td><td>{{ facility.stock_on_hand_con }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
-            <tr><td>Injectables</td><td>{{ facility.stock_on_hand_inj }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
-            <tr><td>Combined Oral Contraceptives</td><td>{{ facility.stock_on_hand_coc }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
-            <tr><td>IUD</td><td>{{ facility.stock_on_hand_iud }}</td><td>{{ facility.stock_on_hand_last_reported }}</td></tr>
-        </tbody>
-    </table>
-{% endblock %}
+<div class="module">
+    <h3>{{ facility.parent_service_delivery_point.name }} / <a href="/facilities/{{ facility.id }}/inventory/">{{ facility.name }}</a></h3>
+    <h4>{{ facility.name }}</h4>
+    <div style="float:left;"
+        <p>{% if view_type == 'inventory' %}<a href="/facilities/{{ facility.id }}/months_of_stock/">Show months of stock</a>{% else %}<a href="/facilities/{{ facility.id}}/inventory/">Show inventory</a>{% endif %}</p>
+        <table>
+            <thead>
+                <th>Product</th>
+                <th>Stock on Hand</th>
+            </thead>
+            <tbody>
+            {% if view_type == 'inventory' %}
+                <tr><td>Implants</td><td>{{ facility.stock_on_hand_imp }}</td></tr>
+                <tr><td>Progesterone only Pills</td><td>{{ facility.stock_on_hand_pop }}</td></tr>
+                <tr><td>Condoms</td><td>{{ facility.stock_on_hand_con }}</td></tr>
+                <tr><td>Injectables</td><td>{{ facility.stock_on_hand_inj }}</td></tr>
+                <tr><td>Combined Oral Contraceptives</td><td>{{ facility.stock_on_hand_coc }}</td></tr>
+                <tr><td>IUD</td><td>{{ facility.stock_on_hand_iud }}</td></tr>
+            {% else %}
+                <tr><td>Implants</td><td>{{ facility.months_of_stock_imp }}</td></tr>
+                <tr><td>Progesterone only Pills</td><td>{{ facility.months_of_stock_pop }}</td></tr>
+                <tr><td>Condoms</td><td>{{ facility.months_of_stock_con }}</td></tr>
+                <tr><td>Injectables</td><td>{{ facility.months_of_stock_inj }}</td></tr>
+                <tr><td>Combined Oral Contraceptives</td><td>{{ facility.months_of_stock_coc }}</td></tr>
+                <tr><td>IUD</td><td>{{ facility.months_of_stock_iud }}</td></tr>        
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <div style="float:left;padding:25px 0 0 30px;width:550px;"
+        <h4>R&amp;R Status</h4>
+        <p>{{ facility.randr_status }}</p>
+        <p><a href="/docdownload">See most recent R&amp;R</a></p>
 
+        <h4>Communication Status</h4>
+        <p>Last SMS received: 
+        {% if facility.last_message_received %}
+            "{{ facility.last_message_received.text }}" from {{ facility.last_message_received.contact }}, {{ facility.last_message_received.contact.contactdetail.role }} on {{ facility.stock_on_hand_last_reported }}
+        {% else %}
+            {{ facility.stock_on_hand_last_reported }}
+        {% endif %}    
+        </p>
+        <p><a href="/facilities/{{ facility.id }}/message_history/">See message history</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -9,17 +9,13 @@ from django.http import Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
+from rapidsms.contrib.messagelog.models import Message
 
-#test
 from httplib import HTTPSConnection, HTTPConnection
-from BeautifulSoup import BeautifulStoneSoup
 from django.shortcuts import render_to_response
 from django.conf import settings
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
-
-#xml test
-from xml.etree import ElementTree
 
 #gdata
 import gdata.docs.data
@@ -57,6 +53,16 @@ def dashboard(request):
                               context_instance=RequestContext(request))
 
 @login_required
+def message_history(request, facility_id):
+    #TODO: restrict to current user's sdp (or by role)
+    sdp = ServiceDeliveryPoint.objects.filter(id=facility_id)[0:1].get()
+    messages = Message.objects.filter(contact__contactdetail__service_delivery_point=facility_id, direction="I").order_by('-date')
+    return render_to_response("message_history.html", 
+                              {'messages': messages,
+                               'sdp': sdp}, 
+                              context_instance=RequestContext(request))
+
+@login_required
 def facilities_index(request, view_type='inventory'):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp).order_by("delivery_group")
@@ -80,7 +86,7 @@ def facilities_ordering(request):
                               context_instance=RequestContext(request),)
 
 @login_required
-def facilities_detail(request, facility_id):
+def facilities_detail(request, facility_id,view_type='inventory'):
     try:
         f = ServiceDeliveryPoint.objects.get(pk=facility_id)
     except ServiceDeliveryPoint.DoesNotExist:
@@ -88,7 +94,8 @@ def facilities_detail(request, facility_id):
 
     products = Product.objects.all()
     return render_to_response('facilities_detail.html', {'facility': f,
-                                                         'products': products},
+                                                         'products': products,
+                                                         "view_type": view_type},
                               context_instance=RequestContext(request),)
 
 @login_required    
@@ -121,7 +128,7 @@ def gdata_required(f):
             # no token at all, request one-time-token
             # next: where to redirect
             # scope: what service you want to get access to
-            return HttpResponseRedirect("https://www.google.com/accounts/AuthSubRequest?next=http://ilsgateway.dimagi.com/doclist&scope=https://docs.google.com/feeds/%20https://docs.googleusercontent.com/&session=1")
+            return HttpResponseRedirect("https://www.google.com/accounts/AuthSubRequest?next=http://ilsgateway.dimagi.com/docdownload&scope=https://docs.google.com/feeds/%20https://docs.googleusercontent.com/&session=1")
         elif 'token' not in request.session and 'token' in request.GET:
             # request session token using one-time-token
             conn = HTTPSConnection("www.google.com")
@@ -146,11 +153,11 @@ def doclist(request):
     Simple example - list google docs documents
     """
     if 'token' in request.session:
-	client = gdata.docs.client.DocsClient()
-	client.ssl = True  # Force all API requests through HTTPS
-	client.http_client.debug = False  # Set to True for debugging HTTP requests
-	client.auth_token = gdata.gauth.AuthSubToken(request.session['token'])
-	feed = client.GetDocList()
+        client = gdata.docs.client.DocsClient()
+        client.ssl = True  # Force all API requests through HTTPS
+        client.http_client.debug = False  # Set to True for debugging HTTP requests
+        client.auth_token = gdata.gauth.AuthSubToken(request.session['token'])
+        feed = client.GetDocList()
 
 	print '\n'
 	if not feed.entry:
@@ -165,7 +172,7 @@ def doclist(request):
         return render_to_response('a.html', {}, context_instance=RequestContext(request))
 
 @gdata_required
-def docdownload(request):
+def docdownload(request, msd_code):
     """
     Simple example - download google docs document
     """
@@ -175,26 +182,19 @@ def docdownload(request):
         client.ssl = True  # Force all API requests through HTTPS
         client.http_client.debug = False  # Set to True for debugging HTTP requests
         client.auth_token = gdata.gauth.AuthSubToken(request.session['token'])
-        feed = client.GetDocList()
-
-        print '\n'
-	lastdoc = None
+        query_string = '/feeds/default/private/full?title=%s&title-exact=false&max-results=100' % msd_code
+        feed = client.GetDocList(uri=query_string)
+        
+        lastdoc = None
+        
         if not feed.entry:
                 print 'No entries in feed.\n'
-        for entry in feed.entry:
-                print entry.title.text.encode('UTF-8'), entry.GetDocumentType(), entry.resource_id.text
-		#client.Download(entry, '/home/dimagivm/projects/%s.pdf' % entry.title.text)
-		last_doc = entry
-
-        # List folders the document is in.
-        for folder in entry.InFolders():
-                print folder.title
+        else:
+            for entry in feed.entry:
+                last_doc = entry
 	
 	exportFormat = '&exportFormat=pdf'
 	content = client.GetFileContent(uri=last_doc.content.src + exportFormat)
-        response = HttpResponse(content, mimetype='application/pdf')
-#	response['Content-Type'] = 'application/pdf'
-#	response['mimetype']=
-	response['Content-Disposition'] = 'inline; filename=%s' % last_doc.title.text
-#	response.write(content)
-        return HttpResponse(response)
+    response = HttpResponse(content, mimetype='application/pdf')
+    response['Content-Disposition'] = 'inline; filename=%s' % last_doc.title.text
+    return HttpResponse(response)
