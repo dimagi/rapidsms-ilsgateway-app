@@ -47,7 +47,8 @@
 
 <h1>Message History</h1>
 <div class="module">
-    <h3>{{ sdp.parent_service_delivery_point.name }} / <a href="/facilities/{{ sdp.id }}/inventory/">{{ sdp.name }}</a> / Message History</h3>
+    <h3>{{ my_sdp.parent_service_delivery_point.name }} / <a href="/facilities/inventory/">{{ facility.parent_service_delivery_point.name }}</a> / <a href="/facilities/{{ facility.id }}/inventory/">{{ facility.name }}</a> / Message History</h3>
+{% if messages %}
     <table>
         <thead>
             <th>Sender</th>
@@ -66,5 +67,8 @@
             {% endfor %}
         </tbody>
     </table>
+{% else %}
+    <p>No messages.</p>
+{% endif %}
 </div>
 {% endblock %}

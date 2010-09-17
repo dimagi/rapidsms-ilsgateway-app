@@ -55,11 +55,13 @@ def dashboard(request):
 @login_required
 def message_history(request, facility_id):
     #TODO: restrict to current user's sdp (or by role)
-    sdp = ServiceDeliveryPoint.objects.filter(id=facility_id)[0:1].get()
+    my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    facility = ServiceDeliveryPoint.objects.filter(id=facility_id)[0:1].get()    
     messages = Message.objects.filter(contact__contactdetail__service_delivery_point=facility_id, direction="I").order_by('-date')
     return render_to_response("message_history.html", 
                               {'messages': messages,
-                               'sdp': sdp}, 
+                               'my_sdp': my_sdp,
+                               'facility': facility}, 
                               context_instance=RequestContext(request))
 
 @login_required
@@ -87,6 +89,7 @@ def facilities_ordering(request):
 
 @login_required
 def facilities_detail(request, facility_id,view_type='inventory'):
+    my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     try:
         f = ServiceDeliveryPoint.objects.get(pk=facility_id)
     except ServiceDeliveryPoint.DoesNotExist:
@@ -95,7 +98,8 @@ def facilities_detail(request, facility_id,view_type='inventory'):
     products = Product.objects.all()
     return render_to_response('facilities_detail.html', {'facility': f,
                                                          'products': products,
-                                                         "view_type": view_type},
+                                                         'view_type': view_type,
+                                                         'my_sdp': my_sdp},
                               context_instance=RequestContext(request),)
 
 @login_required    
@@ -128,7 +132,12 @@ def gdata_required(f):
             # no token at all, request one-time-token
             # next: where to redirect
             # scope: what service you want to get access to
-            return HttpResponseRedirect("https://www.google.com/accounts/AuthSubRequest?next=http://ilsgateway.dimagi.com/docdownload&scope=https://docs.google.com/feeds/%20https://docs.googleusercontent.com/&session=1")
+            base_url='https://www.google.com/accounts/AuthSubRequest'
+            scope='https://docs.google.com/feeds/%20https://docs.googleusercontent.com/'
+            next_url='http://ilsgateway.dimagi.com%s' %  request.get_full_path()
+            session_val='1'
+            target_url="%s?next=%s&scope=%s&session=%s" % (base_url, next_url, scope, session_val)
+            return HttpResponseRedirect(target_url)
         elif 'token' not in request.session and 'token' in request.GET:
             # request session token using one-time-token
             conn = HTTPSConnection("www.google.com")
@@ -159,7 +168,6 @@ def doclist(request):
         client.auth_token = gdata.gauth.AuthSubToken(request.session['token'])
         feed = client.GetDocList()
 
-	print '\n'
 	if not feed.entry:
     		print 'No entries in feed.\n'
   	for entry in feed.entry:
@@ -177,24 +185,28 @@ def docdownload(request, msd_code):
     Simple example - download google docs document
     """
     if 'token' in request.session:
-	#should be able to make this global
+        #should be able to make this global
         client = gdata.docs.client.DocsClient()
         client.ssl = True  # Force all API requests through HTTPS
         client.http_client.debug = False  # Set to True for debugging HTTP requests
         client.auth_token = gdata.gauth.AuthSubToken(request.session['token'])
         query_string = '/feeds/default/private/full?title=%s&title-exact=false&max-results=100' % msd_code
         feed = client.GetDocList(uri=query_string)
-        
-        lastdoc = None
-        
+
+        most_recent_doc = None
+
         if not feed.entry:
-                print 'No entries in feed.\n'
+            return HttpResponse('No entries in feed.')
         else:
             for entry in feed.entry:
-                last_doc = entry
-	
-	exportFormat = '&exportFormat=pdf'
-	content = client.GetFileContent(uri=last_doc.content.src + exportFormat)
+                print entry.updated
+                if not most_recent_doc:
+                        most_recent_doc = entry
+                elif most_recent_doc.updated < entry.updated:
+                        most_recent_doc = entry
+
+        exportFormat = '&exportFormat=pdf'
+        content = client.GetFileContent(uri=most_recent_doc.content.src + exportFormat)
     response = HttpResponse(content, mimetype='application/pdf')
-    response['Content-Disposition'] = 'inline; filename=%s' % last_doc.title.text
+    response['Content-Disposition'] = 'attachment; filename=%s' % most_recent_doc.title.text
     return HttpResponse(response)

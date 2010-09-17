@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="module">
-    <h3>{{ facility.parent_service_delivery_point.name }} / <a href="/facilities/{{ facility.id }}/inventory/">{{ facility.name }}</a></h3>
+    <h3>{{ my_sdp.parent_service_delivery_point.name }} / <a href="/facilities/{{ view_type }}">{{ facility.parent_service_delivery_point.name }}</a> / <a href="/facilities/{{ facility.id }}/inventory/">{{ facility.name }}</a></h3>
     <h4>{{ facility.name }}</h4>
     <div style="float:left;"
         <p>{% if view_type == 'inventory' %}<a href="/facilities/{{ facility.id }}/months_of_stock/">Show months of stock</a>{% else %}<a href="/facilities/{{ facility.id}}/inventory/">Show inventory</a>{% endif %}</p>
@@ -32,15 +32,16 @@
             </tbody>
         </table>
     </div>
-    <div style="float:left;padding:25px 0 0 30px;width:550px;"
-        <h4>R&amp;R Status</h4>
+    <div style="float:left;padding:45px 0 0 30px;width:550px;"
+        <strong>R&amp;R Status</strong>
         <p>{{ facility.randr_status }}</p>
-        <p><a href="/docdownload">See most recent R&amp;R</a></p>
+        <p><a href="/docdownload/{{ facility.msd_code }}">Download most recent R&amp;R</a></p>
 
-        <h4>Communication Status</h4>
+        <strong>Communication Status</strong>
         <p>Last SMS received: 
         {% if facility.last_message_received %}
-            "{{ facility.last_message_received.text }}" from {{ facility.last_message_received.contact }}, {{ facility.last_message_received.contact.contactdetail.role }} on {{ facility.stock_on_hand_last_reported }}
+            "{{ facility.last_message_received.text }}"</p>
+            <p>From: {{ facility.last_message_received.contact }}, {{ facility.last_message_received.contact.contactdetail.role }}</p><p>Received on: {{ facility.stock_on_hand_last_reported }}</p>
         {% else %}
             {{ facility.stock_on_hand_last_reported }}
         {% endif %}    
