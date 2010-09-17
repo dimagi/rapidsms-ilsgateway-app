@@ -52,12 +52,12 @@
     <a href="">ILSGateway</a>
     / <a href="">Dashboard</a>
 </h1>
-<h2>Welcome, {{ user.username }}</h2>
-<div>Current Language: {{ language }} <a href="/change_language">change language</a></div>
+<h2>{% trans 'Welcome' %}, {{ user.username }}</h2>
+<div>{% trans 'Language' %}: {{ language }} <a href="/change_language">change language</a></div>
 <div class="module">
-    <h3>{{ sdp.name }} District</h3>
+    <h3>{{ sdp.name }} {% trans 'District' %}</h3>
     
-    <h4>Alerts</h4> (click the links for more details or to send reminders to these facilities)
+    <h4>{% trans 'Alerts' %}</h4> (click the links for more details)
     <ul>
         <li><a href="">6 Facilities</a> have reported not submitting their R &amp; R form as of June 6.</li>
         <li><a href="">5 Facilities</a> did not respond to the SMS on June 6 asking if they had submitted their R&amp;R form.</li>
