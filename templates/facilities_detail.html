@@ -34,10 +34,22 @@
     </div>
     <div style="float:left;padding:45px 0 0 30px;width:550px;"
         <strong>R&amp;R Status</strong>
-        <p>{{ facility.randr_status }}</p>
+        {% if facility.randr_status %}
+        <p>
+            Status: {{ facility.randr_status }}
+        </p>
+        <p>
+            Last updated on: {{ facility.randr_status.status_date }}
+        </p>
+        {% else %}
+        <p>
+             No status reported
+        </p>
+        {% endif %}
+        </p>
         <p><a href="/docdownload/{{ facility.msd_code }}">Download most recent R&amp;R</a></p>
 
-        <strong>Communication Status</strong>
+        <strong>Inventory Status</strong>
         <p>Last SMS received: 
         {% if facility.last_message_received %}
             "{{ facility.last_message_received.text }}"</p>

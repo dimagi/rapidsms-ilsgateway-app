@@ -2,11 +2,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-16 18:57-0700\n"
+"POT-Creation-Date: 2010-09-20 11:30-0700\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\views.py:39
+#: .\views.py:35
 msgid "hello"
 msgstr "jambo"
 
@@ -26,15 +26,18 @@ msgstr "Wilaya"
 msgid "Alerts"
 msgstr "Rapporteringar"
 
-msgid "Last submitted"
-msgstr ""
-
 #~ msgid "Sorry, %(project_name)s could not understand your message."
 #~ msgstr "!"
+
+#~ msgid ""
+#~ "Have you sent in your R&R form yet for this quarter?  Please reply yes or "
+#~ "no"
+#~ msgstr ""
+#~ "Je, umeshatuma fomu yako ya R&R kwa kipindi cha robo mwaka hii? Tafadhali "
+#~ "Jibu ndiyo au hapana"
 
 #~ msgid "Log out"
 #~ msgstr "Kuondoka"
 
 #~ msgid "DATETIME_FORMAT"
 #~ msgstr "P j, Y, N"
-

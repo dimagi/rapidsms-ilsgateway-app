@@ -64,10 +64,7 @@ class ServiceDeliveryPoint(models.Model):
         
     def randr_status(self):
         status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
-        if status:
-            return "%s on %s" % (status, status.status_date)
-        else:
-            return "No R&R status reported"
+        return status
     
     def delivery_status(self):
         return self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='delivery').latest()  
@@ -241,7 +238,17 @@ class ServiceDeliveryPointStatus(models.Model):
 class ServiceDeliveryPointLocation(Location):
     service_delivery_point = models.ForeignKey(ServiceDeliveryPoint, null=True, blank=True)
     
+    @property
+    def label(self):
+        """
+        Return an HTML fragment, for embedding in a Google map. This
+        method should be overridden by subclasses wishing to provide
+        better contextual information.
+        """
+
+        return unicode(self)
+    
     def __unicode__(self):
         """
         """
-        return getattr(self, "name", "%s" % self.service_delivery_point.name)
+        return getattr(self, "name", "%s <div>yeah</div>" % self.service_delivery_point.name)

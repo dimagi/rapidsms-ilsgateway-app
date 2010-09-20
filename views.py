@@ -16,6 +16,8 @@ from django.shortcuts import render_to_response
 from django.conf import settings
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
+import iso8601
+import re
 
 #gdata
 import gdata.docs.data
@@ -199,10 +201,12 @@ def docdownload(request, msd_code):
             return HttpResponse('No entries in feed.')
         else:
             for entry in feed.entry:
-                print entry.updated
                 if not most_recent_doc:
                         most_recent_doc = entry
-                elif most_recent_doc.updated < entry.updated:
+                else:
+                    new_date = iso8601.parse_date(entry.updated.text)
+                    old_date = iso8601.parse_date(most_recent_doc.updated.text)
+                    if new_date > old_date:
                         most_recent_doc = entry
 
         exportFormat = '&exportFormat=pdf'

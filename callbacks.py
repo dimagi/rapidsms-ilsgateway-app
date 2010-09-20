@@ -17,7 +17,7 @@ def facility_randr_reminder(router):
     for fic_cd in facility_in_charge_contact_details:
         c = fic_cd.default_connection
         if c:
-            m = OutgoingMessage(c, "%s: Please send in your R&R form by Sep 15 2010 and reply \"submitted\"" % (fic_cd.name))
+            m = OutgoingMessage(c, "Have you sent in your R&R form yet for this quarter?  Please reply 'yes' or 'no'")
             m.send() 
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_reminder_sent_facility")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=fic_cd.service_delivery_point, status_type=st, status_date=datetime.datetime.now())
