@@ -24,11 +24,6 @@ import gdata.docs.data
 import gdata.docs.client
 import gdata.gauth
 
-def hello_world(request):
-    return render_to_response('hello_world.html',
-                              {},
-                              context_instance=RequestContext(request))
-    
 def change_language(request):
     language = ''
     if request.LANGUAGE_CODE == 'en':
@@ -216,6 +211,7 @@ def docdownload(request, msd_code):
 
         exportFormat = '&exportFormat=pdf'
         content = client.GetFileContent(uri=most_recent_doc.content.src + exportFormat)
-    response = HttpResponse(content, mimetype='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename=%s' % most_recent_doc.title.text
-    return HttpResponse(response)
+    response = HttpResponse(content)
+    response['content-Type'] = 'application/pdf'
+    response['Content-Disposition'] = 'inline; filename=%s' % most_recent_doc.title.text
+    return response
