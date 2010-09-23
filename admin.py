@@ -10,9 +10,16 @@ from rapidsms.contrib.locations.models import Point
 class ServiceDeliveryPointTypeAdmin(admin.ModelAdmin):
     model = ServiceDeliveryPointType
 
+class ServiceDeliveryPointLocationInline(admin.TabularInline):
+    model = ServiceDeliveryPointLocation
+    extra = 0
+
 class ServiceDeliveryPointAdmin(admin.ModelAdmin):
     list_display = ('name', 'service_delivery_point_type_name')
     ordering = ['name']
+    inlines = [
+         ServiceDeliveryPointLocationInline,      
+    ]
     
 class ConnectionInline(admin.TabularInline):
     model = Connection

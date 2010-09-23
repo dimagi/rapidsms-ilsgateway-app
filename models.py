@@ -10,8 +10,13 @@ from django.contrib.auth.models import User
 from rapidsms.contrib.messagelog.models import Message
 import datetime
 
+class DeliveryGroupManager(models.Manager):    
+    def get_by_natural_key(self, name):
+        return self.get(name=name)    
+
 class DeliveryGroup(models.Model):
-    name = models.CharField(max_length=100)
+    objects = DeliveryGroupManager()
+    name = models.CharField(max_length=100, unique=True)
     
     def __unicode__(self):
         return self.name
@@ -48,7 +53,7 @@ class ServiceDeliveryPoint(models.Model):
 
     service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType, null=True, blank=True)
     parent_service_delivery_point = models.ForeignKey("self", null=True, blank=True)
-    name = models.CharField(max_length=100, blank=True, unique=True)
+    name = models.CharField(max_length=100, blank=True)
     active = models.BooleanField(default=True)
     delivery_group = models.ForeignKey(DeliveryGroup, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -238,6 +243,14 @@ class ServiceDeliveryPointStatus(models.Model):
 class ServiceDeliveryPointLocation(Location):
     service_delivery_point = models.ForeignKey(ServiceDeliveryPoint, null=True, blank=True)
     
+    class Meta:
+        abstract = True
+
+    @property
+    def name(self):
+        if self.service_delivery_point:
+            return self.service_delivery_point.name 
+    
     @property
     def label(self):
         """
@@ -247,8 +260,22 @@ class ServiceDeliveryPointLocation(Location):
         """
 
         return unicode(self)
+    @property
+    def InfoWindowHTML(self):
+        html = "<div><p>%s</p><p>INJ: 002</p></div>" % self.name
+        return html
+    
     
     def __unicode__(self):
         """
         """
-        return getattr(self, "name", "%s <div>yeah</div>" % self.service_delivery_point.name)
+        return getattr(self, "name", "%s" % self.service_delivery_point.name)
+    
+class FacilityLocation(ServiceDeliveryPointLocation):
+    pass
+
+class DistrictLocation(ServiceDeliveryPointLocation):
+    pass
+
+class RegionLocation(ServiceDeliveryPointLocation):
+    pass

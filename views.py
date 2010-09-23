@@ -24,6 +24,11 @@ import gdata.docs.data
 import gdata.docs.client
 import gdata.gauth
 
+def hello_world(request):
+    return render_to_response('hello_world.html',
+                              {},
+                              context_instance=RequestContext(request))
+    
 def change_language(request):
     language = ''
     if request.LANGUAGE_CODE == 'en':
@@ -69,7 +74,7 @@ def message_history(request, facility_id):
 @login_required
 def facilities_index(request, view_type='inventory'):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
-    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp).order_by("delivery_group")
+    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp).order_by("delivery_group", "name")
     products = Product.objects.all()
     return render_to_response("facilities_list.html", 
                               {"facilities": facilities,
