@@ -11,7 +11,7 @@
         <table>
             <thead>
                 <th>Product</th>
-                <th>Stock on Hand</th>
+                <th>{% if view_type == 'inventory' %}Stock on Hand{% else %}Months of Stock{% endif %}</th>
             </thead>
             <tbody>
             {% if view_type == 'inventory' %}
@@ -22,12 +22,12 @@
                 <tr><td>Combined Oral Contraceptives</td><td>{{ facility.stock_on_hand_coc }}</td></tr>
                 <tr><td>IUD</td><td>{{ facility.stock_on_hand_iud }}</td></tr>
             {% else %}
-                <tr><td>Implants</td><td>{{ facility.months_of_stock_imp }}</td></tr>
-                <tr><td>Progesterone only Pills</td><td>{{ facility.months_of_stock_pop }}</td></tr>
-                <tr><td>Condoms</td><td>{{ facility.months_of_stock_con }}</td></tr>
-                <tr><td>Injectables</td><td>{{ facility.months_of_stock_inj }}</td></tr>
-                <tr><td>Combined Oral Contraceptives</td><td>{{ facility.months_of_stock_coc }}</td></tr>
-                <tr><td>IUD</td><td>{{ facility.months_of_stock_iud }}</td></tr>        
+                <tr><td>Implants</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_imp }}{% endif %}</td></tr>
+                <tr><td>Progesterone only Pills</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_pop }}{% endif %}</td></tr>
+                <tr><td>Condoms</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_con }}{% endif %}</td></tr>
+                <tr><td>Injectables</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_inj }}{% endif %}</td></tr>
+                <tr><td>Combined Oral Contraceptives</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_coc }}{% endif %}</td></tr>
+                <tr><td>IUD</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_iud }}{% endif %}</td></tr>        
             {% endif %}
             </tbody>
         </table>
