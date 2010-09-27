@@ -1,50 +1,83 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 
 {% block title %}Dashboard{% endblock %}
-
-{% block stylesheets %}
+{% block javascripts %}
 {{ block.super }}
-<style type="text/css">
-    #inner {
-        #margin: 4em 25%;
-    }
-
-    div.module div {
-        border: 1px solid #ddd;
-        border-top-color: #636363;
-        margin-top: -1px;
-    }
-
-    div.module p {
-        padding-left: 1em;
-        padding-right: 1em;
-    }
-
-    code, pre {
-        background: #ffe;
-    }
-
-    pre {
-        padding: 1em;
-        margin: 0;
-    }
+    <!--[if IE]><script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.pie.pack.js"></script>     
     
-    /* only a single h1 per view */
-    #inner h1 {
-        color: #ccc;
-        font-size: 2em;
-        line-height: 1;
-        font-weight: normal;
-        margin: 0.5em 0 1em 0;
-        text-shadow: #eee 2px 2px 2px;
-    }
 
-    #inner h1 a {
-        color: #000;
-        text-decoration: none;
-    }    
-</style>
+<script id="source" language="javascript" type="text/javascript">
+$(function () {
+    var d1 = [[0, {{ sdp.child_sdps_submitted_randr_this_month }}]];
+    var d2 = [[2, {{ sdp.child_sdps_not_submitted_randr_this_month }}]];
+    var d3 = [[4, {{ sdp.child_sdps_not_responded_randr_this_month }}]];
+                        
+    $.plot($("#placeholder"), [
+        {
+            data: d1,
+            bars: { show: true},
+            xaxis: 1,
+            fillColor: "red"             
+        },
+        {
+            data: d2,
+            bars: { show: true},
+            xaxis: 1,
+            fillColor: "blue"             
+        },
+        {
+            data: d3,
+            bars: { show: true},
+            xaxis: 1,
+            fillColor: "green"             
+        }
+    ],
+        {
+            xaxis: { ticks: [[.5, "Submitted"], [2.5, "Haven't Submitted"], [4.5, "Didn't Respond"]]},
+            legend: {position: "nw"}
+        }
+    );
+
+    $.plot($("#placeholder2"), [
+        { label: "Not stocked out",  data: {{ sdp.not_stocked_out }} },
+        { label: "1 item",  data: {{ sdp.stocked_out_1 }} },
+        { label: "2 items",  data: {{ sdp.stocked_out_2 }} },
+        { label: "3 items",  data: {{ sdp.stocked_out_3 }} },
+        { label: "4 items",  data: {{ sdp.stocked_out_4 }} },
+        { label: "5 items",  data: {{ sdp.stocked_out_5 }} },
+        { label: "6 items",  data: {{ sdp.stocked_out_6 }} }
+    ], 
+    {
+        pie: { 
+            show: true, 
+            pieStrokeLineWidth: 1, 
+            pieStrokeColor: '#FFF', 
+            //pieChartRadius: 100,             // by default it calculated by 
+            //centerOffsetTop:30,
+            //centerOffsetLeft:30,             // if 'auto' and legend position is "nw" then centerOffsetLeft is equal a width of legend.
+            showLabel: true,                //use ".pieLabel div" to format looks of labels
+            labelOffsetFactor: 5/6,         // part of radius (default 5/6)
+            //labelOffset: 0                // offset in pixels if > 0 then labelOffsetFactor is ignored
+            labelBackgroundOpacity: 0.55,     // default is 0.85
+            labelFormatter: function(serie){// default formatter is "serie.label"
+                //return serie.label;
+                //return serie.data;
+                return serie.label+'<br/>'+Math.round(serie.percent)+'%';
+            }
+        },
+        legend: {
+            show: false, 
+            position: "ne", 
+            backgroundOpacity: 0
+        }
+    })
+});
+</script>
+
 {% endblock %}
 
 {% block content %}
@@ -52,15 +85,37 @@
 <h2>{% trans 'Welcome' %}, {{ user.username }}</h2>
 <div>{% trans 'Language' %}: {{ language }} <a href="/change_language">change language</a></div>
 <div class="module">
-    <h3>{{ sdp.name }} {% trans 'District' %}</h3>
+    <h3>{% trans 'District' %} {{ sdp.name }} <a href="">Select a different district</a></h3>
     
-    <h4>{% trans 'Alerts' %}</h4> (click the links for more details)
+    <h4>{% trans 'Alerts' %}</h4>
     <ul>
-        <li><a href="">6 Facilities</a> have reported not submitting their R &amp; R form as of June 6.</li>
-        <li><a href="">5 Facilities</a> did not respond to the SMS on June 6 asking if they had submitted their R&amp;R form.</li>
-        <li><a href="">6 Facilities</a> have not reported their stock levels for June 1.</li>
+        {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_submitted_randr_this_month }} Facilities</a> have reported not submitting their R &amp; R form as of today.</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} Facilities</a> did not respond to the SMS on {{ randr_inquiry_date }} asking if they had submitted their R&amp;R form.</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_soh_this_month }} Facilities</a> have not reported their stock levels for {{ soh_inquiry_date }}.</li>{% endif %}
     </ul>
-    
-    <img src="/static/ilsgateway/images/reports-mock-up-district-page.jpg">
 </div>
+    <div class="module" style="float:left;margin-right:30px;">
+        <h3 align="center">R&amp;R Submission Summary</h3>
+        <div id="placeholder" style="width:300px;height:300px;"></div>
+    </div>
+    <div class="module" style="float:left;margin-right:30px;">
+        <h3 align="center">Product Availability Summary - Stockouts</h3>
+        <div id="placeholder2" style="width:300px;height:300px;"></div>
+    </div>
+    <div class="module" style="float:left;text-align:center;width:250px;">
+        <h3 align="center">District Summary</h3>
+        <p>Facilities:</p><span style="font-size:3em;">{{ counts.total }}</span>
+        <p>Groups:</p>
+        <table width="100%" style="font-size:2em;">
+            <tr>
+                <td>{{ counts.a }}</td><td>{{ counts.b }}</td><td>{{ counts.c }}</td>
+            </tr>
+            <tr>
+                <td>A</td><td>B</td><td>C</td>
+            </tr>
+        </table>
+        <h4>Reported Stock via SMS</h4>
+        <p>This month: {{ sdp.child_sdps_percentage_reporting_stock_this_month }}%</p>
+        <p>Last month: {{ sdp.child_sdps_percentage_reporting_stock_last_month }}%</p> 
+    </div>
 {% endblock %}

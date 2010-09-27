@@ -1,11 +1,11 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
 <div class="module">
-    <h3>{{ my_sdp.parent_service_delivery_point.name }} / <a href="/facilities/{{ view_type }}">{{ facility.parent_service_delivery_point.name }}</a> / <a href="/facilities/{{ facility.id }}/inventory/">{{ facility.name }}</a></h3>
-    <h4>{{ facility.name }}</h4>
+    <h3>{{ my_sdp.parent_service_delivery_point.name }} / <a href="/facilities/{{ view_type }}">{{ facility.parent_service_delivery_point.name }}</a> / {{ facility.name }}</h3>
+    <h4>{{ facility.name }} ({{ facility.msd_code }}) - <a href="{% url locations location.uid %}">see on map</a></h4>
     <div style="float:left;"
         <p>{% if view_type == 'inventory' %}<a href="/facilities/{{ facility.id }}/months_of_stock/">Show months of stock</a>{% else %}<a href="/facilities/{{ facility.id}}/inventory/">Show inventory</a>{% endif %}</p>
         <table>
@@ -36,26 +36,26 @@
         <strong>R&amp;R Status</strong>
         {% if facility.randr_status %}
         <p>
-            Status: {{ facility.randr_status }}
+            Status: <span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status }}</span>
         </p>
         <p>
-            Last updated on: {{ facility.randr_status.status_date }}
+            Last updated on: <span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status.status_date }}</span>
         </p>
         {% else %}
         <p>
-             No status reported
+             <span class="no_delivery_status_reported">No delivery status reported</a>
         </p>
         {% endif %}
         </p>
-        <p><a href="/docdownload/{{ facility.msd_code }}">Download most recent R&amp;R</a></p>
+        <p><a href="/docdownload/{{ facility.id }}">Download most recent R&amp;R</a></p>
 
         <strong>Inventory Status</strong>
-        <p>Last SMS received: 
+        <p>Last Inventory SMS received: 
         {% if facility.last_message_received %}
             "{{ facility.last_message_received.text }}"</p>
             <p>From: {{ facility.last_message_received.contact }}, {{ facility.last_message_received.contact.contactdetail.role }}</p><p>Received on: {{ facility.stock_on_hand_last_reported }}</p>
         {% else %}
-            {{ facility.stock_on_hand_last_reported }}
+            No inventory messages have been received
         {% endif %}    
         </p>
         <p><a href="/facilities/{{ facility.id }}/message_history/">See message history</a></p>

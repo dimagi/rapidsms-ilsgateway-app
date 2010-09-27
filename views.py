@@ -4,7 +4,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 import datetime
-from ilsgateway.models import ServiceDeliveryPoint, Product
+from ilsgateway.models import ServiceDeliveryPoint, Product, FacilityLocation
 from django.http import Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -24,6 +24,12 @@ import gdata.docs.data
 import gdata.docs.client
 import gdata.gauth
 
+
+def flot_test(request):
+    return render_to_response('flot_test.html',
+                              {},
+                              context_instance=RequestContext(request))
+    
 def change_language(request):
     language = ''
     if request.LANGUAGE_CODE == 'en':
@@ -49,9 +55,26 @@ def dashboard(request):
         language = 'Spanish'        
     
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    sdp_children = ServiceDeliveryPoint.objects.filter(parent_service_delivery_point=sdp)
+    counts = {}
+    counts['a'] = len(sdp_children.filter(delivery_group__name='A'))
+    counts['b'] = len(sdp_children.filter(delivery_group__name='B'))
+    counts['c'] = len(sdp_children.filter(delivery_group__name='C'))
+    counts['total'] = counts['a'] + counts['b'] + counts['c']
+    now = datetime.datetime.now()
+    if now.day >= 15:
+        randr_inquiry_date = datetime.date(now.year, now.month, 15)
+        soh_inquiry_date = randr_inquiry_date
+    else:
+        randr_inquiry_date = datetime.date(now.year, now.month, 1)
+        soh_inquiry_date = randr_inquiry_date        
+          
     return render_to_response('ilsgateway_dashboard.html',
                               {'sdp': sdp,
-                               'language': language},
+                               'language': language,
+                               'counts': counts,
+                               'soh_inquiry_date': soh_inquiry_date,
+                               'randr_inquiry_date': randr_inquiry_date},
                               context_instance=RequestContext(request))
 
 @login_required
@@ -71,8 +94,23 @@ def facilities_index(request, view_type='inventory'):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp).order_by("delivery_group", "name")
     products = Product.objects.all()
+    facilities_dict = []
+    for facility in facilities:
+        facility_dict = {}
+        facility_dict['msd_code'] = facility.msd_code
+        facility_dict['delivery_group'] = facility.delivery_group.name
+        facility_dict['id'] = facility.id
+        facility_dict['name'] = facility.name
+        facility_dict['stock_levels'] = []
+        for product in products:
+            if view_type == "inventory":
+                facility_dict['stock_levels'].append(facility.stock_on_hand(product.sms_code))
+            elif view_type == "months_of_stock":
+                facility_dict['stock_levels'].append(facility.months_of_stock(product.sms_code))
+        facilities_dict.append(facility_dict)
     return render_to_response("facilities_list.html", 
                               {"facilities": facilities,
+                               "facilities_dict": facilities_dict,
                                "products": products,
                                "sdp": sdp,
                                "view_type": view_type },
@@ -81,7 +119,7 @@ def facilities_index(request, view_type='inventory'):
 @login_required
 def facilities_ordering(request):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
-    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp)
+    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp).order_by("delivery_group", "name")
     products = Product.objects.all()
     return render_to_response("facilities_ordering.html", 
                               {"facilities": facilities,
@@ -91,17 +129,19 @@ def facilities_ordering(request):
 
 @login_required
 def facilities_detail(request, facility_id,view_type='inventory'):
+    print request.user.id
     my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     try:
         f = ServiceDeliveryPoint.objects.get(pk=facility_id)
     except ServiceDeliveryPoint.DoesNotExist:
         raise Http404
-
+    location = FacilityLocation.objects.filter(service_delivery_point=f)[0:1].get()
     products = Product.objects.all()
     return render_to_response('facilities_detail.html', {'facility': f,
                                                          'products': products,
                                                          'view_type': view_type,
-                                                         'my_sdp': my_sdp},
+                                                         'my_sdp': my_sdp,
+                                                         'location': location},
                               context_instance=RequestContext(request),)
 
 @login_required    
@@ -182,7 +222,7 @@ def doclist(request):
         return render_to_response('a.html', {}, context_instance=RequestContext(request))
 
 @gdata_required
-def docdownload(request, msd_code):
+def docdownload(request, facility_id):
     """
     Simple example - download google docs document
     """
@@ -192,7 +232,11 @@ def docdownload(request, msd_code):
         client.ssl = True  # Force all API requests through HTTPS
         client.http_client.debug = False  # Set to True for debugging HTTP requests
         client.auth_token = gdata.gauth.AuthSubToken(request.session['token'])
-        query_string = '/feeds/default/private/full?title=%s&title-exact=false&max-results=100' % msd_code
+        try:
+            sdp = ServiceDeliveryPoint.objects.filter(id=facility_id)[0:1].get()
+        except:
+            raise Http404
+        query_string = '/feeds/default/private/full?title=%s&title-exact=false&max-results=100' % sdp.msd_code
         feed = client.GetDocList(uri=query_string)
 
         most_recent_doc = None

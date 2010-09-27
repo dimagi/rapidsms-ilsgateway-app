@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Django package.
 #
 
-DATE_FORMAT = r'j \de F \de Y'
+DATE_FORMAT = 'j N Y'
 TIME_FORMAT = 'H:i:s'
-DATETIME_FORMAT = r'j \de F \de Y \a \l\e\s H:i'
+DATETIME_FORMAT = 'j N Y P'
 YEAR_MONTH_FORMAT = r'F \de Y'
 MONTH_DAY_FORMAT = r'j \de F'
 SHORT_DATE_FORMAT = 'd/m/Y'

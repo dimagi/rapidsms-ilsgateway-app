@@ -8,7 +8,8 @@ from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact, Connection
 from django.contrib.auth.models import User
 from rapidsms.contrib.messagelog.models import Message
-import datetime
+from datetime import datetime, timedelta
+from utils import *
 
 class DeliveryGroupManager(models.Manager):    
     def get_by_natural_key(self, name):
@@ -49,8 +50,10 @@ class ServiceDeliveryPointManager(models.Manager):
         return self.get(name=name)    
     
 class ServiceDeliveryPoint(models.Model):
+    """
+    ServiceDeliveryPoint - the main concept of a location.  Currently covers MOHSW, Regions, Districts and Facilities.  This could/should be broken out into subclasses.
+    """
     objects = ServiceDeliveryPointManager()
-
     service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType, null=True, blank=True)
     parent_service_delivery_point = models.ForeignKey("self", null=True, blank=True)
     name = models.CharField(max_length=100, blank=True)
@@ -60,6 +63,18 @@ class ServiceDeliveryPoint(models.Model):
     products = models.ManyToManyField(Product, through='ServiceDeliveryPointProductReport')
     msd_code = models.CharField(max_length=100, blank=True, null=True)
 
+    def primary_contacts(self):
+        return ContactDetail.objects.filter(service_delivery_point=self, primary=True)
+        
+    def received_reminder_after(self, short_name, date):
+        result_set = self.servicedeliverypointstatus_set.filter(status_type__short_name=short_name, 
+                                                      status_date__month=datetime.now().date().month,
+                                                      status_date__year=datetime.now().date().year)
+        if result_set:
+            return True
+        else:
+            return False
+    
     def service_delivery_point_type_name(self):
         return self.service_delivery_point_type
     
@@ -81,33 +96,66 @@ class ServiceDeliveryPoint(models.Model):
     def get_products(self):
         return Product.objects.filter(servicedeliverypoint=self.id).distinct()
     
-    def months_of_stock(self, product):
-        return "Insufficient data"
+    def months_of_stock(self, sms_code):
+        return None
 
-    #As soon as I learn how to create dynamic methods these are gone        
-    def months_of_stock_inj(self):
-        return self.months_of_stock('inj')
-
-    def months_of_stock_pop(self):
-        return self.months_of_stock('pop')
-
-    def months_of_stock_coc(self):
-        return self.months_of_stock('coc')
-
-    def months_of_stock_imp(self):
-        return self.months_of_stock('imp')
-
-    def months_of_stock_con(self):
-        return self.months_of_stock('con')
-
-    def months_of_stock_iud(self):
-        return self.months_of_stock('iud')
-    
     def last_message_received(self):
         reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id, report_type__id=1).order_by('-report_date')
         if reports:
             return reports[0].message
         
+    def child_sdps_submitted_randr_this_month(self):
+        return ServiceDeliveryPoint.objects.filter(servicedeliverypointstatus__status_type__short_name="r_and_r_submitted_facility_to_district").distinct().count()
+
+    def child_sdps_not_submitted_randr_this_month(self):
+        return ServiceDeliveryPoint.objects.filter(servicedeliverypointstatus__status_type__short_name="r_and_r_not_submitted_facility_to_district").distinct().count()
+
+    def child_sdps_not_responded_randr_this_month(self):
+        return self.child_sdps().count() - self.child_sdps_submitted_randr_this_month() - self.child_sdps_not_submitted_randr_this_month()
+    
+    def child_sdps(self):
+        return ServiceDeliveryPoint.objects.filter(parent_service_delivery_point=self)
+    
+    def child_sdps_not_responded_soh_this_month(self):
+        return self.child_sdps().count() - self.child_sdps_responded_soh()
+
+    def child_sdps_responded_soh(self, month=datetime.now().month):
+        return self.child_sdps().filter(servicedeliverypointproductreport__report_date__range=( beginning_of_month(month), end_of_month(month) )).distinct().count()   
+    
+    def not_stocked_out(self):
+        return 7
+    
+    def stocked_out_1(self):
+        return 7
+    
+    def stocked_out_2(self):
+        return 7
+    
+    def stocked_out_3(self):
+        return 7
+    
+    def stocked_out_4(self):
+        return 7
+    
+    def stocked_out_5(self):
+        return 7
+
+    def stocked_out_6(self):
+        return 7
+    
+    def child_sdps_percentage_reporting_stock_this_month(self):
+        percentage = ( (self.child_sdps_responded_soh() * 100 ) / self.child_sdps().count() ) 
+        return "%d " % percentage
+
+    def child_sdps_percentage_reporting_stock_last_month(self):
+        now = datetime.now()
+        if now.month == 1:
+            last_month = 12
+        else:
+            last_month = now.month - 1
+        percentage = ( (self.child_sdps_responded_soh(last_month) * 100 ) / self.child_sdps().count() ) 
+        return "%d " % percentage
+    
     def stock_on_hand(self, sms_code):
         reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
                                                 product__sms_code=sms_code,
@@ -115,7 +163,7 @@ class ServiceDeliveryPoint(models.Model):
         if reports:
             return reports[0].quantity                                 
         else:
-            return "Waiting for reply"        
+            return None        
     
     def stock_on_hand_last_reported(self):
         reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
@@ -190,7 +238,7 @@ class ServiceDeliveryPointProductReport(models.Model):
     service_delivery_point = models.ForeignKey(ServiceDeliveryPoint)
     report_type = models.ForeignKey(ProductReportType)
     quantity = models.IntegerField()  
-    report_date = models.DateTimeField(auto_now_add=True, default=datetime.datetime.now())
+    report_date = models.DateTimeField(auto_now_add=True, default=datetime.now())
     message = models.ForeignKey(Message)  
     
     def product_name(self):
@@ -210,6 +258,10 @@ class ServiceDeliveryPointProductReport(models.Model):
         ordering = ('-report_date',)
         
 class ServiceDeliveryPointStatusType(models.Model):
+    """
+    This is the status for both R&R process and delivery - could be given a process name field to clarify between the two.
+    """
+    
     name = models.CharField(max_length=100)
     short_name = models.CharField(max_length=100)
 
@@ -245,6 +297,7 @@ class ServiceDeliveryPointLocation(Location):
     
     class Meta:
         abstract = True
+        ordering = ('service_delivery_point__name',) 
 
     @property
     def name(self):
@@ -260,11 +313,6 @@ class ServiceDeliveryPointLocation(Location):
         """
 
         return unicode(self)
-    @property
-    def InfoWindowHTML(self):
-        html = "<div><p>%s</p><p>INJ: 002</p></div>" % self.name
-        return html
-    
     
     def __unicode__(self):
         """

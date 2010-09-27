@@ -1,54 +1,12 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
 
-<style type="text/css">
-    #inner {
-        #margin: 4em 25%;
-    }
-
-    div.module div {
-        border: 1px solid #ddd;
-        border-top-color: #636363;
-        margin-top: -1px;
-    }
-
-    div.module p {
-        padding-left: 1em;
-        padding-right: 1em;
-    }
-
-    code, pre {
-        background: #ffe;
-    }
-
-    pre {
-        padding: 1em;
-        margin: 0;
-    }
-    
-    /* only a single h1 per view */
-    #inner h1 {
-        color: #000;
-        font-size: 2em;
-        line-height: 1;
-        font-weight: normal;
-        margin: 0.5em 0 1em 0;
-        text-shadow: #eee 2px 2px 2px;
-    }
-
-    #inner h1 a {
-        color: #ccc;
-        #text-decoration: none;
-    }    
-</style>
-
-<h1><a href="/facilities">Current Stock Status</a> | Ordering Status</h1>
-
+<h2>Ordering Status</h2>
 <div class="module">
-    <h3>{{ sdp.parent_service_delivery_point.name }} / <a href="/facilities/inventory/">{{ sdp.name }}</a> / <a href="/facilities/inventory/">FACILITIES</a></h3>
+    <h3>{{ sdp.parent_service_delivery_point.name }} / {{ sdp.name }} / FACILITIES</h3>
     <table>
         <thead>
             <th>MSD Code</th>
@@ -65,10 +23,10 @@
                 <td>{{ facility.msd_code }}</td>
                 <td>{{ facility.delivery_group.name }}</td>
                 <td><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a></td>
-                <td>{{ facility.randr_status.status_type.name }}</td>
-                <td>{{ facility.randr_status.status_date }}</td>
-                <td>{{ facility.delivery_status.status_type.name }}</td>
-                <td>{{ facility.delivery_status.status_date }}</td>
+                <td><span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status.status_type.name }}</span></td>
+                <td><span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status.status_date }}</span></td>
+                <td><span class="{{ facility.delivery_status.status_type.short_name }}">{{ facility.delivery_status.status_type.name }}</span></td>
+                <td><span class="{{ facility.delivery_status.status_type.short_name }}">{{ facility.delivery_status.status_date }}</span></td>
             </tr>
             {% endfor %}
         </tbody>

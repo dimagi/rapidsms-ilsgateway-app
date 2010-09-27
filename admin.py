@@ -58,8 +58,14 @@ class ServiceDeliveryPointStatusTypeAdmin(admin.ModelAdmin):
 class PointAdmin(admin.ModelAdmin):
     model = Point    
 
-class ServiceDeliveryPointLocationAdmin(admin.ModelAdmin):
-    model = ServiceDeliveryPointLocation
+class FacilityLocationAdmin(admin.ModelAdmin):
+    model = FacilityLocation
+
+class DistrictLocationAdmin(admin.ModelAdmin):
+    model = DistrictLocation
+
+class RegionLocationAdmin(admin.ModelAdmin):
+    model = RegionLocation
 
 class DeliveryGroupAdmin(admin.ModelAdmin):
     model = DeliveryGroup
@@ -75,7 +81,9 @@ admin.site.register(ServiceDeliveryPoint, ServiceDeliveryPointAdmin)
 admin.site.register(ServiceDeliveryPointStatus, ServiceDeliveryPointStatusAdmin)
 admin.site.register(ServiceDeliveryPointStatusType, ServiceDeliveryPointStatusTypeAdmin)
 admin.site.register(Point, PointAdmin)
-admin.site.register(ServiceDeliveryPointLocation, ServiceDeliveryPointLocationAdmin)
+admin.site.register(FacilityLocation, FacilityLocationAdmin)
+admin.site.register(DistrictLocation, DistrictLocationAdmin)
+admin.site.register(RegionLocation, RegionLocationAdmin)
 admin.site.register(DeliveryGroup, DeliveryGroupAdmin)
 
 

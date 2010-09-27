@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Django package.
 #
 
-DATE_FORMAT = 'N j, Y'
+DATE_FORMAT = 'j N Y'
 TIME_FORMAT = 'P'
 DATETIME_FORMAT = 'j N Y P'
 YEAR_MONTH_FORMAT = 'F Y'

@@ -1,1 +1,17 @@
-test
+div.module ul li {
+    margin-bottom: 7px;
+}
+
+span.r_and_r_not_submitted_facility_to_district, 
+span.delivery_not_received_facility, 
+span.r_and_r_reminder_sent_facility, 
+span.delivery_received_reminder_sent_facility,
+span.zero_count,
+span.no_delivery_status_reported {
+   color: red;
+}
+
+span.not_reported,
+span.insufficient_data {
+   color: gray;
+}

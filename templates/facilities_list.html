@@ -1,55 +1,13 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
 
-<style type="text/css">
-    #inner {
-        #margin: 4em 25%;
-    }
-
-    div.module div {
-        border: 1px solid #ddd;
-        border-top-color: #636363;
-        margin-top: -1px;
-    }
-
-    div.module p {
-        padding-left: 1em;
-        padding-right: 1em;
-    }
-
-    code, pre {
-        background: #ffe;
-    }
-
-    pre {
-        padding: 1em;
-        margin: 0;
-    }
-    
-    /* only a single h1 per view */
-    #inner h1 {
-        color: #000;
-        font-size: 2em;
-        line-height: 1;
-        font-weight: normal;
-        margin: 0.5em 0 1em 0;
-        text-shadow: #eee 2px 2px 2px;
-    }
-
-    #inner h1 a {
-        color: #ccc;
-        #text-decoration: none;
-    }    
-</style>
-
-<h1>Current Stock Status | <a href="/facilities/ordering">Ordering Status</a></h1>
-<h2>{% if view_type == 'inventory' %}<a href="/facilities/months_of_stock/">Show months of stock</a>{% else %}<a href="/facilities/inventory/">Show inventory</a>{% endif %}</></h2>
-
+<h2>Current Stock Status</h2>
+{% if view_type == 'inventory' %}<a href="/facilities/months_of_stock/">Show months of stock</a>{% else %}<a href="/facilities/inventory/">Show inventory</a>{% endif %}</>
 <div class="module">
-    <h3>{{ sdp.parent_service_delivery_point.name }} / <a href="/facilities/{{ view_type }}">{{ sdp.name }}</a> / <a href="/facilities/{{ view_type }}/">FACILITIES</a></h3>
+    <h3>{{ sdp.parent_service_delivery_point.name }} / {{ sdp.name }} / FACILITIES</h3>
     <table>
         <thead>
             <th>MSD Code</th>
@@ -60,25 +18,19 @@
           {% endfor %}            
         </thead>
         <tbody>
-            {% for facility in facilities %}
+            {% for facility in facilities_dict %}
             <tr>
                 <td>{{ facility.msd_code }}</td>
-                <td>{{ facility.delivery_group.name }}</td>
+                <td>{{ facility.delivery_group }}</td>
                 <td><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a></td>
             {% if view_type == 'inventory' %}
-                <td>{{ facility.stock_on_hand_imp }}</td>
-                <td>{{ facility.stock_on_hand_pop }}</td>
-                <td>{{ facility.stock_on_hand_con}}</td>
-                <td>{{ facility.stock_on_hand_inj }}</td>
-                <td>{{ facility.stock_on_hand_coc }}</td>
-                <td>{{ facility.stock_on_hand_iud }}</td>
+                {% for quantity in facility.stock_levels %}
+                    <td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}not_reported{% endif %}{% endif %}">{{quantity}}</span></td>
+                {% endfor %}
             {% else %}
-                <td>{{ facility.months_of_stock_imp }}</td>
-                <td>{{ facility.months_of_stock_pop }}</td>
-                <td>{{ facility.months_of_stock_con}}</td>
-                <td>{{ facility.months_of_stock_inj }}</td>
-                <td>{{ facility.months_of_stock_coc }}</td>
-                <td>{{ facility.months_of_stock_iud }}</td>            
+                {% for quantity in facility.stock_levels %}
+                    <td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}insufficient_data{% endif %}{% endif %}">{% if not quantity %}insufficient data{% else %}{{quantity}}{% endif %}</span></td>
+                {% endfor %}
             {% endif %}
             </tr>
             {% endfor %}

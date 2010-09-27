@@ -27,7 +27,7 @@ class TestSchedule (TestScript):
     def test_all(self):
         schedule = EventSchedule(callback="foo", \
                                  minutes=ALL)
-        self.assertFalse(schedule.should_fire(start))
+        self.assertTrue(schedule.should_fire(start))
         self.assertTrue(schedule.should_fire(start+sec))
         self.assertTrue(schedule.should_fire(start+min))
         self.assertTrue(schedule.should_fire(start+hour))
