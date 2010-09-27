@@ -10,7 +10,7 @@ class ConfirmDeliveryReceived(KeywordHandler):
     for reporting delivery confirmation, products and amounts
     """
 
-    keyword = "delivered"
+    keyword = "delivered|dlvd"
 
     def help(self):
         st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received")[0:1].get()

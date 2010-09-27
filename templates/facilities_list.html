@@ -25,11 +25,11 @@
                 <td><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a></td>
             {% if view_type == 'inventory' %}
                 {% for quantity in facility.stock_levels %}
-                    <td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}not_reported{% endif %}{% endif %}">{{quantity}}</span></td>
+                    <td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}insufficient_data{% endif %}{% endif %}">{% if quantity == None %}no data{% else %}{{quantity}}{% endif %}</span></td>
                 {% endfor %}
             {% else %}
                 {% for quantity in facility.stock_levels %}
-                    <td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}insufficient_data{% endif %}{% endif %}">{% if not quantity %}insufficient data{% else %}{{quantity}}{% endif %}</span></td>
+                    <td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}insufficient_data{% endif %}{% endif %}">{% if quantity == None %}insufficient data{% else %}{{quantity}}{% endif %}</span></td>
                 {% endfor %}
             {% endif %}
             </tr>
