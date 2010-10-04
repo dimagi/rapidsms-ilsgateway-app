@@ -1,5 +1,13 @@
+div.module ul {
+    list-style: none;
+}
+
 div.module ul li {
-    margin-bottom: 7px;
+    padding-bottom: 13px;
+    padding-left: 20px;
+    background-image: url(/static/ilsgateway/images/exclamation_trans_bg_icon.gif);
+    background-repeat: no-repeat;
+    background-position: 0 0;
 }
 
 span.r_and_r_not_submitted_facility_to_district, 

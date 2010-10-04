@@ -3,6 +3,7 @@
 
 
 from django.db import models
+from django.db.models import Q
 from rapidsms.models import ExtensibleModelBase
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact, Connection
@@ -10,6 +11,7 @@ from django.contrib.auth.models import User
 from rapidsms.contrib.messagelog.models import Message
 from datetime import datetime, timedelta
 from utils import *
+from django.contrib.contenttypes.models import ContentType
 
 class DeliveryGroupManager(models.Manager):    
     def get_by_natural_key(self, name):
@@ -24,17 +26,7 @@ class DeliveryGroup(models.Model):
 
     class Meta:
         ordering = ('name',)  
-    
-class ServiceDeliveryPointType(models.Model):
-    name = models.CharField(max_length=100, blank=True)
-    parent_service_delivery_point_type = models.ForeignKey("self", null=True, blank=True)
-    
-    def __unicode__(self):
-        return self.name
-    
-    class Meta:
-        verbose_name = "ILS Level"      
-        
+            
 class Product(models.Model):
     name = models.CharField(max_length=100)
     units = models.CharField(max_length=100)
@@ -44,43 +36,76 @@ class Product(models.Model):
     
     def __unicode__(self):
         return self.name
+    
+class ServiceDeliveryPointType(models.Model):
+    name = models.CharField(max_length=100)
+    
+    def __unicode__(self):
+        return self.name
 
 class ServiceDeliveryPointManager(models.Manager):    
     def get_by_natural_key(self, name):
         return self.get(name=name)    
     
-class ServiceDeliveryPoint(models.Model):
+class ServiceDeliveryPoint(Location):
     """
     ServiceDeliveryPoint - the main concept of a location.  Currently covers MOHSW, Regions, Districts and Facilities.  This could/should be broken out into subclasses.
     """
+    @property
+    def label(self):
+        """
+        Return an HTML fragment, for embedding in a Google map. This
+        method should be overridden by subclasses wishing to provide
+        better contextual information.
+        """
+        return unicode(self)
+    
     objects = ServiceDeliveryPointManager()
-    service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType, null=True, blank=True)
-    parent_service_delivery_point = models.ForeignKey("self", null=True, blank=True)
     name = models.CharField(max_length=100, blank=True)
     active = models.BooleanField(default=True)
     delivery_group = models.ForeignKey(DeliveryGroup, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     products = models.ManyToManyField(Product, through='ServiceDeliveryPointProductReport')
     msd_code = models.CharField(max_length=100, blank=True, null=True)
+    service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType)
+    
+    def active_products(self):
+        return Product.objects.all()
+    
+    def contacts(self, contact_type='all'):
+        if contact_type == 'all':
+            return ContactDetail.objects.filter(service_delivery_point=self)
+        elif contact_type == 'primary':
+            return ContactDetail.objects.filter(service_delivery_point=self, primary=True)
+        elif contact_type == 'secondary':
+            return ContactDetail.objects.filter(service_delivery_point=self, primary=False)
+        else:
+            return []
+
+    def child_sdps_contacts(self):
+        return ContactDetail.objects.filter(service_delivery_point__parent_id=self.id)        
 
     def primary_contacts(self):
-        return ContactDetail.objects.filter(service_delivery_point=self, primary=True)
+        return self.contacts('primary')
+
+    def secondary_contacts(self):
+        return self.contacts('secondary')
         
     def received_reminder_after(self, short_name, date):
         result_set = self.servicedeliverypointstatus_set.filter(status_type__short_name=short_name, 
-                                                      status_date__month=datetime.now().date().month,
-                                                      status_date__year=datetime.now().date().year)
+                                                      status_date__gt=date)
         if result_set:
             return True
         else:
             return False
     
-    def service_delivery_point_type_name(self):
-        return self.service_delivery_point_type
-    
     def report_product_status(self, **kwargs):
         npr = ServiceDeliveryPointProductReport(service_delivery_point = self,  **kwargs)
         npr.save()
+        
+    def report_delivery_group_status(self, **kwargs):
+        sdp_dgr = ServiceDeliveryPointDGReport(service_delivery_point = self,  **kwargs)
+        sdp_dgr.save()        
         
     def randr_status(self):
         status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
@@ -89,10 +114,6 @@ class ServiceDeliveryPoint(models.Model):
     def delivery_status(self):
         return self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='delivery').latest()  
         
-    def current_status(self):
-        #TODO catch when no status exists
-        return self.servicedeliverypointstatus_set.latest()
-    
     def get_products(self):
         return Product.objects.filter(servicedeliverypoint=self.id).distinct()
     
@@ -104,47 +125,70 @@ class ServiceDeliveryPoint(models.Model):
         if reports:
             return reports[0].message
         
+    def child_sdps(self):
+        return ServiceDeliveryPoint.objects.filter(parent_id=self.id)
+    
     def child_sdps_submitted_randr_this_month(self):
-        return ServiceDeliveryPoint.objects.filter(servicedeliverypointstatus__status_type__short_name="r_and_r_submitted_facility_to_district").distinct().count()
+        return self.child_sdps_submitting().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_submitted_facility_to_district").distinct().count()
+
+    def child_sdps_received_delivery_this_month(self):
+        return self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name__in=["delivery_received_facility", "delivery_quantities_reported"]).distinct().count()
+
+    def child_sdps_not_received_delivery_this_month(self):
+        return self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name__in=["delivery_not_received_facility", "delivery_quantities_reported"]).distinct().count()
+
+    def child_sdps_not_responded_delivery_this_month(self):
+        return self.child_sdps_receiving().count() - self.child_sdps_not_received_delivery_this_month() - self.child_sdps_not_received_delivery_this_month()
 
     def child_sdps_not_submitted_randr_this_month(self):
-        return ServiceDeliveryPoint.objects.filter(servicedeliverypointstatus__status_type__short_name="r_and_r_not_submitted_facility_to_district").distinct().count()
+        return self.child_sdps_submitting().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_not_submitted_facility_to_district").distinct().count()
 
     def child_sdps_not_responded_randr_this_month(self):
-        return self.child_sdps().count() - self.child_sdps_submitted_randr_this_month() - self.child_sdps_not_submitted_randr_this_month()
+        return self.child_sdps_submitting().count() - self.child_sdps_submitted_randr_this_month() - self.child_sdps_not_submitted_randr_this_month()
     
-    def child_sdps(self):
-        return ServiceDeliveryPoint.objects.filter(parent_service_delivery_point=self)
+    def child_sdps_processing_sent_to_msd(self, month=datetime.now().month):
+        sdp_dgr_list = ServiceDeliveryPointDGReport.objects.filter(delivery_group__name=current_processing_group(), report_date__range=( beginning_of_month(month), end_of_month(month) ) )
+        if not sdp_dgr_list:
+            return 0
+        else:
+            return sdp_dgr_list[0].quantity
     
+    def child_sdps_receiving(self):
+        return self.child_sdps().filter(delivery_group__name=current_delivering_group())
+    
+    def child_sdps_submitting(self):
+        return self.child_sdps().filter(delivery_group__name=current_submitting_group())
+
+    def child_sdps_processing(self):
+        return self.child_sdps().filter(delivery_group__name=current_processing_group())
+
     def child_sdps_not_responded_soh_this_month(self):
         return self.child_sdps().count() - self.child_sdps_responded_soh()
 
     def child_sdps_responded_soh(self, month=datetime.now().month):
         return self.child_sdps().filter(servicedeliverypointproductreport__report_date__range=( beginning_of_month(month), end_of_month(month) )).distinct().count()   
     
-    def not_stocked_out(self):
-        return 7
-    
-    def stocked_out_1(self):
-        return 7
-    
-    def stocked_out_2(self):
-        return 7
-    
-    def stocked_out_3(self):
-        return 7
-    
-    def stocked_out_4(self):
-        return 7
-    
-    def stocked_out_5(self):
-        return 7
+    def child_sdps_without_contacts(self):
+        return self.child_sdps().filter(contactdetail__primary__isnull=True).order_by('name')[:3]
 
-    def stocked_out_6(self):
-        return 7
+    def child_sdps_stocked_out(self, sms_code):
+        return self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code,
+                                        servicedeliverypointproductreport__quantity=0,
+                                        servicedeliverypointproductreport__report_date__range=( beginning_of_month(), end_of_month() )).distinct().count()
     
+    def child_sdps_not_stocked_out(self, sms_code):
+        return self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code,
+                                        servicedeliverypointproductreport__quantity__gt=0,
+                                        servicedeliverypointproductreport__report_date__range=( beginning_of_month(), end_of_month() )).distinct().count()
+    
+    def child_sdps_no_stock_out_data(self, sms_code):
+        return self.child_sdps().count() - self.child_sdps_not_stocked_out(sms_code) - self.child_sdps_stocked_out(sms_code)
+
     def child_sdps_percentage_reporting_stock_this_month(self):
-        percentage = ( (self.child_sdps_responded_soh() * 100 ) / self.child_sdps().count() ) 
+        if self.child_sdps().count() > 0:
+            percentage = ( (self.child_sdps_responded_soh() * 100 ) / self.child_sdps().count() )
+        else:
+            percentage = 0  
         return "%d " % percentage
 
     def child_sdps_percentage_reporting_stock_last_month(self):
@@ -153,7 +197,11 @@ class ServiceDeliveryPoint(models.Model):
             last_month = 12
         else:
             last_month = now.month - 1
-        percentage = ( (self.child_sdps_responded_soh(last_month) * 100 ) / self.child_sdps().count() ) 
+
+        if self.child_sdps().count() > 0:
+            percentage = ( (self.child_sdps_responded_soh(last_month) * 100 ) / self.child_sdps().count() ) 
+        else:
+            percentage = 0
         return "%d " % percentage
     
     def stock_on_hand(self, sms_code):
@@ -194,6 +242,24 @@ class ServiceDeliveryPoint(models.Model):
 
     def __unicode__(self):
         return self.name
+
+class MinistryOfHealth(ServiceDeliveryPoint):
+    class Meta:
+        verbose_name_plural = "Ministry of Health"  
+
+    pass
+    
+class Region(ServiceDeliveryPoint):
+    pass
+
+class District(ServiceDeliveryPoint):
+    pass
+
+class Facility(ServiceDeliveryPoint):
+    class Meta:
+        verbose_name_plural = "Facilities"  
+    
+    pass
     
 class ContactRole(models.Model):
     name = models.CharField(max_length=100, blank=True)
@@ -207,9 +273,13 @@ class ContactRole(models.Model):
 class ContactDetail(Contact):
     user = models.OneToOneField(User, null=True, blank=True)
     role = models.ForeignKey(ContactRole, null=True, blank=True)
+    email = models.EmailField(blank=True)
     #TODO validate only one primary can exist (or auto change all others to non-primary when new primary selected)
     service_delivery_point = models.ForeignKey(ServiceDeliveryPoint,null=True,blank=True)
     primary = models.BooleanField(default=False)
+    
+    def phone(self):
+        return contact_detail.default_connection.indentity
     
     def role_name(self):
         return self.role.name
@@ -256,6 +326,16 @@ class ServiceDeliveryPointProductReport(models.Model):
     class Meta:
         verbose_name = "Inventory Status Report" 
         ordering = ('-report_date',)
+
+class ServiceDeliveryPointDGReport(models.Model):
+    service_delivery_point = models.ForeignKey(ServiceDeliveryPoint)
+    quantity = models.IntegerField()  
+    report_date = models.DateTimeField(auto_now_add=True, default=datetime.now())
+    message = models.ForeignKey(Message)  
+    delivery_group = models.ForeignKey(DeliveryGroup)
+    
+    class Meta:
+        ordering = ('-report_date',)
         
 class ServiceDeliveryPointStatusType(models.Model):
     """
@@ -291,39 +371,3 @@ class ServiceDeliveryPointStatus(models.Model):
         verbose_name_plural = "Facility Statuses"  
         get_latest_by = "status_date"  
         ordering = ('-status_date',) 
-        
-class ServiceDeliveryPointLocation(Location):
-    service_delivery_point = models.ForeignKey(ServiceDeliveryPoint, null=True, blank=True)
-    
-    class Meta:
-        abstract = True
-        ordering = ('service_delivery_point__name',) 
-
-    @property
-    def name(self):
-        if self.service_delivery_point:
-            return self.service_delivery_point.name 
-    
-    @property
-    def label(self):
-        """
-        Return an HTML fragment, for embedding in a Google map. This
-        method should be overridden by subclasses wishing to provide
-        better contextual information.
-        """
-
-        return unicode(self)
-    
-    def __unicode__(self):
-        """
-        """
-        return getattr(self, "name", "%s" % self.service_delivery_point.name)
-    
-class FacilityLocation(ServiceDeliveryPointLocation):
-    pass
-
-class DistrictLocation(ServiceDeliveryPointLocation):
-    pass
-
-class RegionLocation(ServiceDeliveryPointLocation):
-    pass

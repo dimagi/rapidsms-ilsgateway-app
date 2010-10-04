@@ -14,7 +14,7 @@ class Not(KeywordHandler):
     keyword = "not|no"
 
     def help(self):
-        self.respond("If you haven't submitted your R&R, respond \"not submitted\".  If you haven't received you delivery, respond \"not delivered\"")
+        self.respond("If you haven't submitted your R&R, respond \"not submitted\".  If you haven't received your delivery, respond \"not delivered\"")
 
     def handle(self, text):
         if re.match("del", text.strip().lower() ):

@@ -11,16 +11,8 @@ from ilsgateway.utils import *
 class ConfirmRandRSubmitted(KeywordHandler):
     keyword = "sub|submitted"
     def help(self):
-        service_delivery_point=self.msg.contact.contactdetail.service_delivery_point
-        if service_delivery_point.service_delivery_point_type.name == "DISTRICT":
-            self.respond("Please respond in the format \"submitted a 12 b 10 c 2.\"")
-        elif service_delivery_point.service_delivery_point_type.name == "FACILITY":
-            st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_submitted_facility_to_district")[0:1].get()
-            ns = ServiceDeliveryPointStatus(service_delivery_point=service_delivery_point, status_type=st, status_date=datetime.now())
-            ns.save()
-            self.respond('Thank you %s for submitting your R and R form for %s' % (self.msg.contact.name,self.msg.contact.contactdetail.service_delivery_point.name))
-            return
-            
+        self.respond("Please respond in the format \"submitted a 12 b 10 c 2.\"")
+
     def handle(self, text):
         service_delivery_point=self.msg.contact.contactdetail.service_delivery_point
         if service_delivery_point.service_delivery_point_type.name == "DISTRICT":
@@ -36,16 +28,11 @@ class ConfirmRandRSubmitted(KeywordHandler):
                 sdp = self.msg.contact.contactdetail.service_delivery_point
                 while len(delivery_groups_list) >= 2:
                     quantity = delivery_groups_list.pop(0)
-                    delivery_group_name = delivery_groups_list.pop(0)
                     if not is_number(quantity):
-                        if is_number(delivery_group_name):
-                            temp = delivery_group_name
-                            delivery_group_name = quantity
-                            quantity = temp
-                        else:                        
-                            self.respond("Sorry, invalid format.  The message should be in the format \"submitted a 12 b 10 c 2.\"")
-                            return
+                        self.respond("%s is not a number" % quantity )
+                        return
                                         
+                    delivery_group_name = delivery_groups_list.pop(0)
                     try:
                         delivery_group = DeliveryGroup.objects.filter(name__iexact=delivery_group_name)[0:1].get()   
                     except DeliveryGroup.DoesNotExist:

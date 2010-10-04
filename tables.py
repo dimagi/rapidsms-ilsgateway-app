@@ -13,7 +13,7 @@ def _edit_link(cell):
 class ContactDetailTable(Table):
     name = Column(link=_edit_link)
     language = Column()
-    role = Column()
+    #role = Column()
     service_delivery_point = Column()
     primary = Column()
 

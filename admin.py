@@ -7,20 +7,10 @@ from ilsgateway.models import *
 from rapidsms.models import Connection
 from rapidsms.contrib.locations.models import Point
 
-class ServiceDeliveryPointTypeAdmin(admin.ModelAdmin):
-    model = ServiceDeliveryPointType
-
-class ServiceDeliveryPointLocationInline(admin.TabularInline):
-    model = ServiceDeliveryPointLocation
-    extra = 0
-
-class ServiceDeliveryPointAdmin(admin.ModelAdmin):
+class DistrictAdmin(admin.ModelAdmin):
     list_display = ('name', 'service_delivery_point_type_name')
     ordering = ['name']
-    inlines = [
-         ServiceDeliveryPointLocationInline,      
-    ]
-    
+        
 class ConnectionInline(admin.TabularInline):
     model = Connection
     extra = 1
@@ -58,14 +48,14 @@ class ServiceDeliveryPointStatusTypeAdmin(admin.ModelAdmin):
 class PointAdmin(admin.ModelAdmin):
     model = Point    
 
-class FacilityLocationAdmin(admin.ModelAdmin):
-    model = FacilityLocation
+class FacilityAdmin(admin.ModelAdmin):
+    model = Facility
 
-class DistrictLocationAdmin(admin.ModelAdmin):
-    model = DistrictLocation
+class DistrictAdmin(admin.ModelAdmin):
+    model = District
 
-class RegionLocationAdmin(admin.ModelAdmin):
-    model = RegionLocation
+class RegionAdmin(admin.ModelAdmin):
+    model = Region
 
 class DeliveryGroupAdmin(admin.ModelAdmin):
     model = DeliveryGroup
@@ -73,17 +63,16 @@ class DeliveryGroupAdmin(admin.ModelAdmin):
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductReportType, ProductReportTypeAdmin)
 admin.site.register(ServiceDeliveryPointProductReport, ServiceDeliveryPointProductReportAdmin)
-admin.site.register(ServiceDeliveryPointType, ServiceDeliveryPointTypeAdmin)
 admin.site.register(ContactRole, ContactRoleAdmin)
 admin.site.unregister(Contact)
 admin.site.register(ContactDetail, ContactDetailAdmin)
-admin.site.register(ServiceDeliveryPoint, ServiceDeliveryPointAdmin)
+admin.site.register(ServiceDeliveryPoint, DistrictAdmin)
 admin.site.register(ServiceDeliveryPointStatus, ServiceDeliveryPointStatusAdmin)
 admin.site.register(ServiceDeliveryPointStatusType, ServiceDeliveryPointStatusTypeAdmin)
 admin.site.register(Point, PointAdmin)
-admin.site.register(FacilityLocation, FacilityLocationAdmin)
-admin.site.register(DistrictLocation, DistrictLocationAdmin)
-admin.site.register(RegionLocation, RegionLocationAdmin)
+admin.site.register(Facility, FacilityAdmin)
+admin.site.register(District, DistrictAdmin)
+admin.site.register(Region, RegionAdmin)
 admin.site.register(DeliveryGroup, DeliveryGroupAdmin)
 
 

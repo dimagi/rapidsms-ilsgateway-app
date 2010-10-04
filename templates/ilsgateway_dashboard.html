@@ -3,81 +3,58 @@
 
 {% block title %}Dashboard{% endblock %}
 {% block javascripts %}
+    <!--[if IE]><script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/excanvas.js"></script><![endif]-->
 {{ block.super }}
-    <!--[if IE]><script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/excanvas.min.js"></script><![endif]-->
-    <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.js"></script>
     <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.js"></script>
-    <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.pie.pack.js"></script>     
-    
+    <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.stack.js"></script>
+    <script language="javascript">
+        $(document).ready(function() {    
 
-<script id="source" language="javascript" type="text/javascript">
-$(function () {
-    var d1 = [[0, {{ sdp.child_sdps_submitted_randr_this_month }}]];
-    var d2 = [[2, {{ sdp.child_sdps_not_submitted_randr_this_month }}]];
-    var d3 = [[4, {{ sdp.child_sdps_not_responded_randr_this_month }}]];
-                        
-    $.plot($("#placeholder"), [
-        {
-            data: d1,
-            bars: { show: true},
-            xaxis: 1,
-            fillColor: "red"             
-        },
-        {
-            data: d2,
-            bars: { show: true},
-            xaxis: 1,
-            fillColor: "blue"             
-        },
-        {
-            data: d3,
-            bars: { show: true},
-            xaxis: 1,
-            fillColor: "green"             
-        }
-    ],
-        {
-            xaxis: { ticks: [[.5, "Submitted"], [2.5, "Haven't Submitted"], [4.5, "Didn't Respond"]]},
-            legend: {position: "nw"}
-        }
-    );
-
-    $.plot($("#placeholder2"), [
-        { label: "Not stocked out",  data: {{ sdp.not_stocked_out }} },
-        { label: "1 item",  data: {{ sdp.stocked_out_1 }} },
-        { label: "2 items",  data: {{ sdp.stocked_out_2 }} },
-        { label: "3 items",  data: {{ sdp.stocked_out_3 }} },
-        { label: "4 items",  data: {{ sdp.stocked_out_4 }} },
-        { label: "5 items",  data: {{ sdp.stocked_out_5 }} },
-        { label: "6 items",  data: {{ sdp.stocked_out_6 }} }
-    ], 
-    {
-        pie: { 
-            show: true, 
-            pieStrokeLineWidth: 1, 
-            pieStrokeColor: '#FFF', 
-            //pieChartRadius: 100,             // by default it calculated by 
-            //centerOffsetTop:30,
-            //centerOffsetLeft:30,             // if 'auto' and legend position is "nw" then centerOffsetLeft is equal a width of legend.
-            showLabel: true,                //use ".pieLabel div" to format looks of labels
-            labelOffsetFactor: 5/6,         // part of radius (default 5/6)
-            //labelOffset: 0                // offset in pixels if > 0 then labelOffsetFactor is ignored
-            labelBackgroundOpacity: 0.55,     // default is 0.85
-            labelFormatter: function(serie){// default formatter is "serie.label"
-                //return serie.label;
-                //return serie.data;
-                return serie.label+'<br/>'+Math.round(serie.percent)+'%';
-            }
-        },
-        legend: {
-            show: false, 
-            position: "ne", 
-            backgroundOpacity: 0
-        }
-    })
-});
+            var d1 = [[0, {{ sdp.child_sdps_submitted_randr_this_month }}]];
+            var d2 = [[2, {{ sdp.child_sdps_not_submitted_randr_this_month }}]];
+            var d3 = [[4, {{ sdp.child_sdps_not_responded_randr_this_month }}]];
+                                
+            $.plot($("#placeholder"), [
+                {
+                    data: d1,
+                    bars: { show: true},
+                    xaxis: 1,
+                    fillColor: "red", 
+                },
+                {
+                    data: d2,
+                    bars: { show: true},
+                    xaxis: 1,
+                    fillColor: "blue"             
+                },
+                {
+                    data: d3,
+                    bars: { show: true},
+                    xaxis: 1,
+                    fillColor: "green"             
+                }
+            ],
+                {
+                    xaxis: { ticks: [[.5, "Submitted"], [2.5, "Haven't Submitted"], [4.5, "Didn't Respond"]]},
+                    legend: {position: "nw"}
+                }
+            );
+            bar_options = {                     
+               series: {
+                 stack: true,
+                 lines: { show: false, steps: false },
+                 bars: { show: true, barWidth: 1 }
+               },
+               xaxis: { 
+                       ticks: {{ bar_ticks|safe }},
+                       max: 12
+                      }, 
+               legend: {show: true, position: 'nw'},
+               yaxis: {max: {{ max_stockout_graph }} }
+            };
+            $.plot($("#placeholder2"), {{ bar_data|safe }}, bar_options);    
+        });
 </script>
-
 {% endblock %}
 
 {% block content %}
@@ -90,8 +67,13 @@ $(function () {
     <h4>{% trans 'Alerts' %}</h4>
     <ul>
         {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_submitted_randr_this_month }} Facilities</a> have reported not submitting their R &amp; R form as of today.</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} Facilities</a> did not respond to the SMS on {{ randr_inquiry_date }} asking if they had submitted their R&amp;R form.</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_soh_this_month }} Facilities</a> have not reported their stock levels for {{ soh_inquiry_date }}.</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} Facilities</a> did not respond to the SMS on {{ randr_inquiry_date|date:"j N Y" }} asking if they had submitted their R&amp;R form.</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_soh_this_month }} Facilities</a> have not reported their stock levels for {{ soh_inquiry_date|date:"j N Y" }}.</li>{% endif %}
+        {% if sdp.child_sdps_not_received_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_received_delivery_this_month }} Facilities</a> have reported not receiving their deliveries as of today.</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} Facilities</a> did not respond to the SMS on {{ delivery_inquiry_date|date:"j N Y" }} asking if they had received their delivery.</li>{% endif %}
+        {% for facility in facilities_without_primary_contacts %}
+            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> has no primary contact.  <a href="{% url registration %}">Register someone now &raquo;</a></li>
+        {% endfor %}
     </ul>
 </div>
     <div class="module" style="float:left;margin-right:30px;">
@@ -104,18 +86,16 @@ $(function () {
     </div>
     <div class="module" style="float:left;text-align:center;width:250px;">
         <h3 align="center">District Summary</h3>
-        <p>Facilities:</p><span style="font-size:3em;">{{ counts.total }}</span>
-        <p>Groups:</p>
-        <table width="100%" style="font-size:2em;">
-            <tr>
-                <td>{{ counts.a }}</td><td>{{ counts.b }}</td><td>{{ counts.c }}</td>
-            </tr>
-            <tr>
-                <td>A</td><td>B</td><td>C</td>
-            </tr>
-        </table>
+        <span style="font-size:3em;">{{ counts.total }}</span><span style="font-size:2em;padding-left:5px;">facilities</span><div style="clear:both;">&nbsp;</div>
+        <span style="font-size:1.5em;">Group {{ groups.current_submitting_group }}</span><span style="font-size:1.5em;padding-left:5px;">submitting</span><div style="clear:both;">&nbsp;</div>
+        <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_submitting_group }} submitted</span><div style="clear:both;">&nbsp;</div>
+        <span style="font-size:1.5em;">Group {{ groups.current_processing_group }}</span><span style="font-size:1.5em;padding-left:5px;">processing</span><div style="clear:both;">&nbsp;</div>
+        <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_processing_sent_to_msd }} of {{ counts.current_processing_group }} forms sent to MSD</span><div style="clear:both;">&nbsp;</div>
+        <span style="font-size:1.5em;">Group {{ groups.current_delivering_group }}</span><span style="font-size:1.5em;padding-left:5px;">delivering</span><div style="clear:both;">&nbsp;</div>
+        <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_delivering_group }} delivered</span><div style="clear:both;">&nbsp;</div>
         <h4>Reported Stock via SMS</h4>
         <p>This month: {{ sdp.child_sdps_percentage_reporting_stock_this_month }}%</p>
         <p>Last month: {{ sdp.child_sdps_percentage_reporting_stock_last_month }}%</p> 
     </div>
 {% endblock %}
+

@@ -3,13 +3,14 @@
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
-import datetime
-from ilsgateway.models import ServiceDeliveryPoint, Product, FacilityLocation
+from datetime import datetime
+from ilsgateway.models import ServiceDeliveryPoint, Product, Facility, ServiceDeliveryPointStatus
 from django.http import Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from rapidsms.contrib.messagelog.models import Message
+from utils import *
 
 from httplib import HTTPSConnection, HTTPConnection
 from django.shortcuts import render_to_response
@@ -24,6 +25,7 @@ import gdata.docs.data
 import gdata.docs.client
 import gdata.gauth
 
+import random
 
 def flot_test(request):
     return render_to_response('flot_test.html',
@@ -53,28 +55,79 @@ def dashboard(request):
         language = 'Swahili'
     elif request.LANGUAGE_CODE == 'es':
         language = 'Spanish'        
-    
+            
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
-    sdp_children = ServiceDeliveryPoint.objects.filter(parent_service_delivery_point=sdp)
+    facilities_without_primary_contacts = sdp.child_sdps_without_contacts()
     counts = {}
-    counts['a'] = len(sdp_children.filter(delivery_group__name='A'))
-    counts['b'] = len(sdp_children.filter(delivery_group__name='B'))
-    counts['c'] = len(sdp_children.filter(delivery_group__name='C'))
-    counts['total'] = counts['a'] + counts['b'] + counts['c']
-    now = datetime.datetime.now()
-    if now.day >= 15:
-        randr_inquiry_date = datetime.date(now.year, now.month, 15)
-        soh_inquiry_date = randr_inquiry_date
-    else:
-        randr_inquiry_date = datetime.date(now.year, now.month, 1)
-        soh_inquiry_date = randr_inquiry_date        
+    counts['current_submitting_group'] = sdp.child_sdps().filter(delivery_group__name=current_submitting_group() ).count()
+    counts['current_processing_group'] = sdp.child_sdps().filter(delivery_group__name=current_processing_group() ).count()
+    counts['current_delivering_group'] = sdp.child_sdps().filter(delivery_group__name=current_delivering_group).count()
+    counts['total'] = counts['current_submitting_group'] + counts['current_processing_group'] + counts['current_delivering_group']
+    groups = {}
+    groups['current_submitting_group'] = current_submitting_group()
+    groups['current_processing_group'] = current_processing_group()
+    groups['current_delivering_group'] = current_delivering_group()
+    d1 = []
+    d2 = []
+    d3 = []
+    ticks = []
+    index = 1
+    for product in sdp.active_products():
+        d1.append([index, sdp.child_sdps_stocked_out(product.sms_code)])
+        d2.append([index, sdp.child_sdps_not_stocked_out(product.sms_code) ])
+        d3.append([index, sdp.child_sdps_no_stock_out_data(product.sms_code) ])
+        ticks.append([ index + .5, str( product.sms_code.upper() ) ])
+        index = index + 2
+    bar_data = [
+                          {"data" : d1,
+                          "label": "Stocked out", 
+                          "bars": { "show" : "true" },  
+                          },
+                          {"data" : d2,
+                          "label": "Not Stocked out", 
+                          "bars": { "show" : "true" }, 
+                          },
+                          {"data" : d3,
+                          "label": "No Stockout Data", 
+                          "bars": { "show" : "true" }, 
+                          }
+                  ]
+    
+    now = datetime.now()
+    message_dates_dict = {}
+    randr_inquiry_date = None
+    soh_inquiry_date = None
+    delivery_inquiry_date = None
+
+    randr_statuses = ServiceDeliveryPointStatus.objects.filter(status_type__short_name="r_and_r_reminder_sent_facility", 
+                                                               status_date__range=( beginning_of_month(), end_of_month() ) )
+    print randr_statuses
+    if randr_statuses:
+        randr_inquiry_date = randr_statuses[0].status_date
           
+    delivery_statuses = ServiceDeliveryPointStatus.objects.filter(status_type__short_name="delivery_received_reminder_sent_facility", 
+                                                                  status_date__range=( beginning_of_month(), end_of_month() ) )
+    if delivery_statuses:
+        delivery_inquiry_date = delivery_statuses[0].status_date
+
+    soh_statuses = ServiceDeliveryPointStatus.objects.filter(status_type__short_name="r_and_r_reminder_sent_facility", 
+                                                             status_date__range=( beginning_of_month(), end_of_month() ) )
+    if randr_statuses:
+        randr_inquiry_date = randr_statuses[0].status_date
+
     return render_to_response('ilsgateway_dashboard.html',
                               {'sdp': sdp,
                                'language': language,
                                'counts': counts,
+                               'groups': groups,
+                               'bar_data': bar_data,
+                               'bar_ticks': ticks,
+                               'facilities_without_primary_contacts': facilities_without_primary_contacts,
                                'soh_inquiry_date': soh_inquiry_date,
-                               'randr_inquiry_date': randr_inquiry_date},
+                               'randr_inquiry_date': randr_inquiry_date,
+                               'delivery_inquiry_date': delivery_inquiry_date,
+                               'max_stockout_graph': sdp.child_sdps().count() * 1.5
+                              },
                               context_instance=RequestContext(request))
 
 @login_required
@@ -92,7 +145,7 @@ def message_history(request, facility_id):
 @login_required
 def facilities_index(request, view_type='inventory'):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
-    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp).order_by("delivery_group", "name")
+    facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
     products = Product.objects.all()
     facilities_dict = []
     for facility in facilities:
@@ -119,7 +172,7 @@ def facilities_index(request, view_type='inventory'):
 @login_required
 def facilities_ordering(request):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
-    facilities = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="facility", parent_service_delivery_point=sdp).order_by("delivery_group", "name")
+    facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
     products = Product.objects.all()
     return render_to_response("facilities_ordering.html", 
                               {"facilities": facilities,
@@ -132,16 +185,14 @@ def facilities_detail(request, facility_id,view_type='inventory'):
     print request.user.id
     my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     try:
-        f = ServiceDeliveryPoint.objects.get(pk=facility_id)
+        f = Facility.objects.get(pk=facility_id)
     except ServiceDeliveryPoint.DoesNotExist:
         raise Http404
-    location = FacilityLocation.objects.filter(service_delivery_point=f)[0:1].get()
     products = Product.objects.all()
     return render_to_response('facilities_detail.html', {'facility': f,
                                                          'products': products,
                                                          'view_type': view_type,
-                                                         'my_sdp': my_sdp,
-                                                         'location': location},
+                                                         'my_sdp': my_sdp},
                               context_instance=RequestContext(request),)
 
 @login_required    

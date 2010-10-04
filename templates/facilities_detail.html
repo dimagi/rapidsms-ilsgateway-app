@@ -5,9 +5,37 @@
 {% block content %}
 <div class="module">
     <h3>{{ my_sdp.parent_service_delivery_point.name }} / <a href="/facilities/{{ view_type }}">{{ facility.parent_service_delivery_point.name }}</a> / {{ facility.name }}</h3>
-    <h4>{{ facility.name }} ({{ facility.msd_code }}) - <a href="{% url locations location.uid %}">see on map</a></h4>
     <div style="float:left;"
-        <p>{% if view_type == 'inventory' %}<a href="/facilities/{{ facility.id }}/months_of_stock/">Show months of stock</a>{% else %}<a href="/facilities/{{ facility.id}}/inventory/">Show inventory</a>{% endif %}</p>
+        <h4>{{ facility.name }} ({{ facility.msd_code }}) - <a href="{% url locations facility.uid %}">see on map</a></h4>
+        <strong>Contact Information</strong>
+        {% if facility.primary_contacts %}
+            {% for contact in facility.primary_contacts %}
+                <p>Primary Contact: {{ contact.name }}<br />Phone: {{ contact.default_connection.identity }}<br />Email: {{ contact.email }}
+            {% endfor %}
+        {% else %}
+            <p>No primary contact.  Click <a href="{% url registration %}">here</a> to add one</p>
+        {% endif %}
+        {% if facility.secondary_contacts %}
+            {% for contact in facility.secondary_contacts %}
+                <p>Secondary Contact: {{ contact.name }}<br />Phone: {{ contact.default_connection.identity }}<br />Email: {{ contact.email }}
+            {% endfor %}
+        {% else %}
+            <p>No secondary contact.  Click <a href="{% url registration %}">here</a> to add one</p>
+        {% endif %}
+    </div>
+    <div style="float:left;padding:40px 0 0 85px;">
+    <strong>Notes</strong>
+    <p>Enter a note for this facility:</p>
+    <textarea></textarea><br />
+    <input type="submit" />
+    <br />
+    <p>Most Recent Note:</p>
+    <p style="padding-left:10px;">&raquo;2010 Sept. 10 10:01am: "<i>Called facility in charge again about missing delivery</i>"</p>
+    <p><a href="">See complete history of notes &raquo;</a></p>
+    </div>
+    <div style="clear:both;">&nbsp;</div>
+    <div style="float:left;"
+        <p><strong>Inventory History</strong><span style="padding-left:7px;">{% if view_type == 'inventory' %}<a href="/facilities/{{ facility.id }}/months_of_stock/">(show months of stock)</a>{% else %}<a href="/facilities/{{ facility.id}}/inventory/">(show stock levels)</a></span>{% endif %}</p>
         <table>
             <thead>
                 <th>Product</th>
@@ -33,6 +61,17 @@
         </table>
     </div>
     <div style="float:left;padding:45px 0 0 30px;width:550px;"
+        <p>Last Inventory SMS received:</p> 
+        {% if facility.last_message_received %}
+            <p style="padding-left:10px;">&raquo;{{ facility.stock_on_hand_last_reported }}: <i>"{{ facility.last_message_received.text }}"</i></p>
+            <p style="padding-left:10px;">From: {{ facility.last_message_received.contact }}, {{ facility.last_message_received.contact.contactdetail.role }}</p>
+        {% else %}
+            No inventory messages have been received
+        {% endif %}    
+        </p>
+        <p><a href="/facilities/{{ facility.id }}/message_history/">See complete SMS message history</a></p>
+    </div>
+    <div style="clear:both;padding-top:25px;">
         <strong>R&amp;R Status</strong>
         {% if facility.randr_status %}
         <p>
@@ -48,17 +87,6 @@
         {% endif %}
         </p>
         <p><a href="/docdownload/{{ facility.id }}">Download most recent R&amp;R</a></p>
-
-        <strong>Inventory Status</strong>
-        <p>Last Inventory SMS received: 
-        {% if facility.last_message_received %}
-            "{{ facility.last_message_received.text }}"</p>
-            <p>From: {{ facility.last_message_received.contact }}, {{ facility.last_message_received.contact.contactdetail.role }}</p><p>Received on: {{ facility.stock_on_hand_last_reported }}</p>
-        {% else %}
-            No inventory messages have been received
-        {% endif %}    
-        </p>
-        <p><a href="/facilities/{{ facility.id }}/message_history/">See message history</a></p>
     </div>
 </div>
 {% endblock %}
