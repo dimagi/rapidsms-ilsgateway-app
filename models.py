@@ -43,6 +43,13 @@ class ServiceDeliveryPointType(models.Model):
     def __unicode__(self):
         return self.name
 
+
+class ActiveProduct(models.Model):
+    is_active = models.BooleanField(default=True)
+    current_quantity = models.IntegerField(blank=True, null=True)
+    service_delivery_point = models.ForeignKey('ServiceDeliveryPoint')
+    product = models.ForeignKey('Product')
+
 class ServiceDeliveryPointManager(models.Manager):    
     def get_by_natural_key(self, name):
         return self.get(name=name)    
@@ -68,10 +75,7 @@ class ServiceDeliveryPoint(Location):
     products = models.ManyToManyField(Product, through='ServiceDeliveryPointProductReport')
     msd_code = models.CharField(max_length=100, blank=True, null=True)
     service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType)
-    
-    def active_products(self):
-        return Product.objects.all()
-    
+        
     def contacts(self, contact_type='all'):
         if contact_type == 'all':
             return ContactDetail.objects.filter(service_delivery_point=self)

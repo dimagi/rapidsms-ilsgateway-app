@@ -72,7 +72,7 @@ def dashboard(request):
     d3 = []
     ticks = []
     index = 1
-    for product in sdp.active_products():
+    for product in Product.objects.all():
         d1.append([index, sdp.child_sdps_stocked_out(product.sms_code)])
         d2.append([index, sdp.child_sdps_not_stocked_out(product.sms_code) ])
         d3.append([index, sdp.child_sdps_no_stock_out_data(product.sms_code) ])

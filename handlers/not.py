@@ -14,7 +14,7 @@ class Not(KeywordHandler):
     keyword = "not|no"
 
     def help(self):
-        self.respond("If you haven't submitted your R&R, respond \"not submitted\".  If you haven't received your delivery, respond \"not delivered\"")
+        self.respond("If you haven't submitted your R&R, respond \"not submitted\". If you haven't received your delivery, respond \"not delivered\"")
 
     def handle(self, text):
         if re.match("del", text.strip().lower() ):
@@ -28,4 +28,6 @@ class Not(KeywordHandler):
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_not_submitted_facility_to_district")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=self.msg.contact.contactdetail.service_delivery_point, status_type=st, status_date=datetime.datetime.now())
             ns.save()
+        else:
+            self.respond("If you haven't submitted your R&R, respond \"not submitted\". If you haven't received your delivery, respond \"not delivered\"")
                           

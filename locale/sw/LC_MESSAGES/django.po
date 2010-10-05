@@ -2,27 +2,27 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-20 11:30-0700\n"
+"POT-Creation-Date: 2010-10-04 20:04-0700\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\views.py:35
+#: .\views.py:45
 msgid "hello"
 msgstr "jambo"
 
-#: .\templates\ilsgateway_dashboard.html.py:55
+#: .\templates\ilsgateway_dashboard.html.py:62
 msgid "Welcome"
 msgstr "Karibu"
 
-#: .\templates\ilsgateway_dashboard.html.py:56
+#: .\templates\ilsgateway_dashboard.html.py:63
 msgid "Language"
 msgstr "Lugha"
 
-#: .\templates\ilsgateway_dashboard.html.py:58
+#: .\templates\ilsgateway_dashboard.html.py:65
 msgid "District"
 msgstr "Wilaya"
 
-#: .\templates\ilsgateway_dashboard.html.py:60
+#: .\templates\ilsgateway_dashboard.html.py:67
 msgid "Alerts"
 msgstr "Rapporteringar"
 
@@ -41,3 +41,11 @@ msgstr "Rapporteringar"
 
 #~ msgid "DATETIME_FORMAT"
 #~ msgstr "P j, Y, N"
+
+#~ msgid ""
+#~ "To register, send register <name> <msd code>. example: register john "
+#~ "patel d34002"
+#~ msgstr "To register...in swahili"
+
+#~ msgid "I will speak to you in Swahili."
+#~ msgstr "I will speak to you in Swahili...in Swahili."

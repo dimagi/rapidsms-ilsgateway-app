@@ -8,22 +8,21 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Adding model 'ServiceDeliveryPointDGReport'
-        db.create_table('ilsgateway_servicedeliverypointdgreport', (
+        # Adding model 'ActiveProduct'
+        db.create_table('ilsgateway_activeproduct', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('is_active', self.gf('django.db.models.fields.BooleanField')(default=True)),
+            ('current_quantity', self.gf('django.db.models.fields.IntegerField')()),
             ('service_delivery_point', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ilsgateway.ServiceDeliveryPoint'])),
-            ('quantity', self.gf('django.db.models.fields.IntegerField')()),
-            ('report_date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2010, 10, 4, 12, 40, 0, 428000), auto_now_add=True, blank=True)),
-            ('message', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['messagelog.Message'])),
-            ('delivery_group', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ilsgateway.DeliveryGroup'])),
+            ('product', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ilsgateway.Product'])),
         ))
-        db.send_create_signal('ilsgateway', ['ServiceDeliveryPointDGReport'])
+        db.send_create_signal('ilsgateway', ['ActiveProduct'])
 
 
     def backwards(self, orm):
         
-        # Deleting model 'ServiceDeliveryPointDGReport'
-        db.delete_table('ilsgateway_servicedeliverypointdgreport')
+        # Deleting model 'ActiveProduct'
+        db.delete_table('ilsgateway_activeproduct')
 
 
     models = {
@@ -62,6 +61,14 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+        },
+        'ilsgateway.activeproduct': {
+            'Meta': {'object_name': 'ActiveProduct'},
+            'current_quantity': ('django.db.models.fields.IntegerField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'product': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ilsgateway.Product']"}),
+            'service_delivery_point': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ilsgateway.ServiceDeliveryPoint']"})
         },
         'ilsgateway.contactdetail': {
             'Meta': {'object_name': 'ContactDetail', '_ormbases': ['rapidsms.Contact']},
@@ -133,7 +140,7 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'message': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['messagelog.Message']"}),
             'quantity': ('django.db.models.fields.IntegerField', [], {}),
-            'report_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2010, 10, 4, 12, 40, 0, 428000)', 'auto_now_add': 'True', 'blank': 'True'}),
+            'report_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2010, 10, 4, 13, 1, 17, 792000)', 'auto_now_add': 'True', 'blank': 'True'}),
             'service_delivery_point': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ilsgateway.ServiceDeliveryPoint']"})
         },
         'ilsgateway.servicedeliverypointproductreport': {
@@ -142,7 +149,7 @@ class Migration(SchemaMigration):
             'message': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['messagelog.Message']"}),
             'product': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ilsgateway.Product']"}),
             'quantity': ('django.db.models.fields.IntegerField', [], {}),
-            'report_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2010, 10, 4, 12, 40, 0, 428000)', 'auto_now_add': 'True', 'blank': 'True'}),
+            'report_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2010, 10, 4, 13, 1, 17, 791000)', 'auto_now_add': 'True', 'blank': 'True'}),
             'report_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ilsgateway.ProductReportType']"}),
             'service_delivery_point': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ilsgateway.ServiceDeliveryPoint']"})
         },

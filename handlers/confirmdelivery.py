@@ -24,7 +24,7 @@ class ConfirmDeliveryReceived(KeywordHandler):
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received_facility")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=service_delivery_point, status_type=st, status_date=datetime.now())
             ns.save()
-            self.respond("To record a delivery, respond with \"delivered product amount\".  For example, dlvd con 500.")
+            self.respond("To record a delivery, respond with \"delivered product amount product amount...\" For example, dlvd inj 200 con 300 imp 10 pop 320 coc 232 iud 10.")
 
     def handle(self, text):
         service_delivery_point=self.msg.contact.contactdetail.service_delivery_point

@@ -86,7 +86,7 @@ def facility_randr_reminder(router):
             if not contact_detail.service_delivery_point.received_reminder_after("r_and_r_reminder_sent_facility", beginning_of_month(datetime.now().month)):
                 default_connection = contact_detail.default_connection
                 if default_connection:
-                    m = OutgoingMessage(default_connection, "Have you sent in your R&R form yet for this quarter?  Please reply \"yes\" or \"not sent\"")
+                    m = OutgoingMessage(default_connection, "Have you sent in your R&R form yet for this quarter?  Please reply \"submitted\" or \"not submitted\"")
                     m.send() 
                     st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_reminder_sent_facility")[0:1].get()
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
@@ -119,7 +119,7 @@ def facility_delivery_reminder(router):
                 for fic_cd in facility.primary_contacts():
                     c = fic_cd.default_connection
                     if c:
-                        m = OutgoingMessage(c, "%s: Did you receive your delivery yet?  Please reply \"delivered\" or \"not delivered\"" % (fic_cd.name))
+                        m = OutgoingMessage(c, "Did you receive your delivery yet?  Please reply \"delivered inj 200 con 300 imp 10 pop 320 coc 232 iud 10\" or \"not delivered\"")
                         m.send() 
                         st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received_reminder_sent_facility")[0:1].get()
                         ns = ServiceDeliveryPointStatus(service_delivery_point=fic_cd.service_delivery_point, status_type=st, status_date=datetime.now())
