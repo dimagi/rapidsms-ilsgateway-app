@@ -4,13 +4,14 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from datetime import datetime
-from ilsgateway.models import ServiceDeliveryPoint, Product, Facility, ServiceDeliveryPointStatus
+from ilsgateway.models import ServiceDeliveryPoint, Product, Facility, ServiceDeliveryPointStatus, ServiceDeliveryPointNote
 from django.http import Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from rapidsms.contrib.messagelog.models import Message
 from utils import *
+from forms import NoteForm
 
 from httplib import HTTPSConnection, HTTPConnection
 from django.shortcuts import render_to_response
@@ -182,17 +183,29 @@ def facilities_ordering(request):
 
 @login_required
 def facilities_detail(request, facility_id,view_type='inventory'):
-    print request.user.id
     my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     try:
-        f = Facility.objects.get(pk=facility_id)
+        f = ServiceDeliveryPoint.objects.get(pk=facility_id)
     except ServiceDeliveryPoint.DoesNotExist:
         raise Http404
     products = Product.objects.all()
+    
+    if request.method == 'POST': 
+        form = NoteForm(request.POST) 
+        if form.is_valid():
+             n = ServiceDeliveryPointNote()
+             n.text = form.cleaned_data['text']
+             n.service_delivery_point = f
+             n.contact_detail_id = request.user.id
+             n.save()
+    form = NoteForm()                
+    note = f.servicedeliverypointnote_set.latest('created_at')
     return render_to_response('facilities_detail.html', {'facility': f,
                                                          'products': products,
                                                          'view_type': view_type,
-                                                         'my_sdp': my_sdp},
+                                                         'my_sdp': my_sdp,
+                                                         'form': form,
+                                                         'note': note},
                               context_instance=RequestContext(request),)
 
 @login_required    

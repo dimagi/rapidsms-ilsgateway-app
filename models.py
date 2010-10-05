@@ -27,6 +27,12 @@ class DeliveryGroup(models.Model):
     class Meta:
         ordering = ('name',)  
             
+class ServiceDeliveryPointNote(models.Model):
+    text = models.CharField(max_length=500)
+    service_delivery_point = models.ForeignKey('ServiceDeliveryPoint')
+    created_at = models.DateTimeField(auto_now_add=True)
+    contact_detail = models.ForeignKey('ContactDetail')
+ 
 class Product(models.Model):
     name = models.CharField(max_length=100)
     units = models.CharField(max_length=100)

@@ -25,12 +25,21 @@
     </div>
     <div style="float:left;padding:40px 0 0 85px;">
     <strong>Notes</strong>
+    {% if form.subject.errors %}
+    <ol>
+    {% for error in form.subject.errors %}
+    <li><strong>{{ error|escape }}</strong></li>
+    {% endfor %}
+    </ol>
+    {% endif %}
     <p>Enter a note for this facility:</p>
-    <textarea></textarea><br />
-    <input type="submit" />
+    <form action="{% url ilsgateway.views.facilities_detail facility.id %}" method="post">
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+    </form>
     <br />
     <p>Most Recent Note:</p>
-    <p style="padding-left:10px;">&raquo;2010 Sept. 10 10:01am: "<i>Called facility in charge again about missing delivery</i>"</p>
+    <p style="padding-left:10px;">&raquo;{{ note.created_at }}: "<i>{{ note.text }}</i>" - by {{ note.contact_detail.name }}</p>
     <p><a href="">See complete history of notes &raquo;</a></p>
     </div>
     <div style="clear:both;">&nbsp;</div>

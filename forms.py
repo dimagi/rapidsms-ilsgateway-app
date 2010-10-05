@@ -15,3 +15,6 @@ class ContactDetailForm(forms.ModelForm):
         super(ContactDetailForm, self).__init__(**kwargs)
         if service_delivery_point:
             self.fields['service_delivery_point'].queryset = service_delivery_point.child_sdps().order_by("name")
+
+class NoteForm(forms.Form):
+    text = forms.CharField()
