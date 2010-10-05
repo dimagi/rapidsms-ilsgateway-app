@@ -14,7 +14,7 @@ from django.db.models import Q
 # Callback Functions #
 ######################
 
-TEST_MODE = True
+TEST_MODE = False
 
 def is_weekend():  
     return False
