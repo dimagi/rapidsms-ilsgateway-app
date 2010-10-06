@@ -21,19 +21,14 @@ from django.http import HttpResponseRedirect, HttpResponse
 import iso8601
 import re
 from django.core.urlresolvers import reverse
+import random
 
 #gdata
 import gdata.docs.data
 import gdata.docs.client
 import gdata.gauth
 
-import random
 
-def flot_test(request):
-    return render_to_response('flot_test.html',
-                              {},
-                              context_instance=RequestContext(request))
-    
 def change_language(request):
     language = ''
     if request.LANGUAGE_CODE == 'en':
@@ -46,6 +41,24 @@ def change_language(request):
     return render_to_response('change_language.html',
                               {'test_phrase': _('hello'),
                                'language': language},
+                              context_instance=RequestContext(request))
+
+def supervision(request):
+    language = ''
+    if request.LANGUAGE_CODE == 'en':
+        language = 'English'
+    elif request.LANGUAGE_CODE == 'sw':
+        language = 'Swahili'
+    elif request.LANGUAGE_CODE == 'es':
+        language = 'Spanish'        
+    my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    breadcrumbs = [[my_sdp.parent.name, ''], [my_sdp.name, ''], ['Supervision', ''] ]
+    notes = ServiceDeliveryPointNote.objects.filter(service_delivery_point__parent_id=my_sdp.id).order_by('-created_at')[:3]
+    return render_to_response('supervision.html',
+                              {'language': language,
+                               'breadcrumbs': breadcrumbs,
+                               'notes': notes,
+                               'my_sdp': my_sdp},
                               context_instance=RequestContext(request))
     
 @login_required
@@ -104,7 +117,6 @@ def dashboard(request):
 
     randr_statuses = ServiceDeliveryPointStatus.objects.filter(status_type__short_name="r_and_r_reminder_sent_facility", 
                                                                status_date__range=( beginning_of_month(), end_of_month() ) )
-    print randr_statuses
     if randr_statuses:
         randr_inquiry_date = randr_statuses[0].status_date
           
@@ -142,6 +154,24 @@ def message_history(request, facility_id):
     messages = Message.objects.filter(contact__contactdetail__service_delivery_point=facility_id, direction="I").order_by('-date')
     return render_to_response("message_history.html", 
                               {'messages': messages,
+                               'my_sdp': my_sdp,
+                               'breadcrumbs': breadcrumbs,
+                               'facility': facility}, 
+                              context_instance=RequestContext(request))
+
+@login_required
+def note_history(request, facility_id):
+    #TODO: restrict to current user's sdp (or by role)
+    my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    facility = ServiceDeliveryPoint.objects.filter(id=facility_id)[0:1].get()    
+    breadcrumbs = [[facility.parent.parent.name], 
+                   #[facility.parent.name, reverse('ilsgateway.views.dashboard')], 
+                   [facility.parent.name],
+                   [facility.name, reverse('ilsgateway.views.facilities_detail', args=[facility.id])], 
+                   ['Note History'] ]    
+    notes = facility.servicedeliverypointnote_set.all().order_by('-created_at')
+    return render_to_response("note_history.html", 
+                              {'notes': notes,
                                'my_sdp': my_sdp,
                                'breadcrumbs': breadcrumbs,
                                'facility': facility}, 

@@ -13,29 +13,32 @@
             var d1 = [[0, {{ sdp.child_sdps_submitted_randr_this_month }}]];
             var d2 = [[2, {{ sdp.child_sdps_not_submitted_randr_this_month }}]];
             var d3 = [[4, {{ sdp.child_sdps_not_responded_randr_this_month }}]];
+            var d4 = [[6, {{ sdp.count_child_sdps_no_primary_contact }}]];
                                 
             $.plot($("#placeholder"), [
                 {
                     data: d1,
                     bars: { show: true},
                     xaxis: 1,
-                    fillColor: "red", 
                 },
                 {
                     data: d2,
                     bars: { show: true},
                     xaxis: 1,
-                    fillColor: "blue"             
                 },
                 {
                     data: d3,
                     bars: { show: true},
                     xaxis: 1,
-                    fillColor: "green"             
+                },
+                {
+                    data: d4,
+                    bars: { show: true},
+                    xaxis: 1,
                 }
             ],
                 {
-                    xaxis: { ticks: [[.5, "Submitted"], [2.5, "Haven't Submitted"], [4.5, "Didn't Respond"]]},
+                    xaxis: { ticks: [[.5, "Submitted"], [2.5, "Haven't Submitted"], [4.5, "Didn't Respond"], [6.5, "No Contact Info"]]},
                     legend: {position: "nw"}
                 }
             );
@@ -65,10 +68,10 @@
     <h2>{% trans 'Alerts' %}</h2>
     <ul class="alerts"">
         {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_submitted_randr_this_month }} Facilities</a> have reported not submitting their R &amp; R form as of today.</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} Facilities</a> did not respond to the SMS on {{ randr_inquiry_date|date:"j N Y" }} asking if they had submitted their R&amp;R form.</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="{% url ordering %}">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} Facilities</a> have not reported their stock levels for last month.</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} Facilities</a> did not respond to the SMS asking if they had submitted their R&amp;R form.</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="/facilities/inventory">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} Facilities</a> have not reported their stock levels for last month.</li>{% endif %}
         {% if sdp.child_sdps_not_received_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_received_delivery_this_month }} Facilities</a> have reported not receiving their deliveries as of today.</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} Facilities</a> did not respond to the SMS on {{ delivery_inquiry_date|date:"j N Y" }} asking if they had received their delivery.</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} Facilities</a> did not respond to the SMS asking if they had received their delivery.</li>{% endif %}
         {% for facility in facilities_without_primary_contacts %}
             <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> has no primary contact.  <a href="{% url registration %}">Register someone now &raquo;</a></li>
         {% endfor %}

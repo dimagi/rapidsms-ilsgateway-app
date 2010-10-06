@@ -149,7 +149,13 @@ class ServiceDeliveryPoint(Location):
         return self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name__in=["delivery_not_received_facility", "delivery_quantities_reported"]).distinct().count()
 
     def child_sdps_not_responded_delivery_this_month(self):
-        return self.child_sdps_receiving().count() - self.child_sdps_not_received_delivery_this_month() - self.child_sdps_not_received_delivery_this_month()
+        now = datetime.now()
+        total = self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name="delivery_received_reminder_sent_facility",
+                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).count() - self.child_sdps_not_received_delivery_this_month()
+        print self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name="delivery_received_reminder_sent_facility",
+                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).count()
+        return self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name="delivery_received_reminder_sent_facility",
+                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).count() - self.child_sdps_not_received_delivery_this_month()
 
     def child_sdps_not_submitted_randr_this_month(self):
         return self.child_sdps_submitting().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_not_submitted_facility_to_district").distinct().count()
@@ -166,6 +172,9 @@ class ServiceDeliveryPoint(Location):
         else:
             return sdp_dgr_list[0].quantity
     
+    def count_child_sdps_no_primary_contact(self):
+        return self.child_sdps().count() - self.child_sdps().filter(contactdetail__primary=True).count()
+        
     def child_sdps_receiving(self):
         return self.child_sdps().filter(delivery_group__name=current_delivering_group())
     
@@ -176,7 +185,9 @@ class ServiceDeliveryPoint(Location):
         return self.child_sdps().filter(delivery_group__name=current_processing_group())
 
     def child_sdps_not_responded_soh_this_month(self):
-        return self.child_sdps().filter(servicedeliverypointstatus__status_type__short_name="soh_reminder_sent_facility").count() - self.child_sdps_responded_soh()
+        now = datetime.now()
+        return self.child_sdps().filter(servicedeliverypointstatus__status_type__short_name="soh_reminder_sent_facility",
+                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now)).count() - self.child_sdps_responded_soh()
 
     def count_child_sdps_not_responded_soh_since_last_month(self):
         now = datetime.now()

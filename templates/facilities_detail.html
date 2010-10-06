@@ -115,7 +115,7 @@
         <div class="module">
             <h2>Notes</h2>
             <div class="toolbar">
-                <a href="">see all notes</a>
+                <a href="{% url ilsgateway.views.note_history facility.id %}">see all notes</a>
             </div>
         {% for note in notes %}
             <div class="recentNote">

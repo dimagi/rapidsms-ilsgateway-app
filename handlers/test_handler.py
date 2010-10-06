@@ -37,6 +37,7 @@ class TestReminder(KeywordHandler):
                 ns.save()
         
         elif text == "reminder delivery":
+            print self.msg.contact
             contact_detail = self.msg.contact.contactdetail
             default_connection = contact_detail.default_connection
             print default_connection

@@ -4,9 +4,16 @@ div.module ul {
 
 div.module ul.alerts li {
     padding: 7px 0 5px 26px;
-    background-image: url(/static/ilsgateway/images/exclamation_trans_bg_icon.gif);
+    background-image: url(/static/ilsgateway/images/icons/exclamation_trans_bg_icon.gif);
     background-repeat: no-repeat;
     background-position: 3px 5px;
+}
+
+div.module ul.downloads li {
+    padding: 7px 0 5px 26px;
+    background-image: url(/static/ilsgateway/images/icons/word_icon.gif);
+    background-repeat: no-repeat;
+    background-position: 3px 5px;                         
 }
 
 .module .recentNote {
