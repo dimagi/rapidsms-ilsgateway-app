@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Ordering Status{% endblock %}
 
 {% block content %}
-
-<h2>Ordering Status</h2>
+<div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
+<div style="clear:both;">&nbsp;</div>
 <div class="module">
-    <h3>{{ sdp.parent_service_delivery_point.name }} / {{ sdp.name }} / FACILITIES</h3>
+    <h2>{% trans 'Ordering Status' %}</h2>
     <table>
         <thead>
             <th>MSD Code</th>

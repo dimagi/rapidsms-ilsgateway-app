@@ -20,6 +20,7 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 import iso8601
 import re
+from django.core.urlresolvers import reverse
 
 #gdata
 import gdata.docs.data
@@ -58,6 +59,7 @@ def dashboard(request):
         language = 'Spanish'        
             
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''] ]
     facilities_without_primary_contacts = sdp.child_sdps_without_contacts()
     counts = {}
     counts['current_submitting_group'] = sdp.child_sdps().filter(delivery_group__name=current_submitting_group() ).count()
@@ -111,10 +113,6 @@ def dashboard(request):
     if delivery_statuses:
         delivery_inquiry_date = delivery_statuses[0].status_date
 
-    soh_statuses = ServiceDeliveryPointStatus.objects.filter(status_type__short_name="r_and_r_reminder_sent_facility", 
-                                                             status_date__range=( beginning_of_month(), end_of_month() ) )
-    if randr_statuses:
-        randr_inquiry_date = randr_statuses[0].status_date
 
     return render_to_response('ilsgateway_dashboard.html',
                               {'sdp': sdp,
@@ -124,10 +122,10 @@ def dashboard(request):
                                'bar_data': bar_data,
                                'bar_ticks': ticks,
                                'facilities_without_primary_contacts': facilities_without_primary_contacts,
-                               'soh_inquiry_date': soh_inquiry_date,
                                'randr_inquiry_date': randr_inquiry_date,
                                'delivery_inquiry_date': delivery_inquiry_date,
-                               'max_stockout_graph': sdp.child_sdps().count() * 1.5
+                               'max_stockout_graph': sdp.child_sdps().count() * 1.5,
+                               'breadcrumbs': breadcrumbs
                               },
                               context_instance=RequestContext(request))
 
@@ -136,16 +134,23 @@ def message_history(request, facility_id):
     #TODO: restrict to current user's sdp (or by role)
     my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     facility = ServiceDeliveryPoint.objects.filter(id=facility_id)[0:1].get()    
+    breadcrumbs = [[facility.parent.parent.name], 
+                   #[facility.parent.name, reverse('ilsgateway.views.dashboard')], 
+                   [facility.parent.name],
+                   [facility.name, reverse('ilsgateway.views.facilities_detail', args=[facility.id])], 
+                   ['Message History'] ]    
     messages = Message.objects.filter(contact__contactdetail__service_delivery_point=facility_id, direction="I").order_by('-date')
     return render_to_response("message_history.html", 
                               {'messages': messages,
                                'my_sdp': my_sdp,
+                               'breadcrumbs': breadcrumbs,
                                'facility': facility}, 
                               context_instance=RequestContext(request))
 
 @login_required
 def facilities_index(request, view_type='inventory'):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Current Stock Status'] ]
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
     products = Product.objects.all()
     facilities_dict = []
@@ -167,17 +172,20 @@ def facilities_index(request, view_type='inventory'):
                                "facilities_dict": facilities_dict,
                                "products": products,
                                "sdp": sdp,
+                               "breadcrumbs": breadcrumbs,
                                "view_type": view_type },
                               context_instance=RequestContext(request),)
 
 @login_required
 def facilities_ordering(request):
     sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Ordering Status'] ]
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
     products = Product.objects.all()
     return render_to_response("facilities_ordering.html", 
                               {"facilities": facilities,
                                "products": products,
+                               "breadcrumbs": breadcrumbs,
                                "sdp": sdp},
                               context_instance=RequestContext(request),)
 
@@ -189,6 +197,7 @@ def facilities_detail(request, facility_id,view_type='inventory'):
     except ServiceDeliveryPoint.DoesNotExist:
         raise Http404
     products = Product.objects.all()
+    breadcrumbs = [[f.parent.parent.name], [f.parent.name, ''], [f.name, ''], ['Facility Detail'] ]    
     
     if request.method == 'POST': 
         form = NoteForm(request.POST) 
@@ -198,14 +207,17 @@ def facilities_detail(request, facility_id,view_type='inventory'):
              n.service_delivery_point = f
              n.contact_detail_id = request.user.id
              n.save()
-    form = NoteForm()                
-    note = f.servicedeliverypointnote_set.latest('created_at')
+             form = NoteForm()                
+    else:
+             form = NoteForm()                        
+    notes = f.servicedeliverypointnote_set.order_by('-created_at')[:3]
     return render_to_response('facilities_detail.html', {'facility': f,
                                                          'products': products,
                                                          'view_type': view_type,
                                                          'my_sdp': my_sdp,
                                                          'form': form,
-                                                         'note': note},
+                                                         'breadcrumbs': breadcrumbs,
+                                                         'notes': notes},
                               context_instance=RequestContext(request),)
 
 @login_required    

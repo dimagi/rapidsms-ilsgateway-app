@@ -58,17 +58,15 @@
 {% endblock %}
 
 {% block content %}
-
-<h2>{% trans 'Welcome' %}, {{ user.username }}</h2>
-<div>{% trans 'Language' %}: {{ language }} <a href="/change_language">change language</a></div>
+<div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
+<div class="welcome">{% trans 'Welcome' %}, {{ user.username }}</div>
+<div style="clear:both;">&nbsp;</div>
 <div class="module">
-    <h3>{% trans 'District' %} {{ sdp.name }} <a href="">Select a different district</a></h3>
-    
-    <h4>{% trans 'Alerts' %}</h4>
-    <ul>
+    <h2>{% trans 'Alerts' %}</h2>
+    <ul class="alerts"">
         {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_submitted_randr_this_month }} Facilities</a> have reported not submitting their R &amp; R form as of today.</li>{% endif %}
         {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} Facilities</a> did not respond to the SMS on {{ randr_inquiry_date|date:"j N Y" }} asking if they had submitted their R&amp;R form.</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_soh_this_month }} Facilities</a> have not reported their stock levels for {{ soh_inquiry_date|date:"j N Y" }}.</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="{% url ordering %}">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} Facilities</a> have not reported their stock levels for last month.</li>{% endif %}
         {% if sdp.child_sdps_not_received_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_received_delivery_this_month }} Facilities</a> have reported not receiving their deliveries as of today.</li>{% endif %}
         {% if sdp.child_sdps_not_responded_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} Facilities</a> did not respond to the SMS on {{ delivery_inquiry_date|date:"j N Y" }} asking if they had received their delivery.</li>{% endif %}
         {% for facility in facilities_without_primary_contacts %}
@@ -76,26 +74,79 @@
         {% endfor %}
     </ul>
 </div>
-    <div class="module" style="float:left;margin-right:30px;">
-        <h3 align="center">R&amp;R Submission Summary</h3>
-        <div id="placeholder" style="width:300px;height:300px;"></div>
+
+<div class="split-3">
+    <div class="left">
+        <div class="module">
+            <h2>R&amp;R Submission Summary</h2>
+            <!--<div class="toolbar">
+                <a href="">All Reports</a>
+            </div>-->
+            <div id="placeholder" style="width:300px;height:300px;"></div>
+        </div>
     </div>
-    <div class="module" style="float:left;margin-right:30px;">
-        <h3 align="center">Product Availability Summary - Stockouts</h3>
-        <div id="placeholder2" style="width:300px;height:300px;"></div>
+    <div class="mid">
+        <div class="module">
+            <h2>Product Availability Summary</h2>
+            <!--<div class="toolbar">
+                <a href="">All Stats</a>
+            </div>-->
+            <div id="placeholder2" style="width:300px;height:300px;"></div>
+        </div>
     </div>
-    <div class="module" style="float:left;text-align:center;width:250px;">
-        <h3 align="center">District Summary</h3>
-        <span style="font-size:3em;">{{ counts.total }}</span><span style="font-size:2em;padding-left:5px;">facilities</span><div style="clear:both;">&nbsp;</div>
-        <span style="font-size:1.5em;">Group {{ groups.current_submitting_group }}</span><span style="font-size:1.5em;padding-left:5px;">submitting</span><div style="clear:both;">&nbsp;</div>
-        <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_submitting_group }} submitted</span><div style="clear:both;">&nbsp;</div>
-        <span style="font-size:1.5em;">Group {{ groups.current_processing_group }}</span><span style="font-size:1.5em;padding-left:5px;">processing</span><div style="clear:both;">&nbsp;</div>
-        <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_processing_sent_to_msd }} of {{ counts.current_processing_group }} forms sent to MSD</span><div style="clear:both;">&nbsp;</div>
-        <span style="font-size:1.5em;">Group {{ groups.current_delivering_group }}</span><span style="font-size:1.5em;padding-left:5px;">delivering</span><div style="clear:both;">&nbsp;</div>
-        <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_delivering_group }} delivered</span><div style="clear:both;">&nbsp;</div>
-        <h4>Reported Stock via SMS</h4>
-        <p>This month: {{ sdp.child_sdps_percentage_reporting_stock_this_month }}%</p>
-        <p>Last month: {{ sdp.child_sdps_percentage_reporting_stock_last_month }}%</p> 
+    <div class="right">
+        <div class="module">
+            <h2>District Summary</h2>
+            <!--<div class="toolbar">
+                <a href="">All Stats</a>
+            </div>-->
+            <ul class="stats">
+                <li>
+                    <div class="report">{{ counts.total }}</div>
+                    <div class="caption"><a href="{% url ordering %}">Facilities</a></div>
+                </li>
+                <li>
+                    <div class="report">Group {{ groups.current_submitting_group }}: Submitting</div>
+                    <div class="caption">{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_submitting_group }} <a href="{% url ordering %}">submitted</a></div>
+                </li>
+                <li>
+                    <div class="report">Group {{ groups.current_processing_group }}: Processing</div>
+                    <div class="caption">{{ sdp.child_sdps_processing_sent_to_msd }} of {{ counts.current_processing_group }} forms sent to MSD</div>
+                </li>
+                <li>
+                    <div class="report">Group {{ groups.current_delivering_group }}: Deliveries</div>
+                    <div class="caption">{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_delivering_group }} <a href="{% url ordering %}">delivered</a></div>
+                </li>
+            </ul>
+        </div>
     </div>
+</div>
+<div class="clear-hack"></div>
+
+
+<!--
+<div class="module" style="float:left;margin-right:30px;">
+    <h3 align="center">R&amp;R Submission Summary</h3>
+    <div id="placeholder" style="width:300px;height:300px;"></div>
+</div>
+
+<div class="module" style="float:left;margin-right:30px;">
+    <h3 align="center">Product Availability Summary - Stockouts</h3>
+    <div id="placeholder2" style="width:300px;height:300px;"></div>
+</div>
+<div class="module" style="float:left;text-align:center;width:250px;">
+    <h3 align="center">District Summary</h3>
+    <span style="font-size:3em;">{{ counts.total }}</span><span style="font-size:2em;padding-left:5px;">facilities</span><div style="clear:both;">&nbsp;</div>
+    <span style="font-size:1.5em;">Group {{ groups.current_submitting_group }}</span><span style="font-size:1.5em;padding-left:5px;">submitting</span><div style="clear:both;">&nbsp;</div>
+    <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_submitting_group }} submitted</span><div style="clear:both;">&nbsp;</div>
+    <span style="font-size:1.5em;">Group {{ groups.current_processing_group }}</span><span style="font-size:1.5em;padding-left:5px;">processing</span><div style="clear:both;">&nbsp;</div>
+    <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_processing_sent_to_msd }} of {{ counts.current_processing_group }} forms sent to MSD</span><div style="clear:both;">&nbsp;</div>
+    <span style="font-size:1.5em;">Group {{ groups.current_delivering_group }}</span><span style="font-size:1.5em;padding-left:5px;">delivering</span><div style="clear:both;">&nbsp;</div>
+    <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_delivering_group }} delivered</span><div style="clear:both;">&nbsp;</div>
+    <h4>Reported Stock via SMS</h4>
+    <p>This month: {{ sdp.child_sdps_percentage_reporting_stock_this_month }}%</p>
+    <p>Last month: {{ sdp.child_sdps_percentage_reporting_stock_last_month }}%</p> 
+</div>
+-->
 {% endblock %}
 

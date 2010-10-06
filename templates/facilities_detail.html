@@ -1,101 +1,134 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}{{ facility.name }} Detail{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+    <link type="text/css" rel="stylesheet" href="/static/ilsgateway/stylesheets/ilsgateway.css" />
+{% endblock %}
 
 {% block content %}
-<div class="module">
-    <h3>{{ my_sdp.parent_service_delivery_point.name }} / <a href="/facilities/{{ view_type }}">{{ facility.parent_service_delivery_point.name }}</a> / {{ facility.name }}</h3>
-    <div style="float:left;"
-        <h4>{{ facility.name }} ({{ facility.msd_code }}) - <a href="{% url locations facility.uid %}">see on map</a></h4>
-        <strong>Contact Information</strong>
-        {% if facility.primary_contacts %}
-            {% for contact in facility.primary_contacts %}
-                <p>Primary Contact: {{ contact.name }}<br />Phone: {{ contact.default_connection.identity }}<br />Email: {{ contact.email }}
-            {% endfor %}
-        {% else %}
-            <p>No primary contact.  Click <a href="{% url registration %}">here</a> to add one</p>
-        {% endif %}
-        {% if facility.secondary_contacts %}
-            {% for contact in facility.secondary_contacts %}
-                <p>Secondary Contact: {{ contact.name }}<br />Phone: {{ contact.default_connection.identity }}<br />Email: {{ contact.email }}
-            {% endfor %}
-        {% else %}
-            <p>No secondary contact.  Click <a href="{% url registration %}">here</a> to add one</p>
-        {% endif %}
-    </div>
-    <div style="float:left;padding:40px 0 0 85px;">
-    <strong>Notes</strong>
-    {% if form.subject.errors %}
-    <ol>
-    {% for error in form.subject.errors %}
-    <li><strong>{{ error|escape }}</strong></li>
-    {% endfor %}
-    </ol>
-    {% endif %}
-    <p>Enter a note for this facility:</p>
-    <form action="{% url ilsgateway.views.facilities_detail facility.id %}" method="post">
-    {{ form.as_p }}
-    <input type="submit" value="Submit" />
-    </form>
-    <br />
-    <p>Most Recent Note:</p>
-    <p style="padding-left:10px;">&raquo;{{ note.created_at }}: "<i>{{ note.text }}</i>" - by {{ note.contact_detail.name }}</p>
-    <p><a href="">See complete history of notes &raquo;</a></p>
-    </div>
-    <div style="clear:both;">&nbsp;</div>
-    <div style="float:left;"
-        <p><strong>Inventory History</strong><span style="padding-left:7px;">{% if view_type == 'inventory' %}<a href="/facilities/{{ facility.id }}/months_of_stock/">(show months of stock)</a>{% else %}<a href="/facilities/{{ facility.id}}/inventory/">(show stock levels)</a></span>{% endif %}</p>
-        <table>
-            <thead>
-                <th>Product</th>
-                <th>{% if view_type == 'inventory' %}Stock on Hand{% else %}Months of Stock{% endif %}</th>
-            </thead>
-            <tbody>
-            {% if view_type == 'inventory' %}
-                <tr><td>Implants</td><td>{{ facility.stock_on_hand_imp }}</td></tr>
-                <tr><td>Progesterone only Pills</td><td>{{ facility.stock_on_hand_pop }}</td></tr>
-                <tr><td>Condoms</td><td>{{ facility.stock_on_hand_con }}</td></tr>
-                <tr><td>Injectables</td><td>{{ facility.stock_on_hand_inj }}</td></tr>
-                <tr><td>Combined Oral Contraceptives</td><td>{{ facility.stock_on_hand_coc }}</td></tr>
-                <tr><td>IUD</td><td>{{ facility.stock_on_hand_iud }}</td></tr>
+<div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
+<div style="clear:both;">&nbsp;</div>
+
+<div class="split-2">
+    <div class="left">
+        <div class="module">
+            <h2>{{ facility.name }} ({{ facility.msd_code }})</h2>
+            <div class="toolbar">
+                <a href="{% url locations facility.uid %}">see on map</a>
+            </div>
+            <table>
+                <thead>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Primary</th>
+                </thead>
+                <tbody>
+                    {% for contact in facility.parent.contactdetail_set.all %}
+                    <tr class="">
+                        <td>{{ contact.name }}</td>
+                        <td>{{ contact.role }}</td>
+                        <td>{{ contact.phone }}</td>
+                        <td>{{ contact.email }}</td>
+                        <td>{{ contact.primary }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% for contact in facility.contactdetail_set.all %}
+                    <tr class="">
+                        <td>{{ contact.name }}</td>
+                        <td>{{ contact.role }}</td>
+                        <td>{{ contact.phone }}</td>
+                        <td>{{ contact.email }}</td>
+                        <td>{{ contact.primary }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br />
+            <span style="margin-top:10px;"><a href="{% url registration %}">Add a contact &raquo;</a></span>
+        </div>
+        <div class="module">
+            <h2>Inventory History</h2>
+            <div class="toolbar">
+                {% if view_type == 'inventory' %}<a href="/facilities/{{ facility.id }}/months_of_stock/">show months of stock</a>
+                {% else %}<a href="/facilities/{{ facility.id}}/inventory/">show stock levels</a>{% endif %}
+            </div>
+            <div class="inventorySMS">
+                <p>Last SMS message received:</p>
+            {% if facility.last_message_received %}
+                <p><i>&raquo;"{{ facility.last_message_received.text }}"</i></p>
+                <p>{{ facility.stock_on_hand_last_reported }} by {{ facility.last_message_received.contact.contactdetail.role }} {{ facility.last_message_received.contact }}</p>
+                <p><a href="/facilities/{{ facility.id }}/message_history/">See complete SMS message history &raquo;</a></p>
             {% else %}
-                <tr><td>Implants</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_imp }}{% endif %}</td></tr>
-                <tr><td>Progesterone only Pills</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_pop }}{% endif %}</td></tr>
-                <tr><td>Condoms</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_con }}{% endif %}</td></tr>
-                <tr><td>Injectables</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_inj }}{% endif %}</td></tr>
-                <tr><td>Combined Oral Contraceptives</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_coc }}{% endif %}</td></tr>
-                <tr><td>IUD</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_iud }}{% endif %}</td></tr>        
+                <p>No inventory messages have been received</p>
+            {% endif %}    
+            </div>
+            <table>
+                <thead>
+                    <th>Product</th>
+                    <th>{% if view_type == 'inventory' %}Stock on Hand{% else %}Months of Stock{% endif %}</th>
+                </thead>
+                <tbody>
+                {% if view_type == 'inventory' %}
+                    <tr><td>Implants</td><td>{{ facility.stock_on_hand_imp }}</td></tr>
+                    <tr><td>Progesterone only Pills</td><td>{{ facility.stock_on_hand_pop }}</td></tr>
+                    <tr><td>Condoms</td><td>{{ facility.stock_on_hand_con }}</td></tr>
+                    <tr><td>Injectables</td><td>{{ facility.stock_on_hand_inj }}</td></tr>
+                    <tr><td>Combined Oral Contraceptives</td><td>{{ facility.stock_on_hand_coc }}</td></tr>
+                    <tr><td>IUD</td><td>{{ facility.stock_on_hand_iud }}</td></tr>
+                {% else %}
+                    <tr><td>Implants</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_imp }}{% endif %}</td></tr>
+                    <tr><td>Progesterone only Pills</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_pop }}{% endif %}</td></tr>
+                    <tr><td>Condoms</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_con }}{% endif %}</td></tr>
+                    <tr><td>Injectables</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_inj }}{% endif %}</td></tr>
+                    <tr><td>Combined Oral Contraceptives</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_coc }}{% endif %}</td></tr>
+                    <tr><td>IUD</td><td>{% if quantity == None %}Insufficient data{% else %}{{ facility.months_of_stock_iud }}{% endif %}</td></tr>        
+                {% endif %}
+                </tbody>
+            </table>            
+        </div>
+        <div class="module">
+            <h2>R &amp; R History</h2>
+            <div class="toolbar">
+                <a href="">see all R&amp;R history</a>
+            </div>
+            {% if facility.randr_status %}
+            <p>
+                Status: <span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status }}</span>
+            </p>
+            <p>
+                Last updated on: <span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status.status_date }}</span>
+            </p>
+            {% else %}
+            <p>
+                 <span class="no_delivery_status_reported">No delivery status reported</a>
+            </p>
             {% endif %}
-            </tbody>
-        </table>
+            </p>
+            <p><a href="/docdownload/{{ facility.id }}">Download most recent R&amp;R &raquo;</a></p>
+        </div>
     </div>
-    <div style="float:left;padding:45px 0 0 30px;width:550px;"
-        <p>Last Inventory SMS received:</p> 
-        {% if facility.last_message_received %}
-            <p style="padding-left:10px;">&raquo;{{ facility.stock_on_hand_last_reported }}: <i>"{{ facility.last_message_received.text }}"</i></p>
-            <p style="padding-left:10px;">From: {{ facility.last_message_received.contact }}, {{ facility.last_message_received.contact.contactdetail.role }}</p>
-        {% else %}
-            No inventory messages have been received
-        {% endif %}    
-        </p>
-        <p><a href="/facilities/{{ facility.id }}/message_history/">See complete SMS message history</a></p>
-    </div>
-    <div style="clear:both;padding-top:25px;">
-        <strong>R&amp;R Status</strong>
-        {% if facility.randr_status %}
-        <p>
-            Status: <span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status }}</span>
-        </p>
-        <p>
-            Last updated on: <span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status.status_date }}</span>
-        </p>
-        {% else %}
-        <p>
-             <span class="no_delivery_status_reported">No delivery status reported</a>
-        </p>
-        {% endif %}
-        </p>
-        <p><a href="/docdownload/{{ facility.id }}">Download most recent R&amp;R</a></p>
+    <div class="right">
+        <div class="module">
+            <h2>Notes</h2>
+            <div class="toolbar">
+                <a href="">see all notes</a>
+            </div>
+        {% for note in notes %}
+            <div class="recentNote">
+                <p class="noteText">&raquo; "{{ note.text }}"</span></p>
+                <p class="noteByLine">{{ note.created_at }} by {{ note.contact_detail.name }}
+            </div> 
+        {% endfor %}
+            <form action="{% url ilsgateway.views.facilities_detail facility.id %}" method="post">
+            <p>Enter a note for this facility:</p>
+            {{ form.as_p }}
+            <input type="submit" value="Submit" />
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

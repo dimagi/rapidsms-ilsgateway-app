@@ -1,13 +1,17 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Current Stock Status{% endblock %}
 
 {% block content %}
 
-<h2>Current Stock Status</h2>
-{% if view_type == 'inventory' %}<a href="/facilities/months_of_stock/">Show months of stock</a>{% else %}<a href="/facilities/inventory/">Show inventory</a>{% endif %}</>
+<div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
+<div style="clear:both;">&nbsp;</div>
 <div class="module">
-    <h3>{{ sdp.parent_service_delivery_point.name }} / {{ sdp.name }} / FACILITIES</h3>
+    <h2>{% trans 'Current Stock Status' %}</h2>
+    <div class="toolbar">
+        {% if view_type == 'inventory' %}<a href="/facilities/months_of_stock/">Show months of stock</a>{% else %}<a href="/facilities/inventory/">Show inventory</a>{% endif %}
+    </div>
     <table>
         <thead>
             <th>MSD Code</th>

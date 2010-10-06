@@ -1,58 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}{{ facility.name }} Message History{% endblock %}
 
 {% block content %}
-
-<style type="text/css">
-    #inner {
-        #margin: 4em 25%;
-    }
-
-    div.module div {
-        border: 1px solid #ddd;
-        border-top-color: #636363;
-        margin-top: -1px;
-    }
-
-    div.module p {
-        padding-left: 1em;
-        padding-right: 1em;
-    }
-
-    code, pre {
-        background: #ffe;
-    }
-
-    pre {
-        padding: 1em;
-        margin: 0;
-    }
-    
-    /* only a single h1 per view */
-    #inner h1 {
-        color: #000;
-        font-size: 2em;
-        line-height: 1;
-        font-weight: normal;
-        margin: 0.5em 0 1em 0;
-        text-shadow: #eee 2px 2px 2px;
-    }
-
-    #inner h1 a {
-        color: #ccc;
-        #text-decoration: none;
-    }    
-</style>
-
-<h1>Message History</h1>
+<div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
+<div style="clear:both;">&nbsp;</div>
 <div class="module">
-    <h3>{{ my_sdp.parent_service_delivery_point.name }} / <a href="/facilities/inventory/">{{ facility.parent_service_delivery_point.name }}</a> / <a href="/facilities/{{ facility.id }}/inventory/">{{ facility.name }}</a> / Message History</h3>
 {% if messages %}
     <table>
         <thead>
             <th>Sender</th>
             <th>Role</th>
+            <th>Phone</th>
             <th>Date</th>
             <th>Text</th>
         </thead>
@@ -61,8 +20,9 @@
             <tr>            
                 <td>{{ msg.who }}</td>
                 <td>{{ msg.contact.contactdetail.role }}</td>
+                <td>{{ msg.contact.contactdetail.phone }}</td>
                 <td>{{ msg.date }}</td>
-                <td>{{ msg.text }}</td>
+                <td><i>{{ msg.text }}</i></td>
             </tr>
             {% endfor %}
         </tbody>

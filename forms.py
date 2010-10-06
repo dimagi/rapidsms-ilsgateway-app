@@ -17,4 +17,4 @@ class ContactDetailForm(forms.ModelForm):
             self.fields['service_delivery_point'].queryset = service_delivery_point.child_sdps().order_by("name")
 
 class NoteForm(forms.Form):
-    text = forms.CharField()
+    text = forms.CharField(widget=forms.Textarea,label="", help_text="", max_length=500)

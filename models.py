@@ -12,6 +12,7 @@ from rapidsms.contrib.messagelog.models import Message
 from datetime import datetime, timedelta
 from utils import *
 from django.contrib.contenttypes.models import ContentType
+from dateutil.relativedelta import relativedelta
 
 class DeliveryGroupManager(models.Manager):    
     def get_by_natural_key(self, name):
@@ -100,7 +101,7 @@ class ServiceDeliveryPoint(Location):
 
     def secondary_contacts(self):
         return self.contacts('secondary')
-        
+
     def received_reminder_after(self, short_name, date):
         result_set = self.servicedeliverypointstatus_set.filter(status_type__short_name=short_name, 
                                                       status_date__gt=date)
@@ -154,7 +155,9 @@ class ServiceDeliveryPoint(Location):
         return self.child_sdps_submitting().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_not_submitted_facility_to_district").distinct().count()
 
     def child_sdps_not_responded_randr_this_month(self):
-        return self.child_sdps_submitting().count() - self.child_sdps_submitted_randr_this_month() - self.child_sdps_not_submitted_randr_this_month()
+        now = datetime.now()
+        return self.child_sdps().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_reminder_sent_facility",
+                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).count() - self.child_sdps_submitted_randr_this_month() - self.child_sdps_not_submitted_randr_this_month()
     
     def child_sdps_processing_sent_to_msd(self, month=datetime.now().month):
         sdp_dgr_list = ServiceDeliveryPointDGReport.objects.filter(delivery_group__name=current_processing_group(), report_date__range=( beginning_of_month(month), end_of_month(month) ) )
@@ -173,8 +176,17 @@ class ServiceDeliveryPoint(Location):
         return self.child_sdps().filter(delivery_group__name=current_processing_group())
 
     def child_sdps_not_responded_soh_this_month(self):
-        return self.child_sdps().count() - self.child_sdps_responded_soh()
+        return self.child_sdps().filter(servicedeliverypointstatus__status_type__short_name="soh_reminder_sent_facility").count() - self.child_sdps_responded_soh()
 
+    def count_child_sdps_not_responded_soh_since_last_month(self):
+        now = datetime.now()
+        # if it's the last day of the month
+        if now.day == now + relativedelta(day=31):
+            date_start = datetime(now.year, now.month, now.day)
+        else:
+            date_start = now + relativedelta(day=31, months=-1)
+        return self.child_sdps().count() - self.child_sdps().filter(servicedeliverypointproductreport__report_date__range=( date_start, now )).distinct().count()
+    
     def child_sdps_responded_soh(self, month=datetime.now().month):
         return self.child_sdps().filter(servicedeliverypointproductreport__report_date__range=( beginning_of_month(month), end_of_month(month) )).distinct().count()   
     
@@ -289,7 +301,7 @@ class ContactDetail(Contact):
     primary = models.BooleanField(default=False)
     
     def phone(self):
-        return contact_detail.default_connection.indentity
+        return self.default_connection.identity
     
     def role_name(self):
         return self.role.name
