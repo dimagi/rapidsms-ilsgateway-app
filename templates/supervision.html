@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ facility.name }} Message History{% endblock %}
+{% block title %}Supervision{{ block.super }}{% endblock %}
 
 {% block content %}
 <div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
@@ -14,6 +14,7 @@
             </div>-->    
             <ul class="downloads">
                 <li><a href="/static/ilsgateway/downloads/supervision_documents/ils_manual.doc">ILS Manual (7mb)</a></li>
+                <li><a href="/static/ilsgateway/downloads/supervision_documents/ils_manual_supervision_excerpts.doc">ILS Manual - Supervision Excerpts (942kb)</a></li>
                 <li><a href="/static/ilsgateway/downloads/supervision_documents/FEFOGraphicJobAid.doc">Job Aid - FEFO (First Expiry, First Out) (164kb)</a></li>
                 <li><a href="/static/ilsgateway/downloads/supervision_documents/OJTRightCondition.doc">On the Job Training - RightCondition (1.7mb)</a></li>
                 <li><a href="/static/ilsgateway/downloads/supervision_documents/OJTSixRights.doc">On the Job Training - Six Rights (401kb)</a></li>

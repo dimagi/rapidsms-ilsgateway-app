@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}Ordering Status{% endblock %}
+{% block title %}Ordering Status{{ block.super }}{% endblock %}
 
 {% block content %}
 <div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>

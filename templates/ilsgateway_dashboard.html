@@ -1,47 +1,49 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard{{ block.super }}{% endblock %}
 {% block javascripts %}
     <!--[if IE]><script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/excanvas.js"></script><![endif]-->
 {{ block.super }}
     <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.pie.js"></script>
     <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.stack.js"></script>
     <script language="javascript">
-        $(document).ready(function() {    
+        $(document).ready(function() { 
+                                      
+            var data = [
+                { label: "Submitted",  data: {{ sdp.child_sdps_submitted_randr_this_month }} },
+                { label: "Haven't Submitted",  data: {{ sdp.child_sdps_not_submitted_randr_this_month }} },
+                { label: "Didn't Respond",  data: {{ sdp.child_sdps_not_responded_randr_this_month }} },
+                { label: "No Contact Info",  data: {{ sdp.count_child_sdps_no_primary_contact }} }
+            ]
+            // DEFAULT
+            $.plot($("#placeholder"), data, 
+            {
+                series: {
+                    pie: { 
+                        show: true,
+                        radius: 1,
+                        label: {
+                            show: true,
+                            radius: 1,
+                            formatter: function(label, series){
+                                return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">'+label+'<br/>'+Math.round(series.percent)+'%</div>';
+                            },
+                            background: { opacity: 0.8 }
+                        }                        
+                    }
+                },
+                legend: {
+                    show: false
+                }
+            });                                         
 
             var d1 = [[0, {{ sdp.child_sdps_submitted_randr_this_month }}]];
             var d2 = [[2, {{ sdp.child_sdps_not_submitted_randr_this_month }}]];
             var d3 = [[4, {{ sdp.child_sdps_not_responded_randr_this_month }}]];
             var d4 = [[6, {{ sdp.count_child_sdps_no_primary_contact }}]];
                                 
-            $.plot($("#placeholder"), [
-                {
-                    data: d1,
-                    bars: { show: true},
-                    xaxis: 1,
-                },
-                {
-                    data: d2,
-                    bars: { show: true},
-                    xaxis: 1,
-                },
-                {
-                    data: d3,
-                    bars: { show: true},
-                    xaxis: 1,
-                },
-                {
-                    data: d4,
-                    bars: { show: true},
-                    xaxis: 1,
-                }
-            ],
-                {
-                    xaxis: { ticks: [[.5, "Submitted"], [2.5, "Haven't Submitted"], [4.5, "Didn't Respond"], [6.5, "No Contact Info"]]},
-                    legend: {position: "nw"}
-                }
-            );
             bar_options = {                     
                series: {
                  stack: true,
@@ -72,6 +74,9 @@
         {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="/facilities/inventory">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} Facilities</a> have not reported their stock levels for last month.</li>{% endif %}
         {% if sdp.child_sdps_not_received_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_received_delivery_this_month }} Facilities</a> have reported not receiving their deliveries as of today.</li>{% endif %}
         {% if sdp.child_sdps_not_responded_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} Facilities</a> did not respond to the SMS asking if they had received their delivery.</li>{% endif %}
+        {% for product, facilities in stockouts_by_product %}{% for facility in facilities %}
+            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> is stocked out of {{ product }}.</li>
+        {% endfor %}{% endfor %}
         {% for facility in facilities_without_primary_contacts %}
             <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> has no primary contact.  <a href="{% url registration %}">Register someone now &raquo;</a></li>
         {% endfor %}
@@ -125,31 +130,5 @@
     </div>
 </div>
 <div class="clear-hack"></div>
-
-
-<!--
-<div class="module" style="float:left;margin-right:30px;">
-    <h3 align="center">R&amp;R Submission Summary</h3>
-    <div id="placeholder" style="width:300px;height:300px;"></div>
-</div>
-
-<div class="module" style="float:left;margin-right:30px;">
-    <h3 align="center">Product Availability Summary - Stockouts</h3>
-    <div id="placeholder2" style="width:300px;height:300px;"></div>
-</div>
-<div class="module" style="float:left;text-align:center;width:250px;">
-    <h3 align="center">District Summary</h3>
-    <span style="font-size:3em;">{{ counts.total }}</span><span style="font-size:2em;padding-left:5px;">facilities</span><div style="clear:both;">&nbsp;</div>
-    <span style="font-size:1.5em;">Group {{ groups.current_submitting_group }}</span><span style="font-size:1.5em;padding-left:5px;">submitting</span><div style="clear:both;">&nbsp;</div>
-    <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_submitting_group }} submitted</span><div style="clear:both;">&nbsp;</div>
-    <span style="font-size:1.5em;">Group {{ groups.current_processing_group }}</span><span style="font-size:1.5em;padding-left:5px;">processing</span><div style="clear:both;">&nbsp;</div>
-    <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_processing_sent_to_msd }} of {{ counts.current_processing_group }} forms sent to MSD</span><div style="clear:both;">&nbsp;</div>
-    <span style="font-size:1.5em;">Group {{ groups.current_delivering_group }}</span><span style="font-size:1.5em;padding-left:5px;">delivering</span><div style="clear:both;">&nbsp;</div>
-    <span style="font-size:1.25em;">&raquo;{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_delivering_group }} delivered</span><div style="clear:both;">&nbsp;</div>
-    <h4>Reported Stock via SMS</h4>
-    <p>This month: {{ sdp.child_sdps_percentage_reporting_stock_this_month }}%</p>
-    <p>Last month: {{ sdp.child_sdps_percentage_reporting_stock_last_month }}%</p> 
-</div>
--->
 {% endblock %}
 

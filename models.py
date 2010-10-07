@@ -207,7 +207,7 @@ class ServiceDeliveryPoint(Location):
     def child_sdps_stocked_out(self, sms_code):
         return self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code,
                                         servicedeliverypointproductreport__quantity=0,
-                                        servicedeliverypointproductreport__report_date__range=( beginning_of_month(), end_of_month() )).distinct().count()
+                                        servicedeliverypointproductreport__report_date__range=( beginning_of_month(), end_of_month() )).distinct()
     
     def child_sdps_not_stocked_out(self, sms_code):
         return self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code,
@@ -215,7 +215,7 @@ class ServiceDeliveryPoint(Location):
                                         servicedeliverypointproductreport__report_date__range=( beginning_of_month(), end_of_month() )).distinct().count()
     
     def child_sdps_no_stock_out_data(self, sms_code):
-        return self.child_sdps().count() - self.child_sdps_not_stocked_out(sms_code) - self.child_sdps_stocked_out(sms_code)
+        return self.child_sdps().count() - self.child_sdps_not_stocked_out(sms_code) - self.child_sdps_stocked_out(sms_code).count()
 
     def child_sdps_percentage_reporting_stock_this_month(self):
         if self.child_sdps().count() > 0:
@@ -254,25 +254,6 @@ class ServiceDeliveryPoint(Location):
         else:
             return "Waiting for reply"                  
     
-    #As soon as I learn how to create dynamic methods these are gone        
-    def stock_on_hand_inj(self):
-        return self.stock_on_hand('inj')
-
-    def stock_on_hand_pop(self):
-        return self.stock_on_hand('pop')
-
-    def stock_on_hand_coc(self):
-        return self.stock_on_hand('coc')
-
-    def stock_on_hand_imp(self):
-        return self.stock_on_hand('imp')
-
-    def stock_on_hand_con(self):
-        return self.stock_on_hand('con')
-
-    def stock_on_hand_iud(self):
-        return self.stock_on_hand('iud')
-
     def __unicode__(self):
         return self.name
 

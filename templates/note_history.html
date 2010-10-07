@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ facility.name }} Note History{% endblock %}
+{% block title %}{{ facility.name }} Note History{{ block.super }}{% endblock %}
 
 {% block content %}
 <div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>

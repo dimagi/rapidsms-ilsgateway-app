@@ -28,6 +28,16 @@ div.module ul.downloads li {
     padding-left:17px;
 }
 
+.contactGroupHeader {
+  font-weight: bold;
+  padding: 7px;
+}
+
+div.module h2.contactGroup {
+  color: white;      
+  background-color: gray;
+  background-image: none;                    
+}
 
 span.r_and_r_not_submitted_facility_to_district, 
 span.delivery_not_received_facility, 

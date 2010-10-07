@@ -88,8 +88,11 @@ def dashboard(request):
     d3 = []
     ticks = []
     index = 1
-    for product in Product.objects.all():
-        d1.append([index, sdp.child_sdps_stocked_out(product.sms_code)])
+    products = Product.objects.all()
+    stockouts_by_product = []
+    for product in products:
+        stockouts_by_product.append([product.name, sdp.child_sdps_stocked_out(product.sms_code)])
+        d1.append([index, sdp.child_sdps_stocked_out(product.sms_code).count()])
         d2.append([index, sdp.child_sdps_not_stocked_out(product.sms_code) ])
         d3.append([index, sdp.child_sdps_no_stock_out_data(product.sms_code) ])
         ticks.append([ index + .5, str( product.sms_code.upper() ) ])
@@ -137,6 +140,7 @@ def dashboard(request):
                                'randr_inquiry_date': randr_inquiry_date,
                                'delivery_inquiry_date': delivery_inquiry_date,
                                'max_stockout_graph': sdp.child_sdps().count() * 1.5,
+                               'stockouts_by_product': stockouts_by_product,
                                'breadcrumbs': breadcrumbs
                               },
                               context_instance=RequestContext(request))
@@ -227,7 +231,14 @@ def facilities_detail(request, facility_id,view_type='inventory'):
     except ServiceDeliveryPoint.DoesNotExist:
         raise Http404
     products = Product.objects.all()
-    breadcrumbs = [[f.parent.parent.name], [f.parent.name, ''], [f.name, ''], ['Facility Detail'] ]    
+    breadcrumbs = [[f.parent.parent.name], [f.parent.name, ''], [f.name, ''], ['Facility Detail'] ]  
+    
+    product_counts = []
+    for product in Product.objects.all():
+        if view_type == 'inventory':
+            product_counts.append([product.name, f.stock_on_hand(product.sms_code)])
+        elif view_type == 'months_of_stock':
+            product_counts.append([product.name, f.months_of_stock(product.sms_code)])
     
     if request.method == 'POST': 
         form = NoteForm(request.POST) 
@@ -241,12 +252,18 @@ def facilities_detail(request, facility_id,view_type='inventory'):
     else:
              form = NoteForm()                        
     notes = f.servicedeliverypointnote_set.order_by('-created_at')[:3]
+    contact_groups = []
+    contact_groups.append(['Facility', f.contactdetail_set.all().order_by('-role__id')])
+    contact_groups.append(['District', f.parent.contactdetail_set.all().order_by('-role__id')])
+    contact_groups.append(['Region', f.parent.parent.contactdetail_set.all().order_by('-role__id')])
     return render_to_response('facilities_detail.html', {'facility': f,
                                                          'products': products,
                                                          'view_type': view_type,
                                                          'my_sdp': my_sdp,
                                                          'form': form,
                                                          'breadcrumbs': breadcrumbs,
+                                                         'contact_groups': contact_groups,
+                                                         'product_counts': product_counts,
                                                          'notes': notes},
                               context_instance=RequestContext(request),)
 
