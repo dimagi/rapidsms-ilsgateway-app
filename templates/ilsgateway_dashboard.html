@@ -17,7 +17,7 @@
                 { label: "Didn't Respond",  data: {{ sdp.child_sdps_not_responded_randr_this_month }} },
                 { label: "No Contact Info",  data: {{ sdp.count_child_sdps_no_primary_contact }} }
             ]
-            // DEFAULT
+            // Pie chart
             $.plot($("#placeholder"), data, 
             {
                 series: {
@@ -37,13 +37,9 @@
                 legend: {
                     show: false
                 }
-            });                                         
-
-            var d1 = [[0, {{ sdp.child_sdps_submitted_randr_this_month }}]];
-            var d2 = [[2, {{ sdp.child_sdps_not_submitted_randr_this_month }}]];
-            var d3 = [[4, {{ sdp.child_sdps_not_responded_randr_this_month }}]];
-            var d4 = [[6, {{ sdp.count_child_sdps_no_primary_contact }}]];
-                                
+            });         
+                                            
+            // Bar chart
             bar_options = {                     
                series: {
                  stack: true,
@@ -55,7 +51,12 @@
                        max: 12
                       }, 
                legend: {show: true, position: 'nw'},
-               yaxis: {max: {{ max_stockout_graph }} }
+               yaxis: {max: {{ max_stockout_graph }} },
+               grid: {show: true,
+                      tickColor: 'gray',
+                      backgroundColor: '#FFFFFF',
+                      hoverable: true,
+                      autoHighlight:true}
             };
             $.plot($("#placeholder2"), {{ bar_data|safe }}, bar_options);    
         });
@@ -66,19 +67,25 @@
 <div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
 <div class="welcome">{% trans 'Welcome' %}, {{ user.username }}</div>
 <div style="clear:both;">&nbsp;</div>
+<div>
+    <form action="/" method="post">
+    {{ form.location }}
+    <input type="submit" value="Submit" />
+    </form>
+</div>
 <div class="module">
     <h2>{% trans 'Alerts' %}</h2>
     <ul class="alerts"">
-        {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_submitted_randr_this_month }} Facilities</a> have reported not submitting their R &amp; R form as of today.</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} Facilities</a> did not respond to the SMS asking if they had submitted their R&amp;R form.</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="/facilities/inventory">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} Facilities</a> have not reported their stock levels for last month.</li>{% endif %}
-        {% if sdp.child_sdps_not_received_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_received_delivery_this_month }} Facilities</a> have reported not receiving their deliveries as of today.</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} Facilities</a> did not respond to the SMS asking if they had received their delivery.</li>{% endif %}
+        {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_submitted_randr_this_month }} {% trans 'Facilities' %}</a> {% trans 'have reported not submitting their R&amp;R form as of today.' %}</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} {% trans 'Facilities' %}</a> {% trans 'did not respond to the SMS asking if they had submitted their R&amp;R form.'%}</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="/facilities/inventory">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} {% trans 'Facilities' %}</a> {% trans 'have not reported their stock levels for last month.' %}</li>{% endif %}
+        {% if sdp.child_sdps_not_received_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_received_delivery_this_month }} {% trans 'Facilities' %}</a> {% trans 'have reported not receiving their deliveries as of today.' %}</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} {% trans 'Facilities' %}</a> {% trans 'did not respond to the SMS asking if they had received their delivery.' %}</li>{% endif %}
         {% for product, facilities in stockouts_by_product %}{% for facility in facilities %}
-            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> is stocked out of {{ product }}.</li>
+            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> {% blocktrans %}is stocked out of {{ product }} {% endblocktrans %}.</li>
         {% endfor %}{% endfor %}
         {% for facility in facilities_without_primary_contacts %}
-            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> has no primary contact.  <a href="{% url registration %}">Register someone now &raquo;</a></li>
+            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> {% trans 'has no primary contact' %}.  <a href="{% url registration %}">{% trans 'Register someone now' %} &raquo;</a></li>
         {% endfor %}
     </ul>
 </div>
@@ -86,16 +93,16 @@
 <div class="split-3">
     <div class="left">
         <div class="module">
-            <h2>R&amp;R Submission Summary</h2>
+            <h2>{% trans 'R&amp;R Submission Summary' %}</h2>
             <!--<div class="toolbar">
-                <a href="">All Reports</a>
+                <a href="">{% trans 'All Reports'%}</a>
             </div>-->
             <div id="placeholder" style="width:300px;height:300px;"></div>
         </div>
     </div>
     <div class="mid">
         <div class="module">
-            <h2>Product Availability Summary</h2>
+            <h2>{% trans 'Product Availability Summary' %}</h2>
             <!--<div class="toolbar">
                 <a href="">All Stats</a>
             </div>-->
@@ -104,26 +111,26 @@
     </div>
     <div class="right">
         <div class="module">
-            <h2>District Summary</h2>
+            <h2>{% trans 'District Summary' %}</h2>
             <!--<div class="toolbar">
                 <a href="">All Stats</a>
             </div>-->
             <ul class="stats">
                 <li>
                     <div class="report">{{ counts.total }}</div>
-                    <div class="caption"><a href="{% url ordering %}">Facilities</a></div>
+                    <div class="caption"><a href="{% url ordering %}">{% trans 'Facilities' %}</a></div>
                 </li>
                 <li>
-                    <div class="report">Group {{ groups.current_submitting_group }}: Submitting</div>
-                    <div class="caption">{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_submitting_group }} <a href="{% url ordering %}">submitted</a></div>
+                    <div class="report">Group {{ groups.current_submitting_group }}: {% trans 'Submitting' %}</div>
+                    <div class="caption">{% blocktrans with sdp.child_sdps_submitted_randr_this_month as submitted and counts.current_submitting_group as count %}{{ submitted }} of {{ count }}{% endblocktrans %} <a href="{% url ordering %}">{% trans 'submitted' %}</a></div>
                 </li>
                 <li>
-                    <div class="report">Group {{ groups.current_processing_group }}: Processing</div>
-                    <div class="caption">{{ sdp.child_sdps_processing_sent_to_msd }} of {{ counts.current_processing_group }} forms sent to MSD</div>
+                    <div class="report">Group {{ groups.current_processing_group }}: {% trans 'Processing' %}</div>
+                    <div class="caption">{% blocktrans with sdp.child_sdps_processing_sent_to_msd as processed and counts.current_processing_group as count %}{{ processed }} of {{ count }} forms sent to MSD{% endblocktrans %}</div>
                 </li>
                 <li>
                     <div class="report">Group {{ groups.current_delivering_group }}: Deliveries</div>
-                    <div class="caption">{{ sdp.child_sdps_submitted_randr_this_month }} of {{ counts.current_delivering_group }} <a href="{% url ordering %}">delivered</a></div>
+                    <div class="caption">{% blocktrans with sdp.child_sdps_received_delivery_this_month as delivered and counts.current_delivering_group as count %}{{ delivered }} of {{ count }}{% endblocktrans %} <a href="{% url ordering %}">{% trans 'delivered' %}</a></div>
                 </li>
             </ul>
         </div>

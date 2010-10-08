@@ -9,17 +9,17 @@
 {% if notes %}
     <table>
         <thead>
-            <th>Sender</th>
-            <th>Role</th>
-            <th>Phone</th>
-            <th>Date</th>
-            <th>Text</th>
+            <th>{% trans 'Sender' %}</th>
+            <th>{% trans 'Role' %}</th>
+            <th>{% trans 'Phone' %}</th>
+            <th>{% trans 'Date' %}</th>
+            <th>{% trans 'Text' %}</th>
         </thead>
         <tbody>
             {% for note in notes %}
             <tr>            
                 <td>{{ note.contact_detail.name }}</td>
-                <td>{{ note.contact_detail.role }}</td>
+                <td>{% blocktrans with note.contact_detail.role as role %}{{ role }}{% endblocktrans %}</td>
                 <td>{{ note.contact_detail.phone }}</td>
                 <td>{{ note.created_at }}</td>
                 <td><i>{{ note.text }}</i></td>
@@ -28,7 +28,7 @@
         </tbody>
     </table>
 {% else %}
-    <p>No notes.</p>
+    <p>{% trans 'No notes' %}.</p>
 {% endif %}
 </div>
 {% endblock %}

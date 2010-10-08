@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Change Language{{ block.super }}{% endblock %}
 
@@ -13,7 +14,7 @@
             {% endfor %}
         </select>
         <input type="submit" value="Go" />
-        Current language: {{ language }}
+        {% trans 'Current language' %}: {{ language }}
     </form>
 </div>
 {% endblock %}

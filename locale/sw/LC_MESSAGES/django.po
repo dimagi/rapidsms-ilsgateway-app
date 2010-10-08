@@ -2,50 +2,470 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-10-04 20:04-0700\n"
+"POT-Creation-Date: 2010-10-07 21:07-0700\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\views.py:45
-msgid "hello"
-msgstr "jambo"
+#: .\handlers\confirmdelivery.py:25 .\handlers\confirmdelivery.py:40
+#, python-format
+msgid ""
+"Thank you %(contact_name)s for reporting your delivery for %(facility_name)s"
+msgstr ""
+"Asante %(contact_name)s kwa kutuma taarifa ya kupokea vifaa ya %"
+"(facility_name)s"
 
-#: .\templates\ilsgateway_dashboard.html.py:62
+#: .\handlers\confirmdelivery.py:30
+msgid ""
+"To record a delivery, respond with \"delivered product amount product "
+"amount...\" For example, dlvd inj 200 con 300 imp 10 pop 320 coc 232 iud 10."
+msgstr ""
+"Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
+"vifaa>....\"  Kwa mfano, delivered inj 200 con 300 imp 10 pop 320 coc 232 "
+"iud 10."
+
+#: .\handlers\confirmdelivery.py:44 .\handlers\confirmdelivery.py:57
+msgid ""
+"Sorry, invalid format.  The message should be in the format 'dlvd inj 200 "
+"con 300 imp 10 pop 320 coc 232 iud 10'"
+msgstr ""
+
+#: .\handlers\confirmdelivery.py:64
+#, python-format
+msgid "Sorry, invalid product code %(code)s"
+msgstr "Samahani, invalid product code %(code)s"
+
+#: .\handlers\confirmdelivery.py:72 .\handlers\stockonhand.py:62
+#, python-format
+msgid "You reported %(reply_list)s. If incorrect, please resend."
+msgstr ""
+
+#: .\handlers\confirmrandrsubmitted.py:16
+msgid "Please respond in the format \"submitted a 12 b 10 c 2.\""
+msgstr ""
+
+#: .\handlers\confirmrandrsubmitted.py:23
+#: .\handlers\confirmrandrsubmitted.py:78
+#, python-format
+msgid ""
+"Thank you %(contact_name)s for submitting your R and R form for %(sdp_name)s"
+msgstr ""
+
+#: .\handlers\confirmrandrsubmitted.py:35
+#: .\handlers\confirmrandrsubmitted.py:48
+msgid ""
+"Sorry, invalid format.  The message should be in the format \"submitted a 12 "
+"b 10 c 2.\""
+msgstr ""
+
+#: .\handlers\confirmrandrsubmitted.py:54
+#, python-format
+msgid "Sorry, invalid Delivery Group %s.  Please try again."
+msgstr ""
+
+#: .\handlers\confirmrandrsubmitted.py:59
+#, python-format
+msgid ""
+"You reported %(quantity)s forms submitted for group %(delivery_group_name)s, "
+"which is more than the number of facilities in group %(delivery_group_name)"
+"s.  Please try again."
+msgstr ""
+
+#: .\handlers\confirmrandrsubmitted.py:65
+#, python-format
+msgid ""
+"Thank you %(contact_name)s for reporting your R&R form submissions for %"
+"(sdp_name)s"
+msgstr ""
+
+#: .\handlers\confirmrandrsubmitted.py:81
+msgid "Sorry, you need to register."
+msgstr ""
+
+#: .\handlers\help.py:13
+msgid ""
+"Welcome to ILSGateway. Available commands are soh, delivered, not delivered, "
+"submitted, not submitted"
+msgstr ""
+"Karibu katika mfumo wa ILSGateway, maneno yanayotambulika na mfumo huu ni "
+"soh, delivered, not delivered, submitted, not submitted"
+
+#: .\handlers\help.py:15
+msgid ""
+"To register, send register <name> <msd code>. Example: register 'john patel "
+"d34002'"
+msgstr ""
+"Kusajili, tuma register <jina> <msd code>. Mfano 'register Kayanja Prakash "
+"d34002'"
+
+#: .\handlers\stockonhand.py:16
+#, fuzzy
+msgid ""
+"Please send in your stock on hand information in the format \"soh inj 200 "
+"con 300 imp 10 pop 320 coc 232 iud 10\""
+msgstr ""
+"Tafadhali tuma akiba ya vifaaa iliyopo katika mpangilio huu  \"soh inj 200 "
+"con 300 imp 10 pop 320 coc 232 iud 10\""
+
+#: .\handlers\stockonhand.py:21
+#, fuzzy
+msgid ""
+"Sorry, invalid format.  The message should be in the format \"inj 200 con "
+"300 imp 10 pop 320 coc 232 iud 10\""
+msgstr ""
+"Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
+"vifaa>....\"  Kwa mfano, delivered inj 200 con 300 imp 10 pop 320 coc 232 "
+"iud 10."
+
+#: .\handlers\stockonhand.py:36
+#, fuzzy
+msgid ""
+"Sorry, invalid format. The message should be in the format \"inj 200 con 300 "
+"imp 10 pop 320 coc 232 iud 10\""
+msgstr ""
+"Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
+"vifaa>....\"  Kwa mfano, delivered inj 200 con 300 imp 10 pop 320 coc 232 "
+"iud 10."
+
+#: .\handlers\stockonhand.py:42
+#, fuzzy, python-format
+msgid "Sorry, invalid product code %(product_code)s!"
+msgstr "Sahamani, invalid product code %(code)s"
+
+#: .\handlers\stockonhand.py:59
+#, python-format
+msgid ""
+"Thank you %(contact_name)s for reporting your stock on hand for %"
+"(facility_name)s.  Still missing %(product_list)s."
+msgstr ""
+"Asante %(contact_name)s kwa kutuma taarifa za akiba ya vifaa viliyopo ya %"
+"(facility_name)s, bado %(product_list)s"
+
+#: .\templates\change_language.html.py:17
+msgid "Current language"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:18
+msgid "Inventory History"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:20
+msgid "show months of stock"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:21
+msgid "show stock levels"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:24
+msgid "Last SMS message received"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:27
+msgid "by"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:29
+msgid "No inventory messages have been received"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:31
+msgid "See complete SMS message history"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:36
+msgid "Stock on Hand"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:36
+msgid "Months of Stock"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:40
+#: .\templates\facilities_list.html.py:32
+msgid "no data"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:46
+msgid "Group"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:48
+msgid "see on map"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:51
+msgid "Contacts"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:54
+#: .\templates\facilities_list.html.py:19
+#: .\templates\facilities_ordering.html.py:15
+msgid "Name"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:55
+#: .\templates\message_history.html.py:13 .\templates\note_history.html.py:13
+msgid "Role"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:56
+#: .\templates\message_history.html.py:14 .\templates\note_history.html.py:14
+msgid "Phone"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:57
+msgid "Email"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:58
+msgid "Primary"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:64
+#: .\templates\message_history.html.py:22 .\templates\note_history.html.py:22
+#, python-format
+msgid "%(role)s"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:74
+msgid "Add a contact"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:79
+msgid "R&amp;R History"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:81
+msgid "see all R&amp;R history"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:85
+msgid "Status"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:85
+#: .\templates\facilities_ordering.html.py:27
+#: .\templates\facilities_ordering.html.py:28
+#: .\templates\facilities_ordering.html.py:29
+#: .\templates\facilities_ordering.html.py:30
+#, python-format
+msgid "%(status)s"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:92
+msgid "No delivery status reported"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:96
+msgid "Download most recent R&amp;R"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:101
+msgid "see all notes"
+msgstr ""
+
+#: .\templates\facilities_detail.html.py:110
+msgid "Enter a note for this facility"
+msgstr ""
+
+#: .\templates\facilities_list.html.py:11
+msgid "Current Stock Status"
+msgstr ""
+
+#: .\templates\facilities_list.html.py:13
+msgid "Show months of stock"
+msgstr ""
+
+#: .\templates\facilities_list.html.py:13
+msgid "Show inventory"
+msgstr ""
+
+#: .\templates\facilities_list.html.py:17
+#: .\templates\facilities_ordering.html.py:13
+msgid "MSD Code"
+msgstr ""
+
+#: .\templates\facilities_list.html.py:18
+#: .\templates\facilities_ordering.html.py:14
+msgid "Delivery Group"
+msgstr ""
+
+#: .\templates\facilities_list.html.py:36
+msgid "insufficient data"
+msgstr ""
+
+#: .\templates\facilities_ordering.html.py:10
+msgid "Ordering Status"
+msgstr ""
+
+#: .\templates\facilities_ordering.html.py:16
+msgid "R&amp;R Status"
+msgstr ""
+
+#: .\templates\facilities_ordering.html.py:17
+#: .\templates\facilities_ordering.html.py:19
+#: .\templates\message_history.html.py:15 .\templates\note_history.html.py:15
+msgid "Date"
+msgstr ""
+
+#: .\templates\facilities_ordering.html.py:18
+msgid "Delivery Status"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:67
 msgid "Welcome"
 msgstr "Karibu"
 
-#: .\templates\ilsgateway_dashboard.html.py:63
-msgid "Language"
-msgstr "Lugha"
-
-#: .\templates\ilsgateway_dashboard.html.py:65
-msgid "District"
-msgstr "Wilaya"
-
-#: .\templates\ilsgateway_dashboard.html.py:67
+#: .\templates\ilsgateway_dashboard.html.py:70
 msgid "Alerts"
-msgstr "Rapporteringar"
+msgstr "Kumbuka"
 
-#~ msgid "Sorry, %(project_name)s could not understand your message."
-#~ msgstr "!"
+#: .\templates\ilsgateway_dashboard.html.py:72
+#: .\templates\ilsgateway_dashboard.html.py:73
+#: .\templates\ilsgateway_dashboard.html.py:74
+#: .\templates\ilsgateway_dashboard.html.py:75
+#: .\templates\ilsgateway_dashboard.html.py:76
+#: .\templates\ilsgateway_dashboard.html.py:114
+msgid "Facilities"
+msgstr "Vifaa"
+
+#: .\templates\ilsgateway_dashboard.html.py:72
+msgid "have reported not submitting their R&amp;R form as of today."
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:73
+msgid ""
+"did not respond to the SMS asking if they had submitted their R&amp;R form."
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:74
+msgid "have not reported their stock levels for last month."
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:75
+msgid "have reported not receiving their deliveries as of today."
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:76
+msgid "did not respond to the SMS asking if they had received their delivery."
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:78
+#, python-format
+msgid "is stocked out of %(product)s "
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:81
+msgid "has no primary contact"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:81
+msgid "Register someone now"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:89
+msgid "R&amp;R Submission Summary"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:91
+msgid "All Reports"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:98
+msgid "Product Availability Summary"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:107
+msgid "District Summary"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:117
+msgid "Submitting"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:118
+#, python-format
+msgid "%(submitted)s of %(count)s"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:118
+msgid "submitted"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:121
+msgid "Processing"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:122
+#, python-format
+msgid "%(processed)s of %(count)s forms sent to MSD"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:126
+#, python-format
+msgid "%(delivered)s of %(count)s"
+msgstr ""
+
+#: .\templates\ilsgateway_dashboard.html.py:126
+msgid "delivered"
+msgstr ""
+
+#: .\templates\message_history.html.py:3
+msgid "Message History"
+msgstr ""
+
+#: .\templates\message_history.html.py:12 .\templates\note_history.html.py:12
+msgid "Sender"
+msgstr ""
+
+#: .\templates\message_history.html.py:16 .\templates\note_history.html.py:16
+msgid "Text"
+msgstr ""
+
+#: .\templates\message_history.html.py:31
+msgid "No messages"
+msgstr ""
+
+#: .\templates\note_history.html.py:31 .\templates\supervision.html.py:44
+msgid "No notes"
+msgstr ""
+
+#: .\templates\supervision.html.py:4
+msgid "Supervision"
+msgstr ""
+
+#: .\templates\supervision.html.py:12
+msgid "Downloads"
+msgstr ""
+
+#: .\templates\supervision.html.py:32
+#, python-format
+msgid "Notes for Facilities in %(name)s"
+msgstr ""
+
+#~ msgid "Change language"
+#~ msgstr "Mabadiliko ya lugha"
+
+#~ msgid "Language"
+#~ msgstr "Lugha"
+
+#~ msgid "Sorry, %(language)ss could not understand your message."
+#~ msgstr "Samahani, %(language)ss could not understand your message."
 
 #~ msgid ""
-#~ "Have you sent in your R&R form yet for this quarter?  Please reply yes or "
-#~ "no"
+#~ "To register, send register <name> <msd code>. You didn't include an msd "
+#~ "code. example: register john patel d34002"
 #~ msgstr ""
-#~ "Je, umeshatuma fomu yako ya R&R kwa kipindi cha robo mwaka hii? Tafadhali "
-#~ "Jibu ndiyo au hapana"
+#~ "Kusajili, tuma register <jina> <msd code>. You didn't include an msd "
+#~ "code. example: register john patel d34002"
 
-#~ msgid "Log out"
-#~ msgstr "Kuondoka"
-
-#~ msgid "DATETIME_FORMAT"
-#~ msgstr "P j, Y, N"
+#~ msgid "Sorry, can't find the location with MSD CODE %s"
+#~ msgstr "Samahani, Eneo lenye MSD CODE %s halipo"
 
 #~ msgid ""
-#~ "To register, send register <name> <msd code>. example: register john "
-#~ "patel d34002"
-#~ msgstr "To register...in swahili"
+#~ "Thank you for registering at %(sdp_name)s, %(msd_code)s, %(contact_name)s"
+#~ msgstr ""
+#~ "Asante kwa kujisajili katika %(sdp_name)s, %(msd_code)s, %(contact_name)s"
 
 #~ msgid "I will speak to you in Swahili."
-#~ msgstr "I will speak to you in Swahili...in Swahili."
+#~ msgstr "Nitaongea na wewe kwa kiswahili."

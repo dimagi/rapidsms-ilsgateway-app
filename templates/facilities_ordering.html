@@ -10,13 +10,13 @@
     <h2>{% trans 'Ordering Status' %}</h2>
     <table>
         <thead>
-            <th>MSD Code</th>
-            <th>Delivery Group</th>
-            <th>Name</th>
-            <th>R&amp;R Status</th>
-            <th>Date</th>
-            <th>Delivery Status</th>
-            <th>Date</th>
+            <th>{% trans 'MSD Code' %}</th>
+            <th>{% trans 'Delivery Group' %}</th>
+            <th>{% trans 'Name' %}</th>
+            <th>{% trans 'R&amp;R Status' %}</th>
+            <th>{% trans 'Date' %}</th>
+            <th>{% trans 'Delivery Status' %}</th>
+            <th>{% trans 'Date' %}</th>
         </thead>
         <tbody>
             {% for facility in facilities %}
@@ -24,10 +24,10 @@
                 <td>{{ facility.msd_code }}</td>
                 <td>{{ facility.delivery_group.name }}</td>
                 <td><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a></td>
-                <td><span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status.status_type.name }}</span></td>
-                <td><span class="{{ facility.randr_status.status_type.short_name }}">{{ facility.randr_status.status_date }}</span></td>
-                <td><span class="{{ facility.delivery_status.status_type.short_name }}">{{ facility.delivery_status.status_type.name }}</span></td>
-                <td><span class="{{ facility.delivery_status.status_type.short_name }}">{{ facility.delivery_status.status_date }}</span></td>
+                <td><span class="{{ facility.randr_status.status_type.short_name }}">{% blocktrans with facility.randr_status.status_type.name as status %}{{ status }}{% endblocktrans %}</span></td>
+                <td><span class="{{ facility.randr_status.status_type.short_name }}">{% blocktrans with facility.randr_status.status_date as status %}{{ status }}{% endblocktrans %}</span></td>
+                <td><span class="{{ facility.delivery_status.status_type.short_name }}">{% blocktrans with facility.delivery_status.status_type.name as status %}{{ status }}{% endblocktrans %}</span></td>
+                <td><span class="{{ facility.delivery_status.status_type.short_name }}">{% blocktrans with facility.delivery_status.status_date as status %}{{ status }}{% endblocktrans %}</span></td>
             </tr>
             {% endfor %}
         </tbody>

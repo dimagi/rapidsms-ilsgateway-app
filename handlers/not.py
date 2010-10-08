@@ -5,6 +5,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from ilsgateway.models import ServiceDeliveryPointStatus, ServiceDeliveryPointStatusType, ProductReportType, Product
 import datetime
 import re
+
         
 class Not(KeywordHandler):
     """

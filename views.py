@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from rapidsms.contrib.messagelog.models import Message
 from utils import *
-from forms import NoteForm
+from forms import NoteForm, SelectLocationForm
 
 from httplib import HTTPSConnection, HTTPConnection
 from django.shortcuts import render_to_response
@@ -36,11 +36,9 @@ def change_language(request):
     elif request.LANGUAGE_CODE == 'sw':
         language = 'Swahili'
     elif request.LANGUAGE_CODE == 'es':
-        language = 'Spanish'        
-    
+        language = 'Spanish'   
     return render_to_response('change_language.html',
-                              {'test_phrase': _('hello'),
-                               'language': language},
+                              {'language': language},
                               context_instance=RequestContext(request))
 
 def supervision(request):
@@ -53,7 +51,7 @@ def supervision(request):
         language = 'Spanish'        
     my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     breadcrumbs = [[my_sdp.parent.name, ''], [my_sdp.name, ''], ['Supervision', ''] ]
-    notes = ServiceDeliveryPointNote.objects.filter(service_delivery_point__parent_id=my_sdp.id).order_by('-created_at')[:3]
+    notes = ServiceDeliveryPointNote.objects.filter(service_delivery_point__parent_id=my_sdp.id).order_by('-created_at')
     return render_to_response('supervision.html',
                               {'language': language,
                                'breadcrumbs': breadcrumbs,
@@ -63,6 +61,20 @@ def supervision(request):
     
 @login_required
 def dashboard(request):
+    sdp_id = None
+    if request.method == 'POST': 
+        form = SelectLocationForm(request.POST) 
+        if form.is_valid():
+            sdp_id = form.cleaned_data['location']
+            request.session['current_sdp_id'] = sdp_id      
+
+    if not sdp_id:
+        sdp_id = request.session['current_sdp_id']
+    if sdp_id:
+        sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
+    else:
+        sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    form = SelectLocationForm(initial={sdp.id: sdp.name})                        
     language = ''
     if request.LANGUAGE_CODE == 'en':
         language = 'English'
@@ -70,8 +82,6 @@ def dashboard(request):
         language = 'Swahili'
     elif request.LANGUAGE_CODE == 'es':
         language = 'Spanish'        
-            
-    sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''] ]
     facilities_without_primary_contacts = sdp.child_sdps_without_contacts()
     counts = {}
@@ -134,6 +144,7 @@ def dashboard(request):
                                'language': language,
                                'counts': counts,
                                'groups': groups,
+                               'form': form,
                                'bar_data': bar_data,
                                'bar_ticks': ticks,
                                'facilities_without_primary_contacts': facilities_without_primary_contacts,
@@ -183,7 +194,12 @@ def note_history(request, facility_id):
 
 @login_required
 def facilities_index(request, view_type='inventory'):
-    sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    sdp_id = request.session['current_sdp_id']
+    if sdp_id:
+        sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
+    else:
+        sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Current Stock Status'] ]
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
     products = Product.objects.all()
@@ -212,13 +228,28 @@ def facilities_index(request, view_type='inventory'):
 
 @login_required
 def facilities_ordering(request):
-    sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    sdp_id = request.session['current_sdp_id']
+    if sdp_id:
+        sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
+    else:
+        sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Ordering Status'] ]
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
     products = Product.objects.all()
     return render_to_response("facilities_ordering.html", 
                               {"facilities": facilities,
                                "products": products,
+                               "breadcrumbs": breadcrumbs,
+                               "sdp": sdp},
+                              context_instance=RequestContext(request),)
+
+@login_required
+def select_location(request):
+    sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Ordering Status'] ]
+    sdps = ServiceDeliveryPoint.objects.all().order_by("name")[:20]
+    return render_to_response("select_location.html", 
+                              {"sdps": sdps,
                                "breadcrumbs": breadcrumbs,
                                "sdp": sdp},
                               context_instance=RequestContext(request),)
@@ -266,27 +297,6 @@ def facilities_detail(request, facility_id,view_type='inventory'):
                                                          'product_counts': product_counts,
                                                          'notes': notes},
                               context_instance=RequestContext(request),)
-
-@login_required    
-def districts_index(request):
-    #TODO filter
-    districts = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name__iexact="District", order_by="delivery_group_id")
-    return render_to_response("districts_list.html", {"districts": districts },
-                              context_instance=RequestContext(request),)
-
-@login_required
-def districts_detail(request, district_id):
-    try:
-        d = ServiceDeliveryPoint.objects.get(pk=district_id)
-    except ServiceDeliveryPoint.DoesNotExist:
-        raise Http404
-    
-    facilities = ServiceDeliveryPoint.objects.filter(parent_service_delivery_point__id=district_id)
-    products = Product.objects.all()
-    return render_to_response('districts_detail.html', {'district': d,
-                                                        'facilities': facilities, 
-                                                        'products' : products,},
-                                                        context_instance=RequestContext(request),)
         
 def gdata_required(f):
     """

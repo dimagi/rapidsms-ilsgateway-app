@@ -13,12 +13,14 @@ class ConfirmRandRSubmitted(KeywordHandler):
     def help(self):
         service_delivery_point=self.msg.contact.contactdetail.service_delivery_point
         if service_delivery_point.service_delivery_point_type.name == "DISTRICT":
-            self.respond("Please respond in the format \"submitted a 12 b 10 c 2.\"")
+            self.respond(_("Please respond in the format \"submitted a 12 b 10 c 2.\""))
         elif service_delivery_point.service_delivery_point_type.name == "FACILITY":
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_submitted_facility_to_district")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=service_delivery_point, status_type=st, status_date=datetime.now())
             ns.save()
-            self.respond('Thank you %s for submitting your R and R form for %s' % (self.msg.contact.name,self.msg.contact.contactdetail.service_delivery_point.name))
+            kwargs = {'contact_name': self.msg.contact.name,
+                      'sdp_name': self.msg.contact.contactdetail.service_delivery_point.name}
+            self.respond(_('Thank you %(contact_name)s for submitting your R and R form for %(sdp_name)s'), **kwargs)
             return
             
     def handle(self, text):
@@ -30,7 +32,7 @@ class ConfirmRandRSubmitted(KeywordHandler):
             
             delivery_groups_list = text.split()
             if len(delivery_groups_list) > 0 and len(delivery_groups_list) % 2 != 0:
-                 self.respond("Sorry, invalid format.  The message should be in the format \"submitted a 12 b 10 c 2.\"")
+                 self.respond(_("Sorry, invalid format.  The message should be in the format \"submitted a 12 b 10 c 2.\""))
                  return
             else:    
                 sdp = self.msg.contact.contactdetail.service_delivery_point
@@ -43,21 +45,24 @@ class ConfirmRandRSubmitted(KeywordHandler):
                             delivery_group_name = quantity
                             quantity = temp
                         else:                        
-                            self.respond("Sorry, invalid format.  The message should be in the format \"submitted a 12 b 10 c 2.\"")
+                            self.respond(_("Sorry, invalid format.  The message should be in the format \"submitted a 12 b 10 c 2.\""))
                             return
                                         
                     try:
                         delivery_group = DeliveryGroup.objects.filter(name__iexact=delivery_group_name)[0:1].get()   
                     except DeliveryGroup.DoesNotExist:
-                        self.respond('Sorry, invalid Delivery Group %s.  Please try again.' % delivery_group_name)
+                        self.respond(_('Sorry, invalid Delivery Group %s.  Please try again.' % delivery_group_name))
                         return
                     if float(quantity) > 2:
-                        self.respond("You reported %s forms submitted for group %s, which is more than the number of facilities in group %s.  Please try again." % (quantity, delivery_group_name, delivery_group_name) )
+                        kwargs = {'quantity': quantity,
+                                  'delivery_group_name': delivery_group_name}
+                        self.respond(_("You reported %(quantity)s forms submitted for group %(delivery_group_name)s, which is more than the number of facilities in group %(delivery_group_name)s.  Please try again.", **kwargs))
                         return
 
                     sdp.report_delivery_group_status(delivery_group=delivery_group,quantity=quantity, message=self.msg.logger_msg)
-            
-            self.respond('Thank you %s for reporting your R&R form submissions for %s' % (self.msg.contact.name,self.msg.contact.contactdetail.service_delivery_point.name))
+            kwargs = {'contact_name': self.msg.contact.name,
+                      'sdp_name': self.msg.contact.contactdetail.service_delivery_point.name}
+            self.respond(_('Thank you %(contact_name)s for reporting your R&R form submissions for %(sdp_name)s'), **kwargs)
 #            contacts_to_notify = ContactDetail.objects.filter(parent_id=service_delivery_point.id, primary=True, service_delivery_point__delivery_group__name='A')
 #            for contact in contacts_to_notify:
 #                m = OutgoingMessage(contact.connection(), "%s: Your R&R forms have been sent from %s to MSD" % (contact.name(), contact.service_delivery_point.parent_service_delivery_point.name))
@@ -68,8 +73,10 @@ class ConfirmRandRSubmitted(KeywordHandler):
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_submitted_facility_to_district")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=service_delivery_point, status_type=st, status_date=datetime.now())
             ns.save()
-            self.respond('Thank you %s for submitting your R and R form for %s' % (self.msg.contact.name,self.msg.contact.contactdetail.service_delivery_point.name))
+            kwargs = {'contact_name': self.msg.contact.name,
+                      'sdp_name': self.msg.contact.contactdetail.service_delivery_point.name}
+            self.respond(_('Thank you %(contact_name)s for submitting your R and R form for %(sdp_name)s'))
             return
         else:
-            self.respond("Sorry, but we don't know who you are!")
+            self.respond(_("Sorry, you need to register."))
         

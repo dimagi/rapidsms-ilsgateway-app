@@ -1,4 +1,5 @@
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
+from django.utils.translation import ugettext as _
 
 class Help(KeywordHandler):
     """
@@ -9,6 +10,6 @@ class Help(KeywordHandler):
     def help(self):
         try:
             self.msg.contact.contactdetail
-            self.respond('Welcome to ILSGateway. Available commands are soh, delivered, not delivered, submitted, not submitted')
+            self.respond(_('Welcome to ILSGateway. Available commands are soh, delivered, not delivered, submitted, not submitted'))
         except:
-            self.respond("To register, send register <name> <msd code>. example: register john patel d34002")
+            self.respond(_("To register, send register <name> <msd code>. Example: register 'john patel d34002'"))

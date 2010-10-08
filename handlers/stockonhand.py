@@ -6,22 +6,24 @@ from ilsgateway.models import ServiceDeliveryPoint, Product, ProductReportType, 
 from ilsgateway.utils import *
 from dateutil.relativedelta import *
 from django.db.models import Q
+from django.utils.translation import ugettext_noop as _
 
 class StockOnHandHandler(KeywordHandler):
     """
     """
     keyword = "soh"
     def help(self):
-        self.respond("To report stock on hand, respond with \"soh product amount\".  For example, \"inj 200 con 300 imp 10 pop 320 coc 232 iud 10\".")
+        self.respond(_("Please send in your stock on hand information in the format \"soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
 
     def handle(self, text):
         product_list = text.split()
         if len(product_list) > 0 and len(product_list) % 2 != 0:
-             self.respond("Sorry, invalid format.  The message should be in the format \"inj 200 con 300 imp 10 pop 320 coc 232 iud 10\"")
+             self.respond(_("Sorry, invalid format.  The message should be in the format \"inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
              return
         else:    
             reported_products = []
             sdp = self.msg.contact.contactdetail.service_delivery_point
+            reply_list = []
             while len(product_list) >= 2:
                 product_code = product_list.pop(0)
                 quantity = product_list.pop(0)
@@ -31,16 +33,16 @@ class StockOnHandHandler(KeywordHandler):
                         product_code = quantity
                         quantity = temp
                     else:                        
-                        self.respond("Sorry, invalid format. The message should be in the format \"inj 200 con 300 imp 10 pop 320 coc 232 iud 10\"")
+                        self.respond(_("Sorry, invalid format. The message should be in the format \"inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
                         return
-                
                 report_type = ProductReportType.objects.filter(sms_code='soh')[0:1].get()
                 try:
                     product = Product.objects.filter(sms_code__iexact=product_code)[0:1].get()   
                 except Product.DoesNotExist:
-                    self.respond('Sorry, invalid product code %s!' % product_code)
+                    self.respond(_('Sorry, invalid product code %(product_code)s!'), product_code=product_code)
                     return
                 reported_products.append(product.sms_code)
+                reply_list.append('%s %s' % (quantity, product.name) )
                 sdp.report_product_status(product=product,report_type=report_type,quantity=quantity, message=self.msg.logger_msg)
             now = datetime.now()
             all_products = []
@@ -51,6 +53,11 @@ class StockOnHandHandler(KeywordHandler):
                 all_products.append(dict['sms_code'])
             missing_product_list = list(set(all_products)-set(reported_products))
             if missing_product_list:
-                self.respond('Thank you %s for reporting your stock on hand for %s.  Still missing %s.' % (self.msg.contact.name, sdp.name, ', '.join(missing_product_list)))
+                kwargs = {'contact_name': self.msg.contact.name,
+                          'facility_name': sdp.name,
+                          'product_list': ', '.join(missing_product_list)}
+                self.respond(_('Thank you %(contact_name)s for reporting your stock on hand for %(facility_name)s.  Still missing %(product_list)s.'), **kwargs)
             else:    
-                self.respond('Thank you %s for reporting your stock on hand for %s!' % (self.msg.contact.name, sdp.name))              
+                #you reported 100 Injectables,101 Condoms,102 IUD,103 Combined Oral Contraceptive,104 Progesterone Only Pill,105 Injectables. If incorrect, please resend.
+                self.respond(_('You reported %(reply_list)s. If incorrect, please resend.'), reply_list=','.join(reply_list))
+                #self.respond('Thank you %s for reporting your stock on hand for %s!' % (self.msg.contact.name, sdp.name))              

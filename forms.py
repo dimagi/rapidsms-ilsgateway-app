@@ -43,3 +43,7 @@ class ContactDetailForm(forms.ModelForm):
 
 class NoteForm(forms.Form):
     text = forms.CharField(widget=forms.Textarea,label="", help_text="", max_length=500)
+    
+class SelectLocationForm(forms.Form):
+    sdps = ServiceDeliveryPoint.objects.filter(parent_id=20).order_by("name")[:20].values_list('id', 'name')
+    location = forms.ChoiceField(choices=sdps)    
