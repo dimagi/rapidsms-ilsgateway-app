@@ -45,5 +45,12 @@ class NoteForm(forms.Form):
     text = forms.CharField(widget=forms.Textarea,label="", help_text="", max_length=500)
     
 class SelectLocationForm(forms.Form):
-    sdps = ServiceDeliveryPoint.objects.filter(parent_id=20).order_by("name")[:20].values_list('id', 'name')
-    location = forms.ChoiceField(choices=sdps)    
+    location = forms.ChoiceField()    
+
+    def __init__(self, service_delivery_point=None, **kwargs):
+        super(SelectLocationForm, self).__init__(**kwargs)
+        if service_delivery_point:
+            self.fields['location'].choices = ServiceDeliveryPoint.objects.filter(parent_id=service_delivery_point.id).order_by("name").values_list('id', 'name')
+    
+    
+    

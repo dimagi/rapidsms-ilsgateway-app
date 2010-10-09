@@ -4,7 +4,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from datetime import datetime
-from ilsgateway.models import ServiceDeliveryPoint, Product, Facility, ServiceDeliveryPointStatus, ServiceDeliveryPointNote
+from ilsgateway.models import ServiceDeliveryPoint, Product, Facility, ServiceDeliveryPointStatus, ServiceDeliveryPointNote, ContactDetail
 from django.http import Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -42,6 +42,14 @@ def change_language(request):
                               context_instance=RequestContext(request))
 
 def supervision(request):
+    print request.LANGUAGE_CODE
+    my_sdp = _get_my_sdp(request)
+    sdp_id = request.session.get('current_sdp_id')
+    if sdp_id:
+        sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
+    else:
+        sdp = my_sdp
+    
     language = ''
     if request.LANGUAGE_CODE == 'en':
         language = 'English'
@@ -50,31 +58,41 @@ def supervision(request):
     elif request.LANGUAGE_CODE == 'es':
         language = 'Spanish'        
     my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
-    breadcrumbs = [[my_sdp.parent.name, ''], [my_sdp.name, ''], ['Supervision', ''] ]
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Supervision', ''] ]
     notes = ServiceDeliveryPointNote.objects.filter(service_delivery_point__parent_id=my_sdp.id).order_by('-created_at')
     return render_to_response('supervision.html',
                               {'language': language,
                                'breadcrumbs': breadcrumbs,
                                'notes': notes,
-                               'my_sdp': my_sdp},
+                               'sdp': sdp},
                               context_instance=RequestContext(request))
     
 @login_required
 def dashboard(request):
     sdp_id = None
+    contact_detail = ContactDetail.objects.get(user=request.user)
+    #TODO this should be based on values in the DB
+    is_allowed_to_change_location = False
+    if contact_detail.role.id == 3:
+        is_allowed_to_change_location = True
+            
+    #endTODO
+    my_sdp = ServiceDeliveryPoint.objects.get(contactdetail=contact_detail)
     if request.method == 'POST': 
-        form = SelectLocationForm(request.POST) 
+        form = SelectLocationForm(data=request.POST,
+                                  service_delivery_point = my_sdp) 
         if form.is_valid():
             sdp_id = form.cleaned_data['location']
             request.session['current_sdp_id'] = sdp_id      
 
     if not sdp_id:
-        sdp_id = request.session['current_sdp_id']
+        sdp_id = request.session.get('current_sdp_id')
     if sdp_id:
         sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
     else:
-        sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
-    form = SelectLocationForm(initial={sdp.id: sdp.name})                        
+        sdp = my_sdp
+    form = SelectLocationForm(service_delivery_point = my_sdp,
+                              initial={'location': sdp.id})                        
     language = ''
     if request.LANGUAGE_CODE == 'en':
         language = 'English'
@@ -152,6 +170,7 @@ def dashboard(request):
                                'delivery_inquiry_date': delivery_inquiry_date,
                                'max_stockout_graph': sdp.child_sdps().count() * 1.5,
                                'stockouts_by_product': stockouts_by_product,
+                               'is_allowed_to_change_location': is_allowed_to_change_location,
                                'breadcrumbs': breadcrumbs
                               },
                               context_instance=RequestContext(request))
@@ -392,3 +411,8 @@ def docdownload(request, facility_id):
     response['content-Type'] = 'application/pdf'
     response['Content-Disposition'] = 'inline; filename=%s' % most_recent_doc.title.text
     return response
+
+def _get_my_sdp(request):    
+    contact_detail = ContactDetail.objects.get(user=request.user)
+    my_sdp = ServiceDeliveryPoint.objects.get(contactdetail=contact_detail)
+    return my_sdp

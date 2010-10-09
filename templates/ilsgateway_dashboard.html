@@ -67,12 +67,14 @@
 <div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
 <div class="welcome">{% trans 'Welcome' %}, {{ user.username }}</div>
 <div style="clear:both;">&nbsp;</div>
+{% if is_allowed_to_change_location %}
 <div>
     <form action="/" method="post">
-    {{ form.location }}
+    Change location: {{ form.location }}
     <input type="submit" value="Submit" />
     </form>
 </div>
+{% endif %}
 <div class="module">
     <h2>{% trans 'Alerts' %}</h2>
     <ul class="alerts"">
