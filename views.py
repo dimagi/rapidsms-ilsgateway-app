@@ -42,13 +42,7 @@ def change_language(request):
                               context_instance=RequestContext(request))
 
 def supervision(request):
-    print request.LANGUAGE_CODE
-    my_sdp = _get_my_sdp(request)
-    sdp_id = request.session.get('current_sdp_id')
-    if sdp_id:
-        sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
-    else:
-        sdp = my_sdp
+    sdp = _get_current_sdp(request)
     
     language = ''
     if request.LANGUAGE_CODE == 'en':
@@ -57,9 +51,8 @@ def supervision(request):
         language = 'Swahili'
     elif request.LANGUAGE_CODE == 'es':
         language = 'Spanish'        
-    my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Supervision', ''] ]
-    notes = ServiceDeliveryPointNote.objects.filter(service_delivery_point__parent_id=my_sdp.id).order_by('-created_at')
+    notes = ServiceDeliveryPointNote.objects.filter(service_delivery_point__parent_id=sdp.id).order_by('-created_at')
     return render_to_response('supervision.html',
                               {'language': language,
                                'breadcrumbs': breadcrumbs,
@@ -69,7 +62,6 @@ def supervision(request):
     
 @login_required
 def dashboard(request):
-    sdp_id = None
     contact_detail = ContactDetail.objects.get(user=request.user)
     #TODO this should be based on values in the DB
     is_allowed_to_change_location = False
@@ -77,22 +69,17 @@ def dashboard(request):
         is_allowed_to_change_location = True
             
     #endTODO
-    my_sdp = ServiceDeliveryPoint.objects.get(contactdetail=contact_detail)
+    my_sdp = _get_my_sdp(request)
     if request.method == 'POST': 
         form = SelectLocationForm(data=request.POST,
                                   service_delivery_point = my_sdp) 
         if form.is_valid():
             sdp_id = form.cleaned_data['location']
             request.session['current_sdp_id'] = sdp_id      
-
-    if not sdp_id:
-        sdp_id = request.session.get('current_sdp_id')
-    if sdp_id:
-        sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
-    else:
-        sdp = my_sdp
+    sdp = _get_current_sdp(request)
     form = SelectLocationForm(service_delivery_point = my_sdp,
-                              initial={'location': sdp.id})                        
+                              initial={'location': sdp.id}) 
+                           
     language = ''
     if request.LANGUAGE_CODE == 'en':
         language = 'English'
@@ -178,7 +165,7 @@ def dashboard(request):
 @login_required
 def message_history(request, facility_id):
     #TODO: restrict to current user's sdp (or by role)
-    my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    my_sdp = _get_my_sdp(request)
     facility = ServiceDeliveryPoint.objects.filter(id=facility_id)[0:1].get()    
     breadcrumbs = [[facility.parent.parent.name], 
                    #[facility.parent.name, reverse('ilsgateway.views.dashboard')], 
@@ -195,8 +182,6 @@ def message_history(request, facility_id):
 
 @login_required
 def note_history(request, facility_id):
-    #TODO: restrict to current user's sdp (or by role)
-    my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     facility = ServiceDeliveryPoint.objects.filter(id=facility_id)[0:1].get()    
     breadcrumbs = [[facility.parent.parent.name], 
                    #[facility.parent.name, reverse('ilsgateway.views.dashboard')], 
@@ -206,18 +191,17 @@ def note_history(request, facility_id):
     notes = facility.servicedeliverypointnote_set.all().order_by('-created_at')
     return render_to_response("note_history.html", 
                               {'notes': notes,
-                               'my_sdp': my_sdp,
                                'breadcrumbs': breadcrumbs,
                                'facility': facility}, 
                               context_instance=RequestContext(request))
 
 @login_required
 def facilities_index(request, view_type='inventory'):
-    sdp_id = request.session['current_sdp_id']
+    sdp_id = request.session.get('current_sdp_id')
     if sdp_id:
         sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
     else:
-        sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+        sdp = _get_my_sdp(request)
     
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Current Stock Status'] ]
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
@@ -247,7 +231,7 @@ def facilities_index(request, view_type='inventory'):
 
 @login_required
 def facilities_ordering(request):
-    sdp_id = request.session['current_sdp_id']
+    sdp_id = request.session.get('current_sdp_id')
     if sdp_id:
         sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
     else:
@@ -264,7 +248,7 @@ def facilities_ordering(request):
 
 @login_required
 def select_location(request):
-    sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+    sdp = _get_my_sdp(request)
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Ordering Status'] ]
     sdps = ServiceDeliveryPoint.objects.all().order_by("name")[:20]
     return render_to_response("select_location.html", 
@@ -275,7 +259,6 @@ def select_location(request):
 
 @login_required
 def facilities_detail(request, facility_id,view_type='inventory'):
-    my_sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
     try:
         f = ServiceDeliveryPoint.objects.get(pk=facility_id)
     except ServiceDeliveryPoint.DoesNotExist:
@@ -309,7 +292,6 @@ def facilities_detail(request, facility_id,view_type='inventory'):
     return render_to_response('facilities_detail.html', {'facility': f,
                                                          'products': products,
                                                          'view_type': view_type,
-                                                         'my_sdp': my_sdp,
                                                          'form': form,
                                                          'breadcrumbs': breadcrumbs,
                                                          'contact_groups': contact_groups,
@@ -416,3 +398,14 @@ def _get_my_sdp(request):
     contact_detail = ContactDetail.objects.get(user=request.user)
     my_sdp = ServiceDeliveryPoint.objects.get(contactdetail=contact_detail)
     return my_sdp
+
+def _get_current_sdp(request):
+    if not request.session.get('current_sdp_id'):
+        my_sdp = _get_my_sdp(request)
+        if my_sdp.service_delivery_point_type.name == "REGION":
+            #TODO: hacky, no real region views so we set the default to be the first child
+            request.session['current_sdp_id'] = my_sdp.child_sdps()[0].id       
+        else:
+            request.session['current_sdp_id'] = my_sdp.id       
+    return ServiceDeliveryPoint.objects.get(id=request.session.get('current_sdp_id'))
+    
