@@ -7,6 +7,7 @@ from rapidsms.models import Connection
 from rapidsms.messages import OutgoingMessage
 import datetime
 from ilsgateway.utils import *
+from django.utils.translation import ugettext_noop as _
 
 class ConfirmRandRSubmitted(KeywordHandler):
     keyword = "sub|submitted"

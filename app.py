@@ -10,14 +10,6 @@ class App(AppBase):
 
     def parse (self, message):
         """Parse and annotate messages in the parse phase."""
-        # stick a school on here, if we find it.  Otherwise 
-        # just set the property empty
-#        message.school = None
-#        if message.reporter and message.reporter.location:
-#            try:
-#                message.school = School.objects.get(id=message.reporter.location.id)
-#            except School.DoesNotExist:
-#                pass
         pass
 
     def handle (self, message):

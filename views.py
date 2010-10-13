@@ -28,7 +28,6 @@ import gdata.docs.data
 import gdata.docs.client
 import gdata.gauth
 
-
 def change_language(request):
     language = ''
     if request.LANGUAGE_CODE == 'en':

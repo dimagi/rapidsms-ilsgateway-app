@@ -19,5 +19,5 @@ urlpatterns = patterns('',
     (r'^docdownload/(?P<facility_id>\w+)/$', 'ilsgateway.views.docdownload'),
     (r'^change_language', 'ilsgateway.views.change_language'),
     (r'^select_location', 'ilsgateway.views.select_location'),
-    (r'^i18n/', include('django.conf.urls.i18n')),  
+    (r'^i18n/', include('django.conf.urls.i18n'))
 )
