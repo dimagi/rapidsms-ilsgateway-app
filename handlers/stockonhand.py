@@ -13,12 +13,14 @@ class StockOnHandHandler(KeywordHandler):
     """
     keyword = "soh"
     def help(self):
-        self.respond(_("Please send in your stock on hand information in the format \"soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
+        # swahili hack - not translating some reason
+        self.respond(_("Tafadhali tuma akiba ya vifaaa iliyopo katika mpangilio huu  \"soh inj kiafa con kiafa imp kiafa pop kiafa coc kiafa iud kiafa\""))
+        #self.respond(_("Please send in your stock on hand information in the format \"soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
 
     def handle(self, text):
         product_list = text.split()
         if len(product_list) > 0 and len(product_list) % 2 != 0:
-             self.respond(_("Sorry, invalid format.  The message should be in the format \"inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
+             self.respond(_("Sorry, invalid format.  The message should be in the format \"soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
              return
         else:    
             reported_products = []
@@ -33,7 +35,7 @@ class StockOnHandHandler(KeywordHandler):
                         product_code = quantity
                         quantity = temp
                     else:                        
-                        self.respond(_("Sorry, invalid format. The message should be in the format \"inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
+                        self.respond(_("Sorry, invalid format. The message should be in the format \"soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
                         return
                 report_type = ProductReportType.objects.filter(sms_code='soh')[0:1].get()
                 try:
@@ -42,7 +44,7 @@ class StockOnHandHandler(KeywordHandler):
                     self.respond(_('Sorry, invalid product code %(product_code)s!'), product_code=product_code)
                     return
                 reported_products.append(product.sms_code)
-                reply_list.append('%s %s' % (quantity, product.name) )
+                reply_list.append('%s %s' % (quantity, product.sms_code) )
                 sdp.report_product_status(product=product,report_type=report_type,quantity=quantity, message=self.msg.logger_msg)
             now = datetime.now()
             all_products = []

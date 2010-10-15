@@ -63,7 +63,7 @@ class ConfirmDeliveryReceived(KeywordHandler):
                     except Product.DoesNotExist:
                         self.respond(_('Sorry, invalid product code %(code)s'), code=product_code)
                         return
-                    reply_list.append('%s %s' % (quantity, product.name) )
+                    reply_list.append('%s %s' % (quantity, product.sms_code) )
                     service_delivery_point.report_product_status(product=product,report_type=report_type,quantity=quantity, message=self.msg.logger_msg)
                 
                 st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_quantities_reported")[0:1].get()

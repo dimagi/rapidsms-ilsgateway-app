@@ -20,7 +20,7 @@ msgid ""
 "amount...\" For example, dlvd inj 200 con 300 imp 10 pop 320 coc 232 iud 10."
 msgstr ""
 "Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
-"vifaa>....\"  Kwa mfano, delivered inj 200 con 300 imp 10 pop 320 coc 232 "
+"vifaa>....\"  Kwa mfano, delivered inj kiafa con kiafa imp kiafa pop kiafa coc kiafa"
 "iud 10."
 
 #: handlers/confirmdelivery.py:44 handlers/confirmdelivery.py:57
@@ -117,8 +117,8 @@ msgid ""
 "Please send in your stock on hand information in the format \"soh inj 200 "
 "con 300 imp 10 pop 320 coc 232 iud 10\""
 msgstr ""
-"Tafadhali tuma akiba ya vifaaa iliyopo katika mpangilio huu  \"soh inj 200 "
-"con 300 imp 10 pop 320 coc 232 iud 10\""
+"Tafadhali tuma akiba ya vifaaa iliyopo katika mpangilio huu  \"soh inj kiafa "
+"con kiafa imp kiafa pop kiafa coc kiafa iud kiafa\""
 
 #: handlers/stockonhand.py:21
 #, fuzzy
@@ -127,8 +127,8 @@ msgid ""
 "300 imp 10 pop 320 coc 232 iud 10\""
 msgstr ""
 "Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
-"vifaa>....\"  Kwa mfano, delivered inj 200 con 300 imp 10 pop 320 coc 232 "
-"iud 10."
+"vifaa>....\"  Kwa mfano, delivered inj kiafa con kiafa imp kiafa pop kiafa coc kiafa "
+"iud kiafa."
 
 #: handlers/stockonhand.py:36
 #, fuzzy
@@ -137,8 +137,8 @@ msgid ""
 "imp 10 pop 320 coc 232 iud 10\""
 msgstr ""
 "Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
-"vifaa>....\"  Kwa mfano, delivered inj 200 con 300 imp 10 pop 320 coc 232 "
-"iud 10."
+"vifaa>....\"  Kwa mfano, delivered inj kiafa con kiafa imp kiafa pop kiafa coc kiafa "
+"iud kiafa."
 
 #: handlers/stockonhand.py:42
 #, fuzzy, python-format
@@ -173,8 +173,8 @@ msgid ""
 "Did you receive your delivery yet? Please reply \"delivered inj 200 con 300 "
 "imp 10 pop 320 coc 232 iud 10\" or \"not delivered\""
 msgstr ""
-"Je umeshapokea vifaa? Tafadhari jibu \"delivered inj 200 con 300 imp 320 coc "
-"232 iud 10\" kama umepoke au \"not delivered\" Kama haujapokea"
+"Je umeshapokea vifaa? Tafadhari jibu \"delivered inj kiafa con kiafa imp kiafa coc "
+"kiafa iud kiafa\" kama umepoke au \"not delivered\" Kama haujapokea"
 
 #: handlers/test_handler.py:54
 #, python-format
