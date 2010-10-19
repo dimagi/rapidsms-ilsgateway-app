@@ -25,7 +25,7 @@ class TestReminder(KeywordHandler):
             if default_connection:
                 #hack
                 #m = OutgoingMessage(default_connection, _("Please send in your stock on hand information in the format \"soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
-                m = OutgoingMessage(default_connection, _("Tafadhali tuma akiba ya vifaaa iliyopo katika mpangilio huu  \"soh inj kiafa con kiafa imp kiafa pop kiafa coc kiafa iud kiafa\""))
+                m = OutgoingMessage(default_connection, _("Tafadhali tuma hesabu ya mkono ya vifaaa iliyopo katika mpangilio huu \"hmk inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
                 m.send() 
                 st = ServiceDeliveryPointStatusType.objects.filter(short_name="soh_reminder_sent_facility")[0:1].get()
                 ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())

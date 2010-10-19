@@ -12,7 +12,7 @@ class Not(KeywordHandler):
     simple "not"
     """
 
-    keyword = "not|no"
+    keyword = "not|no|hapana"    
 
     def help(self):
         self.respond(_("If you haven't submitted your R&R, respond \"not submitted\". If you haven't received your delivery, respond \"not delivered\""))
@@ -31,4 +31,3 @@ class Not(KeywordHandler):
             ns.save()
         else:
             self.respond(_("If you haven't submitted your R&R, respond \"not submitted\". If you haven't received your delivery, respond \"not delivered\""))
-                          

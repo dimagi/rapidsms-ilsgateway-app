@@ -7,10 +7,10 @@ from rapidsms.models import Connection
 from rapidsms.messages import OutgoingMessage
 import datetime
 from ilsgateway.utils import *
-from django.utils.translation import ugettext_noop as _
+from django.utils.translation import ugettext as _
 
 class ConfirmRandRSubmitted(KeywordHandler):
-    keyword = "sub|submitted"
+    keyword = "submitted|nimetuma"
     def help(self):
         service_delivery_point=self.msg.contact.contactdetail.service_delivery_point
         if service_delivery_point.service_delivery_point_type.name == "DISTRICT":

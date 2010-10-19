@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_noop as _
 class StockOnHandHandler(KeywordHandler):
     """
     """
-    keyword = "soh"
+    keyword = "soh|hmk"
     def help(self):
         # swahili hack - not translating some reason
         self.respond(_("Tafadhali tuma akiba ya vifaaa iliyopo katika mpangilio huu  \"soh inj kiafa con kiafa imp kiafa pop kiafa coc kiafa iud kiafa\""))

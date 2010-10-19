@@ -5,7 +5,7 @@ class Help(KeywordHandler):
     """
     """
 
-    keyword = "help"
+    keyword = "help|msaada"
 
     def help(self):
         try:

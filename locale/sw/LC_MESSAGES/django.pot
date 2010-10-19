@@ -1,28 +1,33 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 0.0\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-10-13 00:32-0500\n"
+"POT-Creation-Date: 2010-10-18 09:11-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-
-msgid "help"
-msgstr "msaada"
 
 #: handlers/confirmdelivery.py:25 handlers/confirmdelivery.py:40
 #, python-format
 msgid ""
 "Thank you %(contact_name)s for reporting your delivery for %(facility_name)s"
 msgstr ""
-"Asante %(contact_name)s kwa kutuma taarifa ya kupokea vifaa ya "
-"%(facility_name)s"
 
 #: handlers/confirmdelivery.py:30
 msgid ""
 "To record a delivery, respond with \"delivered product amount product "
 "amount...\" For example, dlvd inj 200 con 300 imp 10 pop 320 coc 232 iud 10."
 msgstr ""
-"Kutuma taarifa za kupokea vifaa, jibu  \"nimepokea<acha nafasi><jina la vifaa><acha nafasi><idadi ya vifaa><acha nafasi>...\""
 
 #: handlers/confirmdelivery.py:44 handlers/confirmdelivery.py:57
 msgid ""
@@ -33,14 +38,17 @@ msgstr ""
 #: handlers/confirmdelivery.py:64
 #, python-format
 msgid "Sorry, invalid product code %(code)s"
-msgstr "Samahani, invalid product code %(code)s"
+msgstr ""
 
-#: handlers/confirmdelivery.py:72 handlers/stockonhand.py:62
+#: handlers/confirmdelivery.py:72 handlers/stockonhand.py:64
 #, python-format
 msgid "You reported %(reply_list)s. If incorrect, please resend."
 msgstr ""
-"Umetoa taarifa kuwa una %(reply_list)s. Kama sio sahihi, tafadhari tuma tena "
-"taarifa sahihi."
+
+#: handlers/confirmrandrsubmitted.py:13
+#: templates/ilsgateway_dashboard.html:127
+msgid "submitted"
+msgstr ""
 
 #: handlers/confirmrandrsubmitted.py:17
 msgid "Please respond in the format \"submitted a 12 b 10 c 2.\""
@@ -50,7 +58,7 @@ msgstr ""
 #, python-format
 msgid ""
 "Thank you %(contact_name)s for submitting your R and R form for %(sdp_name)s"
-msgstr "Asante %(contact_name)s kwa kuwasilisha R & R fomu kwa %(sdp_name)s"
+msgstr ""
 
 #: handlers/confirmrandrsubmitted.py:36 handlers/confirmrandrsubmitted.py:49
 msgid ""
@@ -87,69 +95,60 @@ msgid ""
 "Welcome to ILSGateway. Available commands are soh, delivered, not delivered, "
 "submitted, not submitted"
 msgstr ""
-"Karibu katika mfumo wa ILSGateway, maneno yanayotambulika na mfumo huu ni "
-"hmk, nimepokea, sijapokea, nimetuma, sijatuma"
 
 #: handlers/help.py:15
 msgid ""
 "To register, send register <name> <msd code>. Example: register 'john patel "
 "d34002'"
-msgstr "Haujasajiliwa,Tafadhali jisajili kwanza kabla ya kupata huduma,Kusajili andika 'sajili<nafasi><jina lako><nafasi><msd code>'. Mfano 'sajili Peter Juma d34002'"
+msgstr ""
 
 #: handlers/not.py:18 handlers/not.py:33
 msgid ""
 "If you haven't submitted your R&R, respond \"not submitted\". If you haven't "
 "received your delivery, respond \"not delivered\""
-msgstr "Kama haujatuma R&R fomu yako jibu \"sijatuma\", kama haujapokea vifaa jibu \"sijapokea\""
+msgstr ""
+
+#: handlers/not.py:21 templates/ilsgateway_dashboard.html:135
+msgid "delivered"
+msgstr ""
 
 #: handlers/not.py:22
 msgid "You have reported that you haven't yet received your delivery."
-msgstr "Umetoa taarifa kuwa haujapokea vifaa bado"
+msgstr ""
 
 #: handlers/not.py:28
 msgid "You have reported that you haven't yet sent in your R&R."
-msgstr "Umetoa taarifa kuwa haujatuma R&R yako."
+msgstr ""
 
-#: handlers/stockonhand.py:16 handlers/test_handler.py:25
-#, fuzzy
+#: handlers/stockonhand.py:17 handlers/test_handler.py:28
 msgid ""
-"Please send in your stock on hand information in the format \"soh inj 200 "
+"Tafadhali tuma akiba ya vifaaa iliyopo katika mpangilio huu  \"soh inj kiafa "
+"con kiafa imp kiafa pop kiafa coc kiafa iud kiafa\""
+msgstr ""
+
+#: handlers/stockonhand.py:23
+msgid ""
+"Sorry, invalid format.  The message should be in the format \"soh inj 200 "
 "con 300 imp 10 pop 320 coc 232 iud 10\""
 msgstr ""
-"Tafadhali tuma hesabu ya mkono ya vifaaa iliyopo katika mpangilio huu \"hmk inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""
 
-#: handlers/stockonhand.py:21
-#, fuzzy
+#: handlers/stockonhand.py:38
 msgid ""
-"Sorry, invalid format.  The message should be in the format \"inj 200 con "
+"Sorry, invalid format. The message should be in the format \"soh inj 200 con "
 "300 imp 10 pop 320 coc 232 iud 10\""
 msgstr ""
-"Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
-"vifaa>....\"  Kwa mfano, delivered inj kiafa con kiafa imp kiafa pop kiafa coc kiafa "
-"iud kiafa."
 
-#: handlers/stockonhand.py:36
-#, fuzzy
-msgid ""
-"Sorry, invalid format. The message should be in the format \"inj 200 con 300 "
-"imp 10 pop 320 coc 232 iud 10\""
-msgstr ""
-"Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
-"vifaa>....\"  Kwa mfano, delivered inj kiafa con kiafa imp kiafa pop kiafa coc kiafa "
-"iud kiafa."
-
-#: handlers/stockonhand.py:42
-#, fuzzy, python-format
+#: handlers/stockonhand.py:44
+#, python-format
 msgid "Sorry, invalid product code %(product_code)s!"
-msgstr "Sahamani, invalid product code %(code)s"
+msgstr ""
 
-#: handlers/stockonhand.py:59
+#: handlers/stockonhand.py:61
 #, python-format
 msgid ""
 "Thank you %(contact_name)s for reporting your stock on hand for "
 "%(facility_name)s.  Still missing %(product_list)s."
 msgstr ""
-"Asante %(contact_name)s kwa kutuma taarifa za hesabu ya mkono ya vifaa vilivyopo ya %(facility_name)s, bado %(product_list)s"
 
 #: handlers/test_handler.py:18
 msgid ""
@@ -157,31 +156,26 @@ msgid ""
 "soh, delivery, randr. Remember to setup your contact details!"
 msgstr ""
 
-#: handlers/test_handler.py:34
+#: handlers/test_handler.py:37
 msgid ""
 "Have you sent in your R&R form yet for this quarter? Please reply \"submitted"
 "\" or \"not submitted\""
 msgstr ""
-"Je? Umetuma R&R fomu yako kwa kota hii? Tafadhal jibu \"nimetuma\" au \"sijatuma\""
 
-#: handlers/test_handler.py:47
+#: handlers/test_handler.py:50
 msgid ""
 "Did you receive your delivery yet? Please reply \"delivered inj 200 con 300 "
 "imp 10 pop 320 coc 232 iud 10\" or \"not delivered\""
 msgstr ""
-"Je? Umekwishapokea vifaa ulivyoagiza kota hii, kama umepokea jibu \"nimepokea inj kiasa con kiasa pop kiasa...\", kama haujapokea jibu \"sijapokea\"."
 
-msgid "If you have received you R&R, respond \"submitted\".  If you have received your delivery, respond \"delivered\""
-msgstr ""
-
-#: handlers/test_handler.py:54
+#: handlers/test_handler.py:57
 #, python-format
 msgid ""
 "It's time to submit group %s. How many R&R forms have you submitted to MSD "
 "so far?  Reply with \"submitted 20 a 10 b 2 c\"."
 msgstr ""
 
-#: handlers/test_handler.py:62
+#: handlers/test_handler.py:65
 msgid ""
 "Sorry I didn't understand. To test a reminder, send \"test reminder "
 "[remindername]\"; valid tests are soh, delivery, randr."
@@ -354,11 +348,11 @@ msgstr ""
 
 #: templates/ilsgateway_dashboard.html:68
 msgid "Welcome"
-msgstr "Karibu"
+msgstr ""
 
 #: templates/ilsgateway_dashboard.html:79
 msgid "Alerts"
-msgstr "Kumbuka"
+msgstr ""
 
 #: templates/ilsgateway_dashboard.html:81
 #: templates/ilsgateway_dashboard.html:82
@@ -367,7 +361,7 @@ msgstr "Kumbuka"
 #: templates/ilsgateway_dashboard.html:85
 #: templates/ilsgateway_dashboard.html:123
 msgid "Facilities"
-msgstr "Vifaa"
+msgstr ""
 
 #: templates/ilsgateway_dashboard.html:81
 msgid "have reported not submitting their R&amp;R form as of today."
@@ -428,10 +422,6 @@ msgstr ""
 msgid "%(submitted)s of %(count)s"
 msgstr ""
 
-#: templates/ilsgateway_dashboard.html:127
-msgid "submitted"
-msgstr "nimetuma"
-
 #: templates/ilsgateway_dashboard.html:130
 msgid "Processing"
 msgstr ""
@@ -445,10 +435,6 @@ msgstr ""
 #, python-format
 msgid "%(delivered)s of %(count)s"
 msgstr ""
-
-#: templates/ilsgateway_dashboard.html:135
-msgid "delivered"
-msgstr "nimepokea"
 
 #: templates/message_history.html:4
 msgid "Message History"
@@ -486,33 +472,7 @@ msgstr ""
 msgid "Downloads"
 msgstr ""
 
-msgid "If you have submitted your R&R, respond \"submitted\".  If you have received your delivery, respond \"delivered\""
-msgstr "Kama umetuma R&R fomu yako jibu 'nimetuma', kama umepokea vifaa jibu 'nimepokea'"
-
 #: templates/supervision.html:32
 #, python-format
 msgid "Notes for Facilities in %(name)s"
 msgstr ""
-
-msgid "Change language"
-msgstr "Mabadiliko ya lugha"
-
-msgid "Language"
-msgstr "Lugha"
-
-msgid "Sorry, %(language)ss could not understand your message."
-msgstr "Samahani, %(language)ss could not understand your message."
-
-msgid "I didn't recognize your msd code.  To register, send register <name> <msd code>. example: register Peter Juma d34002"
-msgstr "msd code yako haitambuliki, Kujisajili, andika 'sajili<nafasi><jina lako><nafasi><msd code ya kituo chako>. Mfano 'sajili Peter Juma d34002'"
-
-msgid "Sorry, can't find the location with MSD CODE %(msd_code)s"
-msgstr "Samahani, Eneo lenye MSD CODE %(msd_code)s halipo"
-
-msgid ""
-"Thank you for registering at %(sdp_name)s, %(msd_code)s, %(contact_name)s"
-msgstr ""
-"Asante kwa kujisajili katika %(sdp_name)s, %(msd_code)s, %(contact_name)s"
-
-msgid "I will speak to you in Swahili."
-msgstr "Nitaongea na wewe kwa kiswahili."

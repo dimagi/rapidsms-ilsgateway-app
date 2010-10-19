@@ -12,7 +12,7 @@ class ConfirmDeliveryReceived(KeywordHandler):
     for reporting delivery confirmation, products and amounts
     """
 
-    keyword = "delivered|dlvd"
+    keyword = "delivered|dlvd|nimepokea"
 
     def help(self):
         service_delivery_point=self.msg.contact.contactdetail.service_delivery_point
