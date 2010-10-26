@@ -309,7 +309,7 @@ def gdata_required(f):
             # scope: what service you want to get access to
             base_url='https://www.google.com/accounts/AuthSubRequest'
             scope='https://docs.google.com/feeds/%20https://docs.googleusercontent.com/'
-            next_url='http://ilsgateway.dimagi.com%s' %  request.get_full_path()
+            next_url='http://ilsgateway.com%s' %  request.get_full_path()
             session_val='1'
             target_url="%s?next=%s&scope=%s&session=%s" % (base_url, next_url, scope, session_val)
             return HttpResponseRedirect(target_url)
