@@ -26,25 +26,24 @@ msgstr ""
 
 #: handlers/confirmdelivery.py:44 handlers/confirmdelivery.py:57
 msgid ""
-"Sorry, invalid format.  The message should be in the format 'dlvd inj 200 "
-"con 300 imp 10 pop 320 coc 232 iud 10'"
-msgstr ""
+"Sorry, invalid format.  The message should be in the format 'delivered product amound product amount'"
+msgstr "Samahani, Mpangilio sio sahihi. Ujumbe uwe katika mpangilio huu 'nimepokea <jina la vifaa> <idadi> <jina la vifaa> <idadi>...'"
 
 #: handlers/confirmdelivery.py:64
 #, python-format
 msgid "Sorry, invalid product code %(code)s"
-msgstr "Samahani, invalid product code %(code)s"
+msgstr "Samahani, vifupisho vya vifaa sio sahihi %(code)s"
 
 #: handlers/confirmdelivery.py:72 handlers/stockonhand.py:62
 #, python-format
 msgid "You reported %(reply_list)s. If incorrect, please resend."
 msgstr ""
-"Umetoa taarifa kuwa una %(reply_list)s. Kama sio sahihi, tafadhari tuma tena "
+"Umetoa taarifa kuwa umepokea %(reply_list)s. Kama sio sahihi, tafadhari tuma tena "
 "taarifa sahihi."
 
 #: handlers/confirmrandrsubmitted.py:17
-msgid "Please respond in the format \"submitted a 12 b 10 c 2.\""
-msgstr ""
+msgid "Please respond in the format \"submitted A <number of group A forms> B <number of group B forms> C <number of group C forms>.\""
+msgstr "Tafadhari, jibu kwa mpangilio huu 'nimetuma a <idadi ya R&R form za group a> b <idadi ya R&R form za group b> c <idadi ya R&R form za group c>'"
 
 #: handlers/confirmrandrsubmitted.py:24 handlers/confirmrandrsubmitted.py:79
 #, python-format
@@ -56,12 +55,12 @@ msgstr "Asante %(contact_name)s kwa kuwasilisha R & R fomu kwa %(sdp_name)s"
 msgid ""
 "Sorry, invalid format.  The message should be in the format \"submitted a 12 "
 "b 10 c 2.\""
-msgstr ""
+msgstr "Samahani, Mpangilio sio sahihi."
 
 #: handlers/confirmrandrsubmitted.py:55
 #, python-format
 msgid "Sorry, invalid Delivery Group %s.  Please try again."
-msgstr ""
+msgstr "Samahani, kundi la upokeaji sio sahihi.  %s"
 
 #: handlers/confirmrandrsubmitted.py:60
 #, python-format
@@ -76,11 +75,11 @@ msgstr ""
 msgid ""
 "Thank you %(contact_name)s for reporting your R&R form submissions for "
 "%(sdp_name)s"
-msgstr ""
+msgstr "Ahsante %(contact_name)s kwa kutoa taarifa ya kutuma kwa R&R fomu yako %(sdp_name)s"
 
 #: handlers/confirmrandrsubmitted.py:82
 msgid "Sorry, you need to register."
-msgstr ""
+msgstr "Samahani, Unatakiwa kujisajili kwanza"
 
 #: handlers/help.py:13
 msgid ""
@@ -141,7 +140,7 @@ msgstr ""
 #: handlers/stockonhand.py:42
 #, fuzzy, python-format
 msgid "Sorry, invalid product code %(product_code)s!"
-msgstr "Sahamani, invalid product code %(code)s"
+msgstr "Samahani, kodi ya kifaa sio sahihi"
 
 #: handlers/stockonhand.py:59
 #, python-format
@@ -177,9 +176,9 @@ msgstr ""
 #: handlers/test_handler.py:54
 #, python-format
 msgid ""
-"It's time to submit group %s. How many R&R forms have you submitted to MSD "
-"so far?  Reply with \"submitted 20 a 10 b 2 c\"."
+"How many R&R forms have you submitted to MSD for group %(group)s?  Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"
 msgstr ""
+"Ni R&R form ngapi umetuma MSD mpaka sasa %(group)s? tafadhari jibu 'nimetuma A <idadi ya R&R form za group a> B <idadi ya R&R form za group B>...'"
 
 #: handlers/test_handler.py:62
 msgid ""
@@ -189,82 +188,82 @@ msgstr ""
 
 #: templates/change_language.html:17
 msgid "Current language"
-msgstr ""
+msgstr "Lugha inayotumika"
 
 #: templates/facilities_detail.html:18
 msgid "Inventory History"
-msgstr ""
+msgstr "Historia ya..."
 
 #: templates/facilities_detail.html:20
 msgid "show months of stock"
-msgstr ""
+msgstr "Onyesha makadilio ya miezi ambayo kituo kitakua na vifaa"
 
 #: templates/facilities_detail.html:21
 msgid "show stock levels"
-msgstr ""
+msgstr "Onyesha idadi ya vifaa"
 
 #: templates/facilities_detail.html:24
 msgid "Last SMS message received"
-msgstr ""
+msgstr "Ujumbe uliopokelewa wa mwisho"
 
 #: templates/facilities_detail.html:27
 msgid "by"
-msgstr ""
+msgstr "na"
 
 #: templates/facilities_detail.html:29
 msgid "No inventory messages have been received"
-msgstr ""
+msgstr "Hakuna ujumbe wa hesabu ya mkono uliokwishapokelewa"
 
 #: templates/facilities_detail.html:31
 msgid "See complete SMS message history"
-msgstr ""
+msgstr "Onyesha historia kamili ya ujumbe wa SMS"
 
 #: templates/facilities_detail.html:36
 msgid "Stock on Hand"
-msgstr ""
+msgstr "Hesabu ya Mkono"
 
 #: templates/facilities_detail.html:36
 msgid "Months of Stock"
-msgstr ""
+msgstr "Miezi ya kua na hakiba"
 
 #: templates/facilities_detail.html:40 templates/facilities_list.html:32
 msgid "no data"
-msgstr ""
+msgstr "Hakuna taarifa"
 
 #: templates/facilities_detail.html:46
 msgid "Group"
-msgstr ""
+msgstr "Kundi"
 
 #: templates/facilities_detail.html:48
 msgid "see on map"
-msgstr ""
+msgstr "Ona katika ramani"
 
 #: templates/facilities_detail.html:51
 msgid "Contacts"
-msgstr ""
+msgstr "Mawasiliano"
 
 #: templates/facilities_detail.html:54 templates/facilities_list.html:19
 #: templates/facilities_ordering.html:15 templates/select_location.html:13
 msgid "Name"
-msgstr ""
+msgstr "Jina"
 
 #: templates/facilities_detail.html:55 templates/message_history.html:14
 #: templates/note_history.html:13
 msgid "Role"
-msgstr ""
+msgstr "Cheo"
 
 #: templates/facilities_detail.html:56 templates/message_history.html:15
 #: templates/note_history.html:14
 msgid "Phone"
-msgstr ""
+msgstr "Simu"
 
 #: templates/facilities_detail.html:57
 msgid "Email"
-msgstr ""
+msgstr "Barua pepe"
 
 #: templates/facilities_detail.html:58
 msgid "Primary"
-msgstr ""
+msgstr "Mhusika mkuu"
 
 #: templates/facilities_detail.html:64 templates/message_history.html:23
 #: templates/note_history.html:22
@@ -274,19 +273,19 @@ msgstr ""
 
 #: templates/facilities_detail.html:74
 msgid "Add a contact"
-msgstr ""
+msgstr "Ongeza mawasiliano"
 
 #: templates/facilities_detail.html:79
 msgid "R&amp;R History"
-msgstr ""
+msgstr "Historia ya R&R"
 
 #: templates/facilities_detail.html:81
 msgid "see all R&amp;R history"
-msgstr ""
+msgstr "Onyesha historia yote ya R&R"
 
 #: templates/facilities_detail.html:85
 msgid "Status"
-msgstr ""
+msgstr "Hali"
 
 #: templates/facilities_detail.html:85 templates/facilities_ordering.html:27
 #: templates/facilities_ordering.html:28 templates/facilities_ordering.html:29
@@ -297,60 +296,60 @@ msgstr ""
 
 #: templates/facilities_detail.html:92
 msgid "No delivery status reported"
-msgstr ""
+msgstr "Hakuna taarifa ya kupokea vifaa imekwisha tumwa"
 
 #: templates/facilities_detail.html:96
 msgid "Download most recent R&amp;R"
-msgstr ""
+msgstr "chukua R&R fomu ya karibuni kutoka kwenye mtandao"
 
 #: templates/facilities_detail.html:101
 msgid "see all notes"
-msgstr ""
+msgstr "Onyesha maelezo yote "
 
 #: templates/facilities_detail.html:110
 msgid "Enter a note for this facility"
-msgstr ""
+msgstr "Ingiza maelezo kwa kituo hiki"
 
 #: templates/facilities_list.html:11
 msgid "Current Stock Status"
-msgstr ""
+msgstr "Hali ya vifaa vilivyopo"
 
 #: templates/facilities_list.html:13
 msgid "Show months of stock"
-msgstr ""
+msgstr "Onyesha makadilio ya miezi ambayo kituo kitakua na vifaa"
 
 #: templates/facilities_list.html:13
 msgid "Show inventory"
-msgstr ""
+msgstr "Onyesha idadi ya vifaa"
 
 #: templates/facilities_list.html:17 templates/facilities_ordering.html:13
 msgid "MSD Code"
-msgstr ""
+msgstr "kodi MSD"
 
 #: templates/facilities_list.html:18 templates/facilities_ordering.html:14
 msgid "Delivery Group"
-msgstr ""
+msgstr "kundi la upokeaji"
 
 #: templates/facilities_list.html:36
 msgid "insufficient data"
-msgstr ""
+msgstr "data"
 
 #: templates/facilities_ordering.html:10
 msgid "Ordering Status"
-msgstr ""
+msgstr "Hali ya uagizaji"
 
 #: templates/facilities_ordering.html:16
 msgid "R&amp;R Status"
-msgstr ""
+msgstr "Hali ya R&R"
 
 #: templates/facilities_ordering.html:17 templates/facilities_ordering.html:19
 #: templates/message_history.html:16 templates/note_history.html:15
 msgid "Date"
-msgstr ""
+msgstr "Tarehe"
 
 #: templates/facilities_ordering.html:18
 msgid "Delivery Status"
-msgstr ""
+msgstr "Hali ya upokeaji"
 
 #: templates/ilsgateway_dashboard.html:68
 msgid "Welcome"
@@ -370,8 +369,8 @@ msgid "Facilities"
 msgstr "Vifaa"
 
 #: templates/ilsgateway_dashboard.html:81
-msgid "have reported not submitting their R&amp;R form as of today."
-msgstr ""
+msgid "%s facilities have reported not submitting their R&amp;R form as of today."
+msgstr "Vituo %s vimetoa taarifa kuwa havijatuma R&R fomu za vituo vyao kwa leo"
 
 #: templates/ilsgateway_dashboard.html:82
 msgid ""
@@ -401,45 +400,45 @@ msgstr ""
 
 #: templates/ilsgateway_dashboard.html:90
 msgid "Register someone now"
-msgstr ""
+msgstr "Sajili mtu sasa"
 
 #: templates/ilsgateway_dashboard.html:98
 msgid "R&amp;R Submission Summary"
-msgstr ""
+msgstr "Muhtasari wa uwasilishaji wa R&R"
 
 #: templates/ilsgateway_dashboard.html:100
 msgid "All Reports"
-msgstr ""
+msgstr "Ripoti zote"
 
 #: templates/ilsgateway_dashboard.html:107
 msgid "Product Availability Summary"
-msgstr ""
+msgstr "Muhtasri wa upatikanaji wa vifaa "
 
 #: templates/ilsgateway_dashboard.html:116
 msgid "District Summary"
-msgstr ""
+msgstr "Muhtasari wa wilaya"
 
 #: templates/ilsgateway_dashboard.html:126
 msgid "Submitting"
-msgstr ""
+msgstr "vituo vinatuma"
 
 #: templates/ilsgateway_dashboard.html:127
 #, python-format
 msgid "%(submitted)s of %(count)s"
-msgstr ""
+msgstr "%(submitted)s kati ya %(count)s"
 
 #: templates/ilsgateway_dashboard.html:127
 msgid "submitted"
-msgstr "nimetuma"
+msgstr "Zimetuma"
 
 #: templates/ilsgateway_dashboard.html:130
 msgid "Processing"
-msgstr ""
+msgstr "Zinashughurikiwa"
 
 #: templates/ilsgateway_dashboard.html:131
 #, python-format
 msgid "%(processed)s of %(count)s forms sent to MSD"
-msgstr ""
+msgstr "Fomu %(processed)s kati ya %(count)s zimetumwa MSD"
 
 #: templates/ilsgateway_dashboard.html:135
 #, python-format
@@ -448,43 +447,43 @@ msgstr ""
 
 #: templates/ilsgateway_dashboard.html:135
 msgid "delivered"
-msgstr "nimepokea"
+msgstr "Wamepokea vifaa"
 
 #: templates/message_history.html:4
 msgid "Message History"
-msgstr ""
+msgstr "Historia ya ujumbe "
 
 #: templates/message_history.html:13 templates/note_history.html:12
 msgid "Sender"
-msgstr ""
+msgstr "Mtumaji"
 
 #: templates/message_history.html:17 templates/note_history.html:16
 msgid "Text"
-msgstr ""
+msgstr "Ujumbe mfupi"
 
 #: templates/message_history.html:32
 msgid "No messages"
-msgstr ""
+msgstr "Hakuna ujumbe"
 
 #: templates/note_history.html:31 templates/supervision.html:44
 msgid "No notes"
-msgstr ""
+msgstr "Hakuna maelezo"
 
 #: templates/select_location.html:4
 msgid "Choose Service Delivery Point"
-msgstr ""
+msgstr "Chagua kituo cha kupokelea huduma"
 
 #: templates/select_location.html:10
 msgid "Select Location"
-msgstr ""
+msgstr "Chagua eneo"
 
 #: templates/supervision.html:4
 msgid "Supervision"
-msgstr ""
+msgstr "Usimamizi"
 
 #: templates/supervision.html:12
 msgid "Downloads"
-msgstr ""
+msgstr "Vitu vya kuchukua kutoka kwenye mtandao"
 
 msgid "If you have submitted your R&R, respond \"submitted\".  If you have received your delivery, respond \"delivered\""
 msgstr "Kama umetuma R&R fomu yako jibu 'nimetuma', kama umepokea vifaa jibu 'nimepokea'"
@@ -492,7 +491,7 @@ msgstr "Kama umetuma R&R fomu yako jibu 'nimetuma', kama umepokea vifaa jibu 'ni
 #: templates/supervision.html:32
 #, python-format
 msgid "Notes for Facilities in %(name)s"
-msgstr ""
+msgstr "Maelekezo kwa vituo vya %(name)s"
 
 msgid "Change language"
 msgstr "Mabadiliko ya lugha"
