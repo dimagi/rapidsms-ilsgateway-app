@@ -6,7 +6,7 @@ from ilsgateway.models import ServiceDeliveryPoint, Product, ProductReportType, 
 from ilsgateway.utils import *
 from dateutil.relativedelta import *
 from django.db.models import Q
-from django.utils.translation import ugettext_noop as _
+from django.utils.translation import ugettext as _
 
 class StockOnHandHandler(KeywordHandler):
     """
@@ -20,7 +20,8 @@ class StockOnHandHandler(KeywordHandler):
     def handle(self, text):
         product_list = text.split()
         if len(product_list) > 0 and len(product_list) % 2 != 0:
-             self.respond(_("Sorry, invalid format.  The message should be in the format \"soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
+             #self.respond(_("Sorry, invalid format. The message should be in the format '<product> <amount> <product> <amount>...'"))
+             self.respond(_("Kutuma taarifa za kupokea vifaa, jibu 'delivered <jina la vifaa> <idadi ya vifaa>...'"))
              return
         else:    
             reported_products = []
@@ -35,13 +36,15 @@ class StockOnHandHandler(KeywordHandler):
                         product_code = quantity
                         quantity = temp
                     else:                        
-                        self.respond(_("Sorry, invalid format. The message should be in the format \"soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
+                        #self.respond(_("Sorry, invalid format. The message should be in the format '<product> <amount> <product> <amount>...'"))
+                        self.respond(_("Kutuma taarifa za kupokea vifaa, jibu 'delivered <jina la vifaa> <idadi ya vifaa>...'"))
                         return
                 report_type = ProductReportType.objects.filter(sms_code='soh')[0:1].get()
                 try:
                     product = Product.objects.filter(sms_code__iexact=product_code)[0:1].get()   
                 except Product.DoesNotExist:
-                    self.respond(_('Sorry, invalid product code %(product_code)s!'), product_code=product_code)
+                    #self.respond(_('Sorry, invalid product code %(product_code)s'), product_code=product_code)
+                    self.respond(_('Samahani, kodi ya kifaa sio sahihi %(product_code)s'), product_code=product_code)
                     return
                 reported_products.append(product.sms_code)
                 reply_list.append('%s %s' % (quantity, product.sms_code) )

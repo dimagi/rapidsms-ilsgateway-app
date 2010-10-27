@@ -112,35 +112,19 @@ msgstr "Umetoa taarifa kuwa haujatuma R&R yako."
 #: handlers/stockonhand.py:16 handlers/test_handler.py:25
 #, fuzzy
 msgid ""
-"Please send in your stock on hand information in the format \"soh inj 200 "
-"con 300 imp 10 pop 320 coc 232 iud 10\""
+"Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"
 msgstr ""
-"Tafadhali tuma hesabu ya mkono ya vifaaa iliyopo katika mpangilio huu \"hmk inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""
+"Tafadhali tuma hesabu ya mkono ya vifaaa iliyopo katika mpangilio huu 'hmk <jina la vifaa> <idadi> <jina la vifaa> <idadi>...'"
 
 #: handlers/stockonhand.py:21
 #, fuzzy
-msgid ""
-"Sorry, invalid format.  The message should be in the format \"inj 200 con "
-"300 imp 10 pop 320 coc 232 iud 10\""
-msgstr ""
-"Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
-"vifaa>....\"  Kwa mfano, delivered inj kiafa con kiafa imp kiafa pop kiafa coc kiafa "
-"iud kiafa."
-
-#: handlers/stockonhand.py:36
-#, fuzzy
-msgid ""
-"Sorry, invalid format. The message should be in the format \"inj 200 con 300 "
-"imp 10 pop 320 coc 232 iud 10\""
-msgstr ""
-"Kutuma taarifa za kupokea vifaa, jibu  \"delivered <jina la vifaa> <idadi ya "
-"vifaa>....\"  Kwa mfano, delivered inj kiafa con kiafa imp kiafa pop kiafa coc kiafa "
-"iud kiafa."
+msgid "Sorry, invalid format. The message should be in the format '<product> <amount> <product> <amount>...'"
+msgstr "Kutuma taarifa za kupokea vifaa, jibu 'delivered <jina la vifaa> <idadi ya vifaa>...'"
 
 #: handlers/stockonhand.py:42
 #, fuzzy, python-format
-msgid "Sorry, invalid product code %(product_code)s!"
-msgstr "Samahani, kodi ya kifaa sio sahihi"
+msgid "Sorry, invalid product code %(product_code)s"
+msgstr "Samahani, kodi ya kifaa sio sahihi %(product_code)s"
 
 #: handlers/stockonhand.py:59
 #, python-format
@@ -164,21 +148,21 @@ msgstr ""
 "Je? Umetuma R&R fomu yako kwa kota hii? Tafadhal jibu \"nimetuma\" au \"sijatuma\""
 
 #: handlers/test_handler.py:47
-msgid ""
-"Did you receive your delivery yet? Please reply \"delivered inj 200 con 300 "
-"imp 10 pop 320 coc 232 iud 10\" or \"not delivered\""
-msgstr ""
-"Je? Umekwishapokea vifaa ulivyoagiza kota hii, kama umepokea jibu \"nimepokea inj kiasa con kiasa pop kiasa...\", kama haujapokea jibu \"sijapokea\"."
+msgid "Did you receive your delivery yet? Please reply 'delivered <product> <amount> <product> <amount>...'"
+msgstr "Je? Umekwishapokea vifaa ulivyoagiza kota hii, kama umepokea jibu 'nimepokea <jina la vifaa> <idadi ya vifaa>...', kama haujapokea jibu 'sijapokea'"
 
 msgid "If you have received you R&R, respond \"submitted\".  If you have received your delivery, respond \"delivered\""
 msgstr ""
 
+msgid "Did you receive your delivery yet? Please reply 'delivered' or 'not delivered'"
+msgstr "Je? Umekwishapokea vifaa ulivyoagiza kota hii, kama umepokea jibu 'nimepokea', kama haujapokea jibu 'sijapokea'"
+
 #: handlers/test_handler.py:54
 #, python-format
 msgid ""
-"How many R&R forms have you submitted to MSD for group %(group)s?  Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"
+"How many R&R forms have you submitted to MSD?  Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"
 msgstr ""
-"Ni R&R form ngapi umetuma MSD mpaka sasa %(group)s? tafadhari jibu 'nimetuma A <idadi ya R&R form za group a> B <idadi ya R&R form za group B>...'"
+"Ni R&R form ngapi umetuma MSD mpaka sasa? tafadhari jibu 'nimetuma A <idadi ya R&R form za group a> B <idadi ya R&R form za group B>...'"
 
 #: handlers/test_handler.py:62
 msgid ""
@@ -369,8 +353,8 @@ msgid "Facilities"
 msgstr "Vifaa"
 
 #: templates/ilsgateway_dashboard.html:81
-msgid "%s facilities have reported not submitting their R&amp;R form as of today."
-msgstr "Vituo %s vimetoa taarifa kuwa havijatuma R&R fomu za vituo vyao kwa leo"
+msgid "have reported not submitting their R&amp;R form as of today."
+msgstr "vimetoa taarifa kuwa havijatuma R&amp;R fomu za vituo vyao kwa leo"
 
 #: templates/ilsgateway_dashboard.html:82
 msgid ""
@@ -384,6 +368,9 @@ msgstr ""
 #: templates/ilsgateway_dashboard.html:84
 msgid "have reported not receiving their deliveries as of today."
 msgstr ""
+
+msgid "Deliveries"
+msgstr "Wamepokea"
 
 #: templates/ilsgateway_dashboard.html:85
 msgid "did not respond to the SMS asking if they had received their delivery."
@@ -474,8 +461,11 @@ msgid "Choose Service Delivery Point"
 msgstr "Chagua kituo cha kupokelea huduma"
 
 #: templates/select_location.html:10
-msgid "Select Location"
+msgid "Change Location"
 msgstr "Chagua eneo"
+
+msgid "Change"
+msgstr "Chagua"
 
 #: templates/supervision.html:4
 msgid "Supervision"
@@ -492,6 +482,9 @@ msgstr "Kama umetuma R&R fomu yako jibu 'nimetuma', kama umepokea vifaa jibu 'ni
 #, python-format
 msgid "Notes for Facilities in %(name)s"
 msgstr "Maelekezo kwa vituo vya %(name)s"
+
+msgid "%s Facilities"
+msgid "Vituo %s"
 
 msgid "Change language"
 msgstr "Mabadiliko ya lugha"

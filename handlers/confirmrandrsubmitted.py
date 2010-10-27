@@ -14,7 +14,7 @@ class ConfirmRandRSubmitted(KeywordHandler):
     def help(self):
         service_delivery_point=self.msg.contact.contactdetail.service_delivery_point
         if service_delivery_point.service_delivery_point_type.name == "DISTRICT":
-            self.respond(_("Please respond in the format \"submitted a 12 b 10 c 2.\""))
+            self.respond(_("How many R&R forms have you submitted to MSD for group %(group)s?  Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>...'"))
         elif service_delivery_point.service_delivery_point_type.name == "FACILITY":
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_submitted_facility_to_district")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=service_delivery_point, status_type=st, status_date=datetime.now())
@@ -54,10 +54,10 @@ class ConfirmRandRSubmitted(KeywordHandler):
                     except DeliveryGroup.DoesNotExist:
                         self.respond(_('Sorry, invalid Delivery Group %s.  Please try again.' % delivery_group_name))
                         return
-                    if float(quantity) > 2:
+                    if float(quantity) > service_delivery_point.child_sdps().filter(delivery_group__name__iexact=delivery_group_name).count():
                         kwargs = {'quantity': quantity,
                                   'delivery_group_name': delivery_group_name}
-                        self.respond(_("You reported %(quantity)s forms submitted for group %(delivery_group_name)s, which is more than the number of facilities in group %(delivery_group_name)s.  Please try again.", **kwargs))
+                        self.respond(_("You reported %(quantity)s forms submitted for group %(delivery_group_name)s, which is more than the number of facilities in group %(delivery_group_name)s.  Please try again.") % kwargs)
                         return
 
                     sdp.report_delivery_group_status(delivery_group=delivery_group,quantity=quantity, message=self.msg.logger_msg)
