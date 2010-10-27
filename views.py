@@ -202,7 +202,7 @@ def facilities_index(request, view_type='inventory'):
     else:
         sdp = _get_my_sdp(request)
     
-    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Current Stock Status'] ]
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Current Stock Status')] ]
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
     products = Product.objects.all()
     facilities_dict = []
@@ -235,7 +235,7 @@ def facilities_ordering(request):
         sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
     else:
         sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
-    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Ordering Status'] ]
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Ordering Status')] ]
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
     products = Product.objects.all()
     return render_to_response("facilities_ordering.html", 

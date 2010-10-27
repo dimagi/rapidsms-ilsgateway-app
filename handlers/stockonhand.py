@@ -44,7 +44,7 @@ class StockOnHandHandler(KeywordHandler):
                     product = Product.objects.filter(sms_code__iexact=product_code)[0:1].get()   
                 except Product.DoesNotExist:
                     #self.respond(_('Sorry, invalid product code %(product_code)s'), product_code=product_code)
-                    self.respond(_('Samahani, kodi ya kifaa sio sahihi %(product_code)s'), product_code=product_code)
+                    self.respond(_('Samahani, kodi ya kifaa sio sahihi %(product_code)s'), product_code=product_code.upper())
                     return
                 reported_products.append(product.sms_code)
                 reply_list.append('%s %s' % (quantity, product.sms_code) )

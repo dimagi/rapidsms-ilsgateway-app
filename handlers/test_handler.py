@@ -5,7 +5,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages import OutgoingMessage
 from ilsgateway.models import ServiceDeliveryPointStatus, ServiceDeliveryPointStatusType, ProductReportType, Product, ServiceDeliveryPoint, ContactDetail
 from datetime import *
-from ilsgateway.utils import current_submitting_group
+from ilsgateway.utils import current_submitting_group, current_delivering_group
 from django.utils.translation import ugettext_noop as _
         
 class TestReminder(KeywordHandler):
@@ -35,12 +35,13 @@ class TestReminder(KeywordHandler):
                     st = ServiceDeliveryPointStatusType.objects.filter(short_name="soh_reminder_sent_facility")[0:1].get()
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
                     ns.save()
+            self.respond("Sent")
         elif command in ['randr']:
             for contact_detail in contact_details_to_remind:
                 default_connection = contact_detail.default_connection
                 if default_connection:
                     if sdp.service_delivery_point_type.name == "DISTRICT":
-                        m = OutgoingMessage(default_connection, _("How many R&R forms have you submitted to MSD?  Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"))
+                        m = OutgoingMessage(default_connection, _("How many R&R forms have you submitted to MSD? Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"))
                         m.send() 
                     elif sdp.service_delivery_point_type.name == "FACILITY":
                         m = OutgoingMessage(default_connection, _("Have you sent in your R&R form yet for this quarter? Please reply \"submitted\" or \"not submitted\""))
@@ -48,12 +49,13 @@ class TestReminder(KeywordHandler):
                         st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_reminder_sent_facility")[0:1].get()
                         ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
                         ns.save()        
+            self.respond("Sent")
         elif command in ['delivery']:
             for contact_detail in contact_details_to_remind:
                 default_connection = contact_detail.default_connection
                 if default_connection:
                     if contact_detail.service_delivery_point.service_delivery_point_type.name == "FACILITY":
-                        m = OutgoingMessage(default_connection, _("Did you receive your delivery yet? Please reply \"delivered inj 200 con 300 imp 10 pop 320 coc 232 iud 10\" or \"not delivered\""))
+                        m = OutgoingMessage(default_connection, _("Did you receive your delivery yet? Please reply 'delivered <product> <amount> <product> <amount>...'"))
                         m.send() 
                         st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received_reminder_sent_facility")[0:1].get()
                         ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
@@ -66,3 +68,19 @@ class TestReminder(KeywordHandler):
                         ns.save()
                     else:
                         self.respond("Sorry there was a problem with your service delivery point setup. Please check via the admin.")
+            self.respond("Sent")
+        elif command in ['latedelivery']:
+            for contact_detail in contact_details_to_remind:
+                default_connection = contact_detail.default_connection
+                if default_connection:
+                    service_delivery_point = contact_detail.service_delivery_point
+                    #"Facility deliveries for group %s (out of %d): %d haven't responded and %d have reported not receiving. See ilsgateway.com" %
+                    m = OutgoingMessage(default_connection, 
+                                        "Vituo vya kundi la upokeaji %s (kati ya %d): %d havijajibu na %d vimetoa taarifa kua havijapokea vifaa. Tizama kwenye ilsgateway.com" % 
+                                        (current_delivering_group(), 
+                                         service_delivery_point.child_sdps().filter(delivery_group__name=current_delivering_group()).count(), 
+                                         service_delivery_point.child_sdps_not_responded_delivery_this_month(), 
+                                         service_delivery_point.child_sdps_not_received_delivery_this_month()))
+                    m.send()         
+            self.respond("Sent")
+                        

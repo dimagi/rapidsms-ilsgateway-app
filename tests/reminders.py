@@ -26,7 +26,7 @@ class TestReminders (TestScript):
            782399299 > help
            782399299 < Welcome to ILSGateway. Available commands are soh, delivered, not delivered, submitted, not submitted
            782399299 > test reminder soh
-           782399299 < Please send in your stock on hand information in the format "soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10" 
+           782399299 < Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...' 
            782399299 > soh inj 100
            782399299 < Thank you ryan for reporting your stock on hand for KILAKALADISP.  Still missing imp, coc, iud, pop, con.
            782399299 > soh imp 121 coc 334 iud 4 pop 0 con 0
@@ -46,7 +46,7 @@ class TestReminders (TestScript):
            782399299 > test reminder delivery
            782399299 < Did you receive your delivery yet? Please reply "delivered inj 200 con 300 imp 10 pop 320 coc 232 iud 10" or "not delivered"
            782399299 > delivered
-           782399299 < To record a delivery, respond with "delivered product amount product amount..." For example, dlvd inj 200 con 300 imp 10 pop 320 coc 232 iud 10.
+           782399299 < To record a delivery, respond with "delivered product amount product amount..."
            782399299 > delivered 200 con
            782399299 < Thank you ryan for reporting your delivery for KILAKALADISP
            """

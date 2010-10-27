@@ -62,7 +62,7 @@ def facility_soh_reminder(router):
             if not contact_detail.service_delivery_point.received_reminder_after("soh_reminder_sent_facility", date_check):
                 default_connection = contact_detail.default_connection
                 if default_connection:
-                    m = OutgoingMessage(default_connection, "Please send in your stock on hand information in the format \"soh inj 200 con 344 imp 20\"")
+                    m = OutgoingMessage(default_connection, "Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'")
                     m.send() 
                     st = ServiceDeliveryPointStatusType.objects.filter(short_name="soh_reminder_sent_facility")[0:1].get()
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
@@ -70,7 +70,7 @@ def facility_soh_reminder(router):
             elif not contact_detail.service_delivery_point.received_reminder_after("soh_reminder_sent_facility", now + relativedelta(days=-3)):
                 default_connection = contact_detail.default_connection
                 if default_connection:
-                    m = OutgoingMessage(default_connection, "Please send in your stock on hand information in the format \"soh inj 200 con 344 imp 20\"")
+                    m = OutgoingMessage(default_connection, "Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'")
                     m.send() 
                     st = ServiceDeliveryPointStatusType.objects.filter(short_name="soh_reminder_sent_facility")[0:1].get()
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())

@@ -20,13 +20,13 @@ msgstr ""
 #: handlers/confirmdelivery.py:30
 msgid ""
 "To record a delivery, respond with \"delivered product amount product "
-"amount...\" For example, dlvd inj 200 con 300 imp 10 pop 320 coc 232 iud 10."
+"amount...\""
 msgstr ""
 "Kutuma taarifa za kupokea vifaa, jibu  \"nimepokea<acha nafasi><jina la vifaa><acha nafasi><idadi ya vifaa><acha nafasi>...\""
 
 #: handlers/confirmdelivery.py:44 handlers/confirmdelivery.py:57
 msgid ""
-"Sorry, invalid format.  The message should be in the format 'delivered product amound product amount'"
+"Sorry, invalid format.  The message should be in the format 'delivered product amount product amount'"
 msgstr "Samahani, Mpangilio sio sahihi. Ujumbe uwe katika mpangilio huu 'nimepokea <jina la vifaa> <idadi> <jina la vifaa> <idadi>...'"
 
 #: handlers/confirmdelivery.py:64
@@ -52,22 +52,17 @@ msgid ""
 msgstr "Asante %(contact_name)s kwa kuwasilisha R & R fomu kwa %(sdp_name)s"
 
 #: handlers/confirmrandrsubmitted.py:36 handlers/confirmrandrsubmitted.py:49
-msgid ""
-"Sorry, invalid format.  The message should be in the format \"submitted a 12 "
-"b 10 c 2.\""
-msgstr "Samahani, Mpangilio sio sahihi."
+msgid "Sorry, invalid format.  The message should be in the format 'submitted A <quantity  of R&R forms for group A> B <quantity  of R&R forms for group B>...'"
+msgstr "Samahani, Mpangilio sio sahihi. Ujumbe uwe katika mpangilio huu 'nimetuma a <idadi ya R&R form za group a> b <idadi ya R&R form za group b>...'"
 
 #: handlers/confirmrandrsubmitted.py:55
 #, python-format
-msgid "Sorry, invalid Delivery Group %s.  Please try again."
-msgstr "Samahani, kundi la upokeaji sio sahihi.  %s"
+msgid "Sorry, invalid Delivery Group %(delivery_group_name)s. Please try again"
+msgstr "Samahani, kundi la upokeaji %(delivery_group_name)s sio sahihi"
 
 #: handlers/confirmrandrsubmitted.py:60
 #, python-format
-msgid ""
-"You reported %(quantity)s forms submitted for group %(delivery_group_name)s, "
-"which is more than the number of facilities in group "
-"%(delivery_group_name)s.  Please try again."
+msgid "You reported %(quantity)s forms submitted for group %(delivery_group_name)s, which is more than the number of facilities in group %(delivery_group_name)s. Please try again."
 msgstr "umetoa taarifa kuwa umetuma fomu %(quantity)s kwa kundi %(delivery_group_name)s, ambayo ni idadi kubwa kuliko idadi ya vituo vya afya vilivyoko katika kundi %(delivery_group_name)s. Tafadhari jaribu tena"
 
 #: handlers/confirmrandrsubmitted.py:66
@@ -75,7 +70,7 @@ msgstr "umetoa taarifa kuwa umetuma fomu %(quantity)s kwa kundi %(delivery_group
 msgid ""
 "Thank you %(contact_name)s for reporting your R&R form submissions for "
 "%(sdp_name)s"
-msgstr "Ahsante %(contact_name)s kwa kutoa taarifa ya kutuma kwa R&R fomu yako %(sdp_name)s"
+msgstr "Ahsante %(contact_name)s kwa kutoa taarifa ya kutuma kwa R&R fomu ya %(sdp_name)s"
 
 #: handlers/confirmrandrsubmitted.py:82
 msgid "Sorry, you need to register."
@@ -94,7 +89,7 @@ msgid ""
 "To register, send register <name> <msd code>. Example: register 'john patel "
 "d34002'"
 msgstr "Haujasajiliwa,Tafadhali jisajili kwanza kabla ya kupata huduma,Kusajili andika 'sajili<nafasi><jina lako><nafasi><msd code>'. Mfano 'sajili Peter Juma d34002'"
-
+		
 #: handlers/not.py:18 handlers/not.py:33
 msgid ""
 "If you haven't submitted your R&R, respond \"not submitted\". If you haven't "
@@ -107,7 +102,7 @@ msgstr "Umetoa taarifa kuwa haujapokea vifaa bado"
 
 #: handlers/not.py:28
 msgid "You have reported that you haven't yet sent in your R&R."
-msgstr "Umetoa taarifa kuwa haujatuma R&R yako."
+msgstr "Umetoa taarifa kua haujatuma R&R fomu zako."
 
 #: handlers/stockonhand.py:16 handlers/test_handler.py:25
 #, fuzzy
@@ -124,7 +119,7 @@ msgstr "Kutuma taarifa za kupokea vifaa, jibu 'delivered <jina la vifaa> <idadi 
 #: handlers/stockonhand.py:42
 #, fuzzy, python-format
 msgid "Sorry, invalid product code %(product_code)s"
-msgstr "Samahani, kodi ya kifaa sio sahihi %(product_code)s"
+msgstr "Samahani, kodi ya kifaa %(product_code)s sio sahihi"
 
 #: handlers/stockonhand.py:59
 #, python-format
@@ -160,9 +155,9 @@ msgstr "Je? Umekwishapokea vifaa ulivyoagiza kota hii, kama umepokea jibu 'nimep
 #: handlers/test_handler.py:54
 #, python-format
 msgid ""
-"How many R&R forms have you submitted to MSD?  Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"
+"How many R&R forms have you submitted to MSD? Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"
 msgstr ""
-"Ni R&R form ngapi umetuma MSD mpaka sasa? tafadhari jibu 'nimetuma A <idadi ya R&R form za group a> B <idadi ya R&R form za group B>...'"
+"Ni R&R fomu ngapi umetuma MSD mpaka sasa? tafadhari jibu 'nimetuma A <idadi ya R&R fomu za kundi a> B <idadi ya R&R fomu za kundi B>...'"
 
 #: handlers/test_handler.py:62
 msgid ""
@@ -391,7 +386,7 @@ msgstr "Sajili mtu sasa"
 
 #: templates/ilsgateway_dashboard.html:98
 msgid "R&amp;R Submission Summary"
-msgstr "Muhtasari wa uwasilishaji wa R&R"
+msgstr "Muhtasari wa R&R"
 
 #: templates/ilsgateway_dashboard.html:100
 msgid "All Reports"
@@ -399,7 +394,7 @@ msgstr "Ripoti zote"
 
 #: templates/ilsgateway_dashboard.html:107
 msgid "Product Availability Summary"
-msgstr "Muhtasri wa upatikanaji wa vifaa "
+msgstr "Muhtasri wa upatikanaji vifaa"
 
 #: templates/ilsgateway_dashboard.html:116
 msgid "District Summary"
@@ -430,7 +425,7 @@ msgstr "Fomu %(processed)s kati ya %(count)s zimetumwa MSD"
 #: templates/ilsgateway_dashboard.html:135
 #, python-format
 msgid "%(delivered)s of %(count)s"
-msgstr ""
+msgstr "%(delivered)s kati ya %(count)s"
 
 #: templates/ilsgateway_dashboard.html:135
 msgid "delivered"

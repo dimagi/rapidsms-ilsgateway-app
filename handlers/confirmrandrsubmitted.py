@@ -14,7 +14,7 @@ class ConfirmRandRSubmitted(KeywordHandler):
     def help(self):
         service_delivery_point=self.msg.contact.contactdetail.service_delivery_point
         if service_delivery_point.service_delivery_point_type.name == "DISTRICT":
-            self.respond(_("How many R&R forms have you submitted to MSD for group %(group)s?  Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>...'"))
+            self.respond(_("How many R&R forms have you submitted to MSD for group %(group)s? Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>...'"))
         elif service_delivery_point.service_delivery_point_type.name == "FACILITY":
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_submitted_facility_to_district")[0:1].get()
             ns = ServiceDeliveryPointStatus(service_delivery_point=service_delivery_point, status_type=st, status_date=datetime.now())
@@ -33,7 +33,7 @@ class ConfirmRandRSubmitted(KeywordHandler):
             
             delivery_groups_list = text.split()
             if len(delivery_groups_list) > 0 and len(delivery_groups_list) % 2 != 0:
-                 self.respond(_("Sorry, invalid format.  The message should be in the format \"submitted a 12 b 10 c 2.\""))
+                 self.respond(_("Sorry, invalid format.  The message should be in the format 'submitted A <quantity  of R&R forms for group A> B <quantity  of R&R forms for group B>...'"))
                  return
             else:    
                 sdp = self.msg.contact.contactdetail.service_delivery_point
@@ -46,18 +46,22 @@ class ConfirmRandRSubmitted(KeywordHandler):
                             delivery_group_name = quantity
                             quantity = temp
                         else:                        
-                            self.respond(_("Sorry, invalid format.  The message should be in the format \"submitted a 12 b 10 c 2.\""))
+                            self.respond(_("Sorry, invalid format.  The message should be in the format 'submitted A <quantity  of R&R forms for group A> B <quantity  of R&R forms for group B>...'"))
                             return
                                         
                     try:
                         delivery_group = DeliveryGroup.objects.filter(name__iexact=delivery_group_name)[0:1].get()   
                     except DeliveryGroup.DoesNotExist:
-                        self.respond(_('Sorry, invalid Delivery Group %s.  Please try again.' % delivery_group_name))
+                        kwargs = {'delivery_group_name': delivery_group_name.upper()}
+                        #self.respond(_('Sorry, invalid Delivery Group %s.  Please try again' % delivery_group_name))
+                        self.respond("Samahani, kundi la upokeaji %(delivery_group_name)s sio sahihi" % kwargs)
                         return
                     if float(quantity) > service_delivery_point.child_sdps().filter(delivery_group__name__iexact=delivery_group_name).count():
                         kwargs = {'quantity': quantity,
-                                  'delivery_group_name': delivery_group_name}
-                        self.respond(_("You reported %(quantity)s forms submitted for group %(delivery_group_name)s, which is more than the number of facilities in group %(delivery_group_name)s.  Please try again.") % kwargs)
+                                  'delivery_group_name': delivery_group_name.upper()}
+                        #str = _("You reported %(quantity)s forms submitted for group %(delivery_group_name)s, which is more than the number of facilities in group %(delivery_group_name)s. Please try again." % kwargs)
+                        str = "umetoa taarifa kuwa umetuma fomu %(quantity)s kwa kundi %(delivery_group_name)s, ambayo ni idadi kubwa kuliko idadi ya vituo vya afya vilivyoko katika kundi %(delivery_group_name)s. Tafadhari jaribu tena" % kwargs
+                        self.respond(str)
                         return
 
                     sdp.report_delivery_group_status(delivery_group=delivery_group,quantity=quantity, message=self.msg.logger_msg)
