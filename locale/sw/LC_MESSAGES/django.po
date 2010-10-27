@@ -374,12 +374,12 @@ msgstr "Wamepokea"
 
 #: templates/ilsgateway_dashboard.html:85
 msgid "did not respond to the SMS asking if they had received their delivery."
-msgstr "Vituo 21 havijajibu ujumbe unaouliza kama vimepokea vifaa"
+msgstr "havijajibu ujumbe unaouliza kama vimepokea vifaa"
 
 #: templates/ilsgateway_dashboard.html:87
 #, python-format
-msgid "is stocked out of %(product)s "
-msgstr "Kituo cha afya Mkoani Kimeishiwa %(product)s"
+msgid "%(name)s is stocked out of %(product)s"
+msgstr "Kituo cha afya %(name)s Kimeishiwa %(product)s"
 
 #: templates/ilsgateway_dashboard.html:90
 msgid "has no primary contact"

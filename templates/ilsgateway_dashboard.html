@@ -78,13 +78,13 @@
 <div class="module">
     <h2>{% trans 'Alerts' %}</h2>
     <ul class="alerts"">
-        {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{% blocktrans with sdp.child_sdps_not_submitted_randr_this_month as count %}{{ count }} Facilities{% endblocktrans %}</a> {% trans 'have reported not submitting their R&amp;R form as of today.' %}</li>{% endif %}
+        {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_submitted_randr_this_month }} {% trans 'Facilities' %}</a> {% trans 'have reported not submitting their R&amp;R form as of today.' %}</li>{% endif %}
         {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} {% trans 'Facilities' %}</a> {% trans 'did not respond to the SMS asking if they had submitted their R&amp;R form.'%}</li>{% endif %}
         {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="/facilities/inventory">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} {% trans 'Facilities' %}</a> {% trans 'have not reported their stock levels for last month.' %}</li>{% endif %}
         {% if sdp.child_sdps_not_received_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_received_delivery_this_month }} {% trans 'Facilities' %}</a> {% trans 'have reported not receiving their deliveries as of today.' %}</li>{% endif %}
         {% if sdp.child_sdps_not_responded_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} {% trans 'Facilities' %}</a> {% trans 'did not respond to the SMS asking if they had received their delivery.' %}</li>{% endif %}
         {% for product, facilities in stockouts_by_product %}{% for facility in facilities %}
-            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> {% blocktrans %}is stocked out of {{ product }} {% endblocktrans %}.</li>
+            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{% blocktrans with facility.name as name %}{{ name }} is stocked out of {{ product }}{% endblocktrans %}<a/>.</li>
         {% endfor %}{% endfor %}
         {% for facility in facilities_without_primary_contacts %}
             <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> {% trans 'has no primary contact' %}.  <a href="{% url registration %}">{% trans 'Register someone now' %} &raquo;</a></li>
