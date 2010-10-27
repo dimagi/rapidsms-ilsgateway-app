@@ -113,15 +113,15 @@ def dashboard(request):
         index = index + 2
     bar_data = [
                           {"data" : d1,
-                          "label": "Stocked out", 
+                          "label": "_(Stocked out)", 
                           "bars": { "show" : "true" },  
                           },
                           {"data" : d2,
-                          "label": "Not Stocked out", 
+                          "label": "_(Not Stocked out)", 
                           "bars": { "show" : "true" }, 
                           },
                           {"data" : d3,
-                          "label": "No Stockout Data", 
+                          "label": "_(No Stockout Data)", 
                           "bars": { "show" : "true" }, 
                           }
                   ]

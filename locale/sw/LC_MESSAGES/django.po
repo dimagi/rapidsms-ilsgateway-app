@@ -505,3 +505,40 @@ msgstr ""
 
 msgid "I will speak to you in Swahili."
 msgstr "Nitaongea na wewe kwa kiswahili."
+
+msgid "Dashboard"
+msgstr "Ubaoni"
+
+msgid "Registration"
+msgstr "Usajili"
+
+msgid "Map"
+msgstr "Ramani"
+
+msgid "Haven't submitted"
+msgstr "Hawajatuma"
+
+msgid "Didn't respond"
+msgstr "Hawajajibu"
+
+msgid "Stocked out"
+msgstr "kimeishiwa vifaa"
+
+msgid "Not stocked out"
+msgstr "Hakijaishiwa vifaa"
+
+msgid "No stockout data"
+msgstr "Hakuna taarifa ya kuishiwa vifaa"
+
+msgid "You have requested to stop reminders to this number.  Send 'help' to this number for instructions on how to reactivate."
+msgstr "Umesitisha kukumbushwa kwenye hii namba. tafadhali tuma 'msaada' kupata maelekezo jinsi ya kujiunga tena"
+
+msgid "Facility deliveries for group %s (out of %d): %d haven't responded and %d have reported not receiving. See ilsgateway.com"
+msgstr "Vituo vya kundi la upokeaji %s (kati ya %d): %d havijajibu na %d vimetoa taarifa kua havijapokea vifaa. Tizama kwenye ilsgateway.com"
+
+msgid "Tanzania Ministry of Health<br /> and Social Welfare"
+msgstr "Wizara ya Afya na <br /> Ustawi wa Jamii"
+
+
+
+

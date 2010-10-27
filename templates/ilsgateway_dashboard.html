@@ -12,10 +12,10 @@
         $(document).ready(function() { 
                                       
             var data = [
-                { label: "Submitted",  data: {{ sdp.child_sdps_submitted_randr_this_month }} },
-                { label: "Haven't Submitted",  data: {{ sdp.child_sdps_not_submitted_randr_this_month }} },
-                { label: "Didn't Respond",  data: {{ sdp.child_sdps_not_responded_randr_this_month }} },
-                { label: "No Contact Info",  data: {{ sdp.count_child_sdps_no_primary_contact }} }
+                { label: "{% trans 'Submitted' %}",  data: {{ sdp.child_sdps_submitted_randr_this_month }} },
+                { label: "{% trans 'Havent Submitted' %}",  data: {{ sdp.child_sdps_not_submitted_randr_this_month }} },
+                { label: "{% trans 'Didnt Respond' %}",  data: {{ sdp.child_sdps_not_responded_randr_this_month }} },
+                { label: "{% trans 'No Contact Info' %}",  data: {{ sdp.count_child_sdps_no_primary_contact }} }
             ]
             // Pie chart
             $.plot($("#placeholder"), data, 
