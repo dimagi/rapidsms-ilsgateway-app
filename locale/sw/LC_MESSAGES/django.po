@@ -350,7 +350,7 @@ msgstr "Kumbuka"
 #: templates/ilsgateway_dashboard.html:85
 #: templates/ilsgateway_dashboard.html:123
 msgid "Facilities"
-msgstr "Vifaa"
+msgstr "Vituo"
 
 #: templates/ilsgateway_dashboard.html:81
 msgid "have reported not submitting their R&amp;R form as of today."
@@ -359,31 +359,31 @@ msgstr "vimetoa taarifa kuwa havijatuma R&amp;R fomu za vituo vyao kwa leo"
 #: templates/ilsgateway_dashboard.html:82
 msgid ""
 "did not respond to the SMS asking if they had submitted their R&amp;R form."
-msgstr ""
+msgstr "havijajibu ujumbe unaouliza kama vimetuma R&R fomu zao"
 
 #: templates/ilsgateway_dashboard.html:83
 msgid "have not reported their stock levels for last month."
-msgstr ""
+msgstr "havijatoa taarifa ya akiba ya vifaa kwa mwezi uliopita "
 
 #: templates/ilsgateway_dashboard.html:84
 msgid "have reported not receiving their deliveries as of today."
-msgstr ""
+msgstr "vimetoa taarifa leo kuwa havijapokea vifaa"
 
 msgid "Deliveries"
 msgstr "Wamepokea"
 
 #: templates/ilsgateway_dashboard.html:85
 msgid "did not respond to the SMS asking if they had received their delivery."
-msgstr ""
+msgstr "Vituo 21 havijajibu ujumbe unaouliza kama vimepokea vifaa"
 
 #: templates/ilsgateway_dashboard.html:87
 #, python-format
 msgid "is stocked out of %(product)s "
-msgstr ""
+msgstr "Kituo cha afya Mkoani Kimeishiwa %(product)s"
 
 #: templates/ilsgateway_dashboard.html:90
 msgid "has no primary contact"
-msgstr ""
+msgstr "Hakuna mhusika mkuu kwa kituo cha afya"
 
 #: templates/ilsgateway_dashboard.html:90
 msgid "Register someone now"
@@ -482,9 +482,6 @@ msgstr "Kama umetuma R&R fomu yako jibu 'nimetuma', kama umepokea vifaa jibu 'ni
 #, python-format
 msgid "Notes for Facilities in %(name)s"
 msgstr "Maelekezo kwa vituo vya %(name)s"
-
-msgid "%s Facilities"
-msgid "Vituo %s"
 
 msgid "Change language"
 msgstr "Mabadiliko ya lugha"
