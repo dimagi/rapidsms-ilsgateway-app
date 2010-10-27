@@ -68,7 +68,7 @@ msgid ""
 "You reported %(quantity)s forms submitted for group %(delivery_group_name)s, "
 "which is more than the number of facilities in group "
 "%(delivery_group_name)s.  Please try again."
-msgstr ""
+msgstr "umetoa taarifa kuwa umetuma fomu %(quantity)s kwa kundi %(delivery_group_name)s, ambayo ni idadi kubwa kuliko idadi ya vituo vya afya vilivyoko katika kundi %(delivery_group_name)s. Tafadhari jaribu tena"
 
 #: handlers/confirmrandrsubmitted.py:66
 #, python-format
