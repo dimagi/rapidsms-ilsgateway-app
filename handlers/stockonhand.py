@@ -21,7 +21,7 @@ class StockOnHandHandler(KeywordHandler):
         product_list = text.split()
         if len(product_list) > 0 and len(product_list) % 2 != 0:
              #self.respond(_("Sorry, invalid format. The message should be in the format '<product> <amount> <product> <amount>...'"))
-             self.respond(_("Kutuma taarifa za kupokea vifaa, jibu 'delivered <jina la vifaa> <idadi ya vifaa>...'"))
+             self.respond(_("Kutuma taarifa za kupokea vifaa, jibu 'hmk <jina la vifaa> <idadi ya vifaa>...'"))
              return
         else:    
             reported_products = []

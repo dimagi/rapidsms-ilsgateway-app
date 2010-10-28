@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from utils import *
 from django.contrib.contenttypes.models import ContentType
 from dateutil.relativedelta import relativedelta
+from django.db.models import Max
 
 class DeliveryGroupManager(models.Manager):    
     def get_by_natural_key(self, name):
@@ -140,6 +141,10 @@ class ServiceDeliveryPoint(Location):
         return ServiceDeliveryPoint.objects.filter(parent_id=self.id)
     
     def child_sdps_submitted_randr_this_month(self):
+#        sdpstatus = ServiceDeliveryPointStatus.objects().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_submitted_facility_to_district").distinct().annotate(most_recent_randr_status=Max('servicedeliverypointstatus__status_date'))
+#        result_set = ServiceDeliveryPoint.objects.filter(service_delivery_point_status__in=[s.most_recent_randr_status for s in sdpstatus])
+#        print result_set
+#        return result_set.count()
         return self.child_sdps_submitting().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_submitted_facility_to_district").distinct().count()
 
     def child_sdps_received_delivery_this_month(self):
@@ -162,8 +167,12 @@ class ServiceDeliveryPoint(Location):
 
     def child_sdps_not_responded_randr_this_month(self):
         now = datetime.now()
-        return self.child_sdps().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_reminder_sent_facility",
-                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).count() - self.child_sdps_submitted_randr_this_month() - self.child_sdps_not_submitted_randr_this_month()
+        total = self.child_sdps_submitting().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_reminder_sent_facility", servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).distinct().count() - self.child_sdps_submitted_randr_this_month() - self.child_sdps_not_submitted_randr_this_month()
+        #hacky until this is designed more clearly
+        if total >= 0:
+            return total
+        else:
+            return 0
     
     def child_sdps_processing_sent_to_msd(self, month=datetime.now().month):
         sdp_dgr_list = ServiceDeliveryPointDGReport.objects.filter(delivery_group__name=current_processing_group(), report_date__range=( beginning_of_month(month), end_of_month(month) ) )

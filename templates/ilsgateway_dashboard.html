@@ -9,12 +9,11 @@
     <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.pie.js"></script>
     <script language="javascript" type="text/javascript" src="/static/ilsgateway/javascripts/jquery.flot.stack.js"></script>
     <script language="javascript">
-        $(document).ready(function() { 
-                                      
+        $(document).ready(function() {                                       
             var data = [
                 { label: "{% trans 'Submitted' %}",  data: {{ sdp.child_sdps_submitted_randr_this_month }} },
-                { label: "{% trans 'Havent Submitted' %}",  data: {{ sdp.child_sdps_not_submitted_randr_this_month }} },
-                { label: "{% trans 'Didnt Respond' %}",  data: {{ sdp.child_sdps_not_responded_randr_this_month }} },
+                { label: "{% blocktrans %}Haven't Submitted{% endblocktrans %}",  data: {{ sdp.child_sdps_not_submitted_randr_this_month }} },
+                { label: "{% blocktrans %}Didn't Respond{% endblocktrans %}",  data: {{ sdp.child_sdps_not_responded_randr_this_month }} },
                 { label: "{% trans 'No Contact Info' %}",  data: {{ sdp.count_child_sdps_no_primary_contact }} }
             ]
             // Pie chart
@@ -81,11 +80,11 @@
     <ul class="alerts"">
         {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_submitted_randr_this_month }} {% trans 'Facilities' %}</a> {% trans 'have reported not submitting their R&amp;R form as of today.' %}</li>{% endif %}
         {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} {% trans 'Facilities' %}</a> {% trans 'did not respond to the SMS asking if they had submitted their R&amp;R form.'%}</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_soh_this_month %}<li><a href="/facilities/inventory">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} {% trans 'Facilities' %}</a> {% trans 'have not reported their stock levels for last month.' %}</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_soh_since_last_month > 0 %}<li><a href="/facilities/inventory">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} {% trans 'Facilities' %}</a> {% trans 'have not reported their stock levels for last month.' %}</li>{% endif %}
         {% if sdp.child_sdps_not_received_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_received_delivery_this_month }} {% trans 'Facilities' %}</a> {% trans 'have reported not receiving their deliveries as of today.' %}</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} {% trans 'Facilities' %}</a> {% trans 'did not respond to the SMS asking if they had received their delivery.' %}</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_delivery_this_month > 0 %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} {% trans 'Facilities' %}</a> {% trans 'did not respond to the SMS asking if they had received their delivery.' %}</li>{% endif %}
         {% for product, facilities in stockouts_by_product %}{% for facility in facilities %}
-            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{% blocktrans with facility.name as name %}{{ name }} is stocked out of {{ product }}{% endblocktrans %}<a/>.</li>
+            <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{% blocktrans with facility.name as name %}{{ name }} is stocked out of {{ product }}{% endblocktrans %}</a>.</li>
         {% endfor %}{% endfor %}
         {% for facility in facilities_without_primary_contacts %}
             <li><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a> {% trans 'has no primary contact' %}.  <a href="{% url registration %}">{% trans 'Register someone now' %} &raquo;</a></li>
@@ -100,7 +99,7 @@
             <!--<div class="toolbar">
                 <a href="">{% trans 'All Reports'%}</a>
             </div>-->
-            <div id="placeholder" style="width:300px;height:300px;"></div>
+            <div id="placeholder" style="width:300px;height:300px;" title="{% trans "This graph represents the R&R submission Summary for the current district." %}"></div>
         </div>
     </div>
     <div class="mid">
@@ -109,7 +108,7 @@
             <!--<div class="toolbar">
                 <a href="">All Stats</a>
             </div>-->
-            <div id="placeholder2" style="width:300px;height:300px;"></div>
+            <div id="placeholder2" style="width:300px;height:300px;" title="{% trans "This graph represents the Product Availability Summary for the current district." %}"></div>
         </div>
     </div>
     <div class="right">

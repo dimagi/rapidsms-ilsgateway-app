@@ -109,19 +109,21 @@ def dashboard(request):
         d1.append([index, sdp.child_sdps_stocked_out(product.sms_code).count()])
         d2.append([index, sdp.child_sdps_not_stocked_out(product.sms_code) ])
         d3.append([index, sdp.child_sdps_no_stock_out_data(product.sms_code) ])
-        ticks.append([ index + .5, str( product.sms_code.upper() ) ])
+        ticks.append([ index + .5, str( '<span title="%s">%s</span>' % (product.name, product.sms_code.upper()) ) ])
         index = index + 2
     bar_data = [
                           {"data" : d1,
-                          "label": "_(Stocked out)", 
-                          "bars": { "show" : "true" },  
+                          "label": str(_("Stocked out")), 
+                          "bars": { "show" : "true" },
+                          "color": "red"  
                           },
                           {"data" : d2,
-                          "label": "_(Not Stocked out)", 
+                          "label": str(_("Not Stocked out")), 
                           "bars": { "show" : "true" }, 
+                          "color": "green"  
                           },
                           {"data" : d3,
-                          "label": "_(No Stockout Data)", 
+                          "label": str(_("No Stock Data")), 
                           "bars": { "show" : "true" }, 
                           }
                   ]
@@ -171,7 +173,7 @@ def message_history(request, facility_id):
                    [facility.parent.name],
                    [facility.name, reverse('ilsgateway.views.facilities_detail', args=[facility.id])], 
                    ['Message History'] ]    
-    messages = Message.objects.filter(contact__contactdetail__service_delivery_point=facility_id, direction="I").order_by('-date')
+    messages = Message.objects.filter(contact__contactdetail__service_delivery_point=facility_id).order_by('-date')
     return render_to_response("message_history.html", 
                               {'messages': messages,
                                'my_sdp': my_sdp,
@@ -401,6 +403,8 @@ def _get_my_sdp(request):
 def _get_current_sdp(request):
     if not request.session.get('current_sdp_id'):
         my_sdp = _get_my_sdp(request)
+        if my_sdp.service_delivery_point_type.name == "MOHSW":
+            request.session['current_sdp_id'] = ServiceDeliveryPoint.objects.filter(service_delivery_point_type="DISTRICT")[0]
         if my_sdp.service_delivery_point_type.name == "REGION":
             #TODO: hacky, no real region views so we set the default to be the first child
             request.session['current_sdp_id'] = my_sdp.child_sdps()[0].id       

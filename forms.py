@@ -50,7 +50,10 @@ class SelectLocationForm(forms.Form):
     def __init__(self, service_delivery_point=None, **kwargs):
         super(SelectLocationForm, self).__init__(**kwargs)
         if service_delivery_point:
-            self.fields['location'].choices = ServiceDeliveryPoint.objects.filter(parent_id=service_delivery_point.id).order_by("name").values_list('id', 'name')
+            if service_delivery_point.service_delivery_point_type.name == "MOHSW":
+                self.fields['location'].choices = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="DISTRICT").order_by("name").values_list('id', 'name')
+            else:
+                self.fields['location'].choices = ServiceDeliveryPoint.objects.filter(parent_id=service_delivery_point.id).order_by("name").values_list('id', 'name')
     
     
     

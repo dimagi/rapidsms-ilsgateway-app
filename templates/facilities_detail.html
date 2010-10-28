@@ -11,6 +11,7 @@
 {% block content %}
 <div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
 <div style="clear:both;">&nbsp;</div>
+<div><h2>{{ facility.name }} ({{ facility.msd_code }}) {% trans 'Group' %} {{ facility.delivery_group.name }}</h2></div>
 
 <div class="split-2">
     <div class="left">
@@ -32,7 +33,7 @@
             </div>
             <table>
                 <thead>
-                    <th>Product</th>
+                    <th>{% trans "Product" %}</th>
                     <th>{% if view_type == 'inventory' %}{% trans 'Stock on Hand' %}{% else %}{% trans 'Months of Stock' %}{% endif %}</th>
                 </thead>
                 <tbody>
@@ -43,7 +44,7 @@
             </table>            
         </div>    
         <div class="module">
-            <h2 class="contactGroup">{{ facility.name }} ({{ facility.msd_code }}) {% trans 'Group' %} {{ facility.delivery_group.name }}</h2>
+            <h2 class="contactGroup">{% trans "Registration" %}</h2>
             <div class="toolbar">
                 <a href="{% url locations facility.uid %}">{% trans 'see on map' %}</a>
             </div>
@@ -64,7 +65,7 @@
                         <td>{% blocktrans with contact.role as role%}{{ role }}{% endblocktrans %}</td>
                         <td>{{ contact.phone }}</td>
                         <td>{{ contact.email }}</td>
-                        <td><input type="checkbox" checked="{{ contact.primary }}" readonly="readonly" /></td>
+                        <td><input type="checkbox" {% if contact.primary %}checked{% endif %} DISABLED /></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -96,7 +97,7 @@
             <p><a href="/docdownload/{{ facility.id }}">{% trans 'Download most recent R&amp;R' %} &raquo;</a></p>
         </div>
         <div class="module">
-            <h2>Notes</h2>
+            <h2>{% trans "Notes" %}</h2>
             <div class="toolbar">
                 <a href="{% url ilsgateway.views.note_history facility.id %}">{% trans 'see all notes' %}'</a>
             </div>

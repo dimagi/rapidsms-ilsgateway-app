@@ -451,6 +451,9 @@ msgstr "Hakuna ujumbe"
 msgid "No notes"
 msgstr "Hakuna maelezo"
 
+msgid "Notes"
+msgstr "Maelezo"
+
 #: templates/select_location.html:4
 msgid "Choose Service Delivery Point"
 msgstr "Chagua kituo cha kupokelea huduma"
@@ -534,6 +537,7 @@ msgstr "Vituo vya kundi la upokeaji %s (kati ya %d): %d havijajibu na %d vimetoa
 msgid "Tanzania Ministry of Health<br /> and Social Welfare"
 msgstr "Wizara ya Afya na <br /> Ustawi wa Jamii"
 
-
+msgid "Product"
+msgstr "Vifaa"
 
 

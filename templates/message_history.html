@@ -10,7 +10,8 @@
 {% if messages %}
     <table>
         <thead>
-            <th>{% trans 'Sender' %}</th>
+            <th>{% trans 'User' %}</th>
+            <th>{% trans 'Direction' %}</th>
             <th>{% trans 'Role' %}</th>
             <th>{% trans 'Phone' %}</th>
             <th>{% trans 'Date' %}</th>
@@ -20,6 +21,7 @@
             {% for msg in messages %}
             <tr>            
                 <td>{{ msg.who }}</td>
+                <td>{% if  msg.direction == "I" %}In{% else %}Out{% endif %}</td>
                 <td>{% blocktrans with msg.contact.contactdetail.role as role %}{{ role }}{% endblocktrans %}</td>
                 <td>{{ msg.contact.contactdetail.phone }}</td>
                 <td>{{ msg.date }}</td>
