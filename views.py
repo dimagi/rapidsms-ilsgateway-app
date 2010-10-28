@@ -404,7 +404,7 @@ def _get_current_sdp(request):
     if not request.session.get('current_sdp_id'):
         my_sdp = _get_my_sdp(request)
         if my_sdp.service_delivery_point_type.name == "MOHSW":
-            request.session['current_sdp_id'] = ServiceDeliveryPoint.objects.filter(service_delivery_point_type="DISTRICT")[0]
+            request.session['current_sdp_id'] = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="DISTRICT")[0]
         if my_sdp.service_delivery_point_type.name == "REGION":
             #TODO: hacky, no real region views so we set the default to be the first child
             request.session['current_sdp_id'] = my_sdp.child_sdps()[0].id       
