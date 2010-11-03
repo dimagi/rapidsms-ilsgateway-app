@@ -14,29 +14,34 @@
                 { label: "{% trans 'Submitted' %}",  data: {{ sdp.child_sdps_submitted_randr_this_month }} },
                 { label: "{% blocktrans %}Haven't Submitted{% endblocktrans %}",  data: {{ sdp.child_sdps_not_submitted_randr_this_month }} },
                 { label: "{% blocktrans %}Didn't Respond{% endblocktrans %}",  data: {{ sdp.child_sdps_not_responded_randr_this_month }} },
-                { label: "{% trans 'No Contact Info' %}",  data: {{ sdp.count_child_sdps_no_primary_contact }} }
+                //{ label: "{% trans 'No Contact Info' %}",  data: {{ sdp.count_child_sdps_submitting_no_primary_contact }} },
+                { label: "{% trans 'No Reminder Sent' %}",  data: {{ sdp.count_child_sdps_no_randr_reminder_sent }} }
             ]
             // Pie chart
-            $.plot($("#placeholder"), data, 
-            {
-                series: {
-                    pie: { 
-                        show: true,
-                        radius: 1,
-                        label: {
+            if({{ sdp.child_sdps_submitting.count }} > 0){
+                $.plot($("#placeholder"), data, 
+                {
+                    series: {
+                        pie: { 
                             show: true,
-                            radius: .75,
-                            formatter: function(label, series){
-                                return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">'+label+'<br/>'+Math.round(series.percent)+'%</div>';
-                            },
-                            background: { opacity: 0.8 }
-                        }                        
+                            radius: 1,
+                            label: {
+                                show: true,
+                                radius: .75,
+                                formatter: function(label, series){
+                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">'+label+'<br/>'+Math.round(series.percent)+'%</div>';
+                                },
+                                background: { opacity: 0.8 }
+                            }                        
+                        }
+                    },
+                    legend: {
+                        show: false
                     }
-                },
-                legend: {
-                    show: false
-                }
-            });         
+                });         
+            }else{
+                  $('#placeholder').html("<h4 style=\"text-align:center;\">No Facilities Submitting R&R for this period</h4>");            
+            };
                                             
             // Bar chart
             bar_options = {                     
@@ -80,7 +85,7 @@
     <ul class="alerts"">
         {% if sdp.child_sdps_not_submitted_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_submitted_randr_this_month }} {% trans 'Facilities' %}</a> {% trans 'have reported not submitting their R&amp;R form as of today.' %}</li>{% endif %}
         {% if sdp.child_sdps_not_responded_randr_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_randr_this_month }} {% trans 'Facilities' %}</a> {% trans 'did not respond to the SMS asking if they had submitted their R&amp;R form.'%}</li>{% endif %}
-        {% if sdp.child_sdps_not_responded_soh_since_last_month > 0 %}<li><a href="/facilities/inventory">{{ sdp.count_child_sdps_not_responded_soh_since_last_month }} {% trans 'Facilities' %}</a> {% trans 'have not reported their stock levels for last month.' %}</li>{% endif %}
+        {% if sdp.child_sdps_not_responded_soh_this_month > 0 %}<li><a href="/facilities/inventory">{{ sdp.child_sdps_not_responded_soh_this_month }} {% trans 'Facilities' %}</a> {% trans 'have not reported their stock levels for last month.' %}</li>{% endif %}
         {% if sdp.child_sdps_not_received_delivery_this_month %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_received_delivery_this_month }} {% trans 'Facilities' %}</a> {% trans 'have reported not receiving their deliveries as of today.' %}</li>{% endif %}
         {% if sdp.child_sdps_not_responded_delivery_this_month > 0 %}<li><a href="{% url ordering %}">{{ sdp.child_sdps_not_responded_delivery_this_month }} {% trans 'Facilities' %}</a> {% trans 'did not respond to the SMS asking if they had received their delivery.' %}</li>{% endif %}
         {% for product, facilities in stockouts_by_product %}{% for facility in facilities %}
@@ -108,7 +113,7 @@
             <!--<div class="toolbar">
                 <a href="">All Stats</a>
             </div>-->
-            <div id="placeholder2" style="width:300px;height:300px;" title="{% trans "This graph represents the Product Availability Summary for the current district." %}"></div>
+            <a href="{% url ilsgateway.views.facilities_index %}"><div id="placeholder2" style="width:300px;height:300px;" title="{% trans "This graph represents the Product Availability Summary for the current district." %}"></div></a>
         </div>
     </div>
     <div class="right">

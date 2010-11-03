@@ -14,6 +14,7 @@ from utils import *
 from django.contrib.contenttypes.models import ContentType
 from dateutil.relativedelta import relativedelta
 from django.db.models import Max
+from re import match
 
 class DeliveryGroupManager(models.Manager):    
     def get_by_natural_key(self, name):
@@ -74,6 +75,20 @@ class ServiceDeliveryPoint(Location):
         better contextual information.
         """
         return unicode(self)
+    
+    def stock_levels_array(self):
+        soh_array = []
+        for product in Product.objects.all():
+            if self.stock_on_hand(product.sms_code) == None:
+                soh_value = "No data"
+            else:
+                soh_value = self.stock_on_hand(product.sms_code)
+            if self.months_of_stock(product.sms_code) == None:
+                mos_value = "Insufficient data"
+            else:
+                mos_value = self.months_of_stock(product.sms_code)
+            soh_array.append([product.sms_code, soh_value, mos_value])
+        return soh_array
     
     objects = ServiceDeliveryPointManager()
     name = models.CharField(max_length=100, blank=True)
@@ -140,83 +155,89 @@ class ServiceDeliveryPoint(Location):
     def child_sdps(self):
         return ServiceDeliveryPoint.objects.filter(parent_id=self.id)
     
-    def child_sdps_submitted_randr_this_month(self):
-#        sdpstatus = ServiceDeliveryPointStatus.objects().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_submitted_facility_to_district").distinct().annotate(most_recent_randr_status=Max('servicedeliverypointstatus__status_date'))
-#        result_set = ServiceDeliveryPoint.objects.filter(service_delivery_point_status__in=[s.most_recent_randr_status for s in sdpstatus])
-#        print result_set
-#        return result_set.count()
-        return self.child_sdps_submitting().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_submitted_facility_to_district").distinct().count()
+    #Delivery
+    def child_sdps_receiving(self):
+        return self.child_sdps().filter(delivery_group__name=current_delivering_group())
 
     def child_sdps_received_delivery_this_month(self):
-        return self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name__in=["delivery_received_facility", "delivery_quantities_reported"]).distinct().count()
+        return self._sdps_with_latest_status_this_month_is("delivery_received_facility").count() + \
+               self._sdps_with_latest_status_this_month_is("delivery_quantities_reported").count()
 
     def child_sdps_not_received_delivery_this_month(self):
-        return self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name__in=["delivery_not_received_facility", "delivery_quantities_reported"]).distinct().count()
+        return self._sdps_with_latest_status_this_month_is("delivery_not_received_facility").count()
 
     def child_sdps_not_responded_delivery_this_month(self):
-        now = datetime.now()
-        total = self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name="delivery_received_reminder_sent_facility",
-                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).count() - self.child_sdps_not_received_delivery_this_month()
-        print self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name="delivery_received_reminder_sent_facility",
-                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).count()
-        return self.child_sdps_receiving().filter(servicedeliverypointstatus__status_type__short_name="delivery_received_reminder_sent_facility",
-                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).count() - self.child_sdps_not_received_delivery_this_month()
+        return self._sdps_with_latest_status_this_month_is("delivery_received_reminder_sent_facility").count()
+
+    #R&R
+    def child_sdps_submitting(self):
+        return self.child_sdps().filter(delivery_group__name=current_submitting_group())
+
+    def count_child_sdps_no_randr_reminder_sent(self,                                               
+                                          start_time=datetime.now() + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1),
+                                          end_time= datetime.now()):
+        return self.child_sdps_submitting().exclude(servicedeliverypointstatus__status_type__short_name__startswith="r_and_r",
+                                                    servicedeliverypointstatus__status_date__range=(start_time, end_time)).count()
+
+    def child_sdps_submitted_randr_this_month(self):
+        return self._sdps_with_latest_status_this_month_is("r_and_r_submitted_facility_to_district").count()
 
     def child_sdps_not_submitted_randr_this_month(self):
-        return self.child_sdps_submitting().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_not_submitted_facility_to_district").distinct().count()
+        return self._sdps_with_latest_status_this_month_is("r_and_r_not_submitted_facility_to_district").count()
 
     def child_sdps_not_responded_randr_this_month(self):
-        now = datetime.now()
-        total = self.child_sdps_submitting().filter(servicedeliverypointstatus__status_type__short_name="r_and_r_reminder_sent_facility", servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now) ).distinct().count() - self.child_sdps_submitted_randr_this_month() - self.child_sdps_not_submitted_randr_this_month()
-        #hacky until this is designed more clearly
-        if total >= 0:
-            return total
-        else:
-            return 0
-    
+        return self._sdps_with_latest_status_this_month_is("r_and_r_reminder_sent_facility").count()
+
+    def _sdps_with_latest_status_this_month_is(self, 
+                                               status_short_name, 
+                                               start_time=datetime.now() + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1),
+                                               end_time= datetime.now()):
+        if match('r_and_r', status_short_name):
+            sdps = self.child_sdps_submitting()
+            startswith = 'r_and_r'
+        elif match('delivery', status_short_name):
+            sdps = self.child_sdps_receiving()
+            startswith = 'delivery'
+        elif match('soh', status_short_name):
+            sdps = self.child_sdps()
+            startswith = 'soh'
+        status_type_id = ServiceDeliveryPointStatusType.objects.get(short_name=status_short_name).id
+        inner_qs = sdps.filter(servicedeliverypointstatus__status_date__range=(start_time, end_time),
+                    servicedeliverypointstatus__status_type__short_name__startswith=startswith) \
+                    .annotate(pk=Max('servicedeliverypointstatus__id'))
+        sdp_status = ServiceDeliveryPointStatus.objects.filter(id__in=inner_qs.values('pk').query,
+                                                               status_type__id=status_type_id).distinct()
+        return sdp_status
+
     def child_sdps_processing_sent_to_msd(self, month=datetime.now().month):
-        sdp_dgr_list = ServiceDeliveryPointDGReport.objects.filter(delivery_group__name=current_processing_group(), report_date__range=( beginning_of_month(month), end_of_month(month) ) )
+        sdp_dgr_list = ServiceDeliveryPointDGReport.objects.filter(delivery_group__name=current_processing_group(), 
+                                                                   report_date__range=( beginning_of_month(month), end_of_month(month) ),
+                                                                   service_delivery_point__id=self.id )
         if not sdp_dgr_list:
             return 0
         else:
             return sdp_dgr_list[0].quantity
     
-    def count_child_sdps_no_primary_contact(self):
-        return self.child_sdps().count() - self.child_sdps().filter(contactdetail__primary=True).count()
-        
-    def child_sdps_receiving(self):
-        return self.child_sdps().filter(delivery_group__name=current_delivering_group())
+    def count_child_sdps_submitting_no_primary_contact(self):
+        return self.child_sdps_submitting().count() - self.child_sdps_submitting().filter(contactdetail__primary=True).count()
     
-    def child_sdps_submitting(self):
-        return self.child_sdps().filter(delivery_group__name=current_submitting_group())
-
     def child_sdps_processing(self):
         return self.child_sdps().filter(delivery_group__name=current_processing_group())
 
+    #SOH
     def child_sdps_not_responded_soh_this_month(self):
-        now = datetime.now()
-        return self.child_sdps().filter(servicedeliverypointstatus__status_type__short_name="soh_reminder_sent_facility",
-                                        servicedeliverypointstatus__status_date__range=(now + relativedelta(days=-31), now)).count() - self.child_sdps_responded_soh()
-
-    def count_child_sdps_not_responded_soh_since_last_month(self):
-        now = datetime.now()
-        # if it's the last day of the month
-        if now.day == now + relativedelta(day=31):
-            date_start = datetime(now.year, now.month, now.day)
-        else:
-            date_start = now + relativedelta(day=31, months=-1)
-        return self.child_sdps().count() - self.child_sdps().filter(servicedeliverypointproductreport__report_date__range=( date_start, now )).distinct().count()
+        return self._sdps_with_latest_status_this_month_is("soh_reminder_sent_facility").count()
     
     def child_sdps_responded_soh(self, month=datetime.now().month):
         return self.child_sdps().filter(servicedeliverypointproductreport__report_date__range=( beginning_of_month(month), end_of_month(month) )).distinct().count()   
     
-    def child_sdps_without_contacts(self):
-        return self.child_sdps().filter(contactdetail__primary__isnull=True).order_by('name')[:3]
-
-    def child_sdps_stocked_out(self, sms_code):
-        return self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code,
-                                        servicedeliverypointproductreport__quantity=0,
-                                        servicedeliverypointproductreport__report_date__range=( beginning_of_month(), end_of_month() )).distinct()
+    def child_sdps_stocked_out(self, 
+                               sms_code):
+        inner_qs = self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code) \
+                    .annotate(pk=Max('servicedeliverypointproductreport__id'))
+        sdps = ServiceDeliveryPoint.objects.filter(servicedeliverypointproductreport__id__in=inner_qs.values('pk').query,
+                                                   servicedeliverypointproductreport__quantity=0).distinct()
+        return sdps
     
     def child_sdps_not_stocked_out(self, sms_code):
         return self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code,
@@ -260,9 +281,15 @@ class ServiceDeliveryPoint(Location):
                                                 report_type__id=1) 
         if reports:
             return reports[0].report_date                                 
+        elif self.received_reminder_after("soh_reminder_sent_facility", 
+                                          datetime.now() + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1)):
+            return "Waiting for reply"           
         else:
-            return "Waiting for reply"                  
-    
+            return "No reminder sent"       
+
+    def child_sdps_without_contacts(self):
+        return self.child_sdps().filter(contactdetail__primary__isnull=True).order_by('name')[:3]
+
     def __unicode__(self):
         return self.name
 
@@ -302,7 +329,10 @@ class ContactDetail(Contact):
     primary = models.BooleanField(default=False)
     
     def phone(self):
-        return self.default_connection.identity
+        if self.default_connection:
+            return self.default_connection.identity
+        else:
+            return " "
     
     def role_name(self):
         return self.role.name

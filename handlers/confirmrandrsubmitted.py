@@ -67,7 +67,7 @@ class ConfirmRandRSubmitted(KeywordHandler):
                     sdp.report_delivery_group_status(delivery_group=delivery_group,quantity=quantity, message=self.msg.logger_msg)
             kwargs = {'contact_name': self.msg.contact.name,
                       'sdp_name': self.msg.contact.contactdetail.service_delivery_point.name}
-            self.respond(_('Thank you %(contact_name)s for reporting your R&R form submissions for %(sdp_name)s'), **kwargs)
+            self.respond(_('Thank you %(contact_name)s for reporting your R&R form submissions for %(sdp_name)s') % kwargs)
 #            contacts_to_notify = ContactDetail.objects.filter(parent_id=service_delivery_point.id, primary=True, service_delivery_point__delivery_group__name='A')
 #            for contact in contacts_to_notify:
 #                m = OutgoingMessage(contact.connection(), "%s: Your R&R forms have been sent from %s to MSD" % (contact.name(), contact.service_delivery_point.parent_service_delivery_point.name))
@@ -80,7 +80,7 @@ class ConfirmRandRSubmitted(KeywordHandler):
             ns.save()
             kwargs = {'contact_name': self.msg.contact.name,
                       'sdp_name': self.msg.contact.contactdetail.service_delivery_point.name}
-            self.respond(_('Thank you %(contact_name)s for submitting your R and R form for %(sdp_name)s'))
+            self.respond(_('Thank you %(contact_name)s for submitting your R and R form for %(sdp_name)s') % kwargs)
             return
         else:
             self.respond(_("Sorry, you need to register."))

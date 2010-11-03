@@ -7,29 +7,9 @@
 <div class="crumbs">{% for title, href in breadcrumbs %}{% if not forloop.first %} &raquo; {% endif %}{% if href %}<a href="{{href}}">{{ title }}</a>{% else %}{{ title }}{% endif %}{% endfor %}</div>
 <div style="clear:both;">&nbsp;</div>
 <div class="module">
+
 {% if messages %}
-    <table>
-        <thead>
-            <th>{% trans 'User' %}</th>
-            <th>{% trans 'Direction' %}</th>
-            <th>{% trans 'Role' %}</th>
-            <th>{% trans 'Phone' %}</th>
-            <th>{% trans 'Date' %}</th>
-            <th>{% trans 'Text' %}</th>
-        </thead>
-        <tbody>
-            {% for msg in messages %}
-            <tr>            
-                <td>{{ msg.who }}</td>
-                <td>{% if  msg.direction == "I" %}In{% else %}Out{% endif %}</td>
-                <td>{% blocktrans with msg.contact.contactdetail.role as role %}{{ role }}{% endblocktrans %}</td>
-                <td>{{ msg.contact.contactdetail.phone }}</td>
-                <td>{{ msg.date }}</td>
-                <td><i>{{ msg.text }}</i></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {{ message_history_table.as_html }}
 {% else %}
     <p>{% trans 'No messages' %}.</p>
 {% endif %}

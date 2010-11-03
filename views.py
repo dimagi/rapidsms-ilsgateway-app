@@ -12,6 +12,7 @@ from django.utils.translation import ugettext as _
 from rapidsms.contrib.messagelog.models import Message
 from utils import *
 from forms import NoteForm, SelectLocationForm
+from ilsgateway.tables import MessageHistoryTable
 
 from httplib import HTTPSConnection, HTTPConnection
 from django.shortcuts import render_to_response
@@ -78,7 +79,6 @@ def dashboard(request):
     sdp = _get_current_sdp(request)
     form = SelectLocationForm(service_delivery_point = my_sdp,
                               initial={'location': sdp.id}) 
-                           
     language = ''
     if request.LANGUAGE_CODE == 'en':
         language = 'English'
@@ -173,9 +173,10 @@ def message_history(request, facility_id):
                    [facility.parent.name],
                    [facility.name, reverse('ilsgateway.views.facilities_detail', args=[facility.id])], 
                    ['Message History'] ]    
-    messages = Message.objects.filter(contact__contactdetail__service_delivery_point=facility_id).order_by('-date')
+    messages = Message.objects.filter(contact__contactdetail__service_delivery_point=facility_id)
     return render_to_response("message_history.html", 
                               {'messages': messages,
+                               "message_history_table": MessageHistoryTable(messages, request=request),
                                'my_sdp': my_sdp,
                                'breadcrumbs': breadcrumbs,
                                'facility': facility}, 
