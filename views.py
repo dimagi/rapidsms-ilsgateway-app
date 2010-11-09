@@ -172,7 +172,7 @@ def message_history(request, facility_id):
                    #[facility.parent.name, reverse('ilsgateway.views.dashboard')], 
                    [facility.parent.name],
                    [facility.name, reverse('ilsgateway.views.facilities_detail', args=[facility.id])], 
-                   ['Message History'] ]    
+                   [_('Message History')] ]    
     messages = Message.objects.filter(contact__contactdetail__service_delivery_point=facility_id)
     return render_to_response("message_history.html", 
                               {'messages': messages,
@@ -266,7 +266,7 @@ def facilities_detail(request, facility_id,view_type='inventory'):
     except ServiceDeliveryPoint.DoesNotExist:
         raise Http404
     products = Product.objects.all()
-    breadcrumbs = [[f.parent.parent.name], [f.parent.name, ''], [f.name, ''], ['Facility Detail'] ]  
+    breadcrumbs = [[f.parent.parent.name], [f.parent.name, ''], [f.name, ''], [_('Facility Detail')] ]  
     
     product_counts = []
     for product in Product.objects.all():

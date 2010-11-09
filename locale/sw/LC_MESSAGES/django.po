@@ -236,8 +236,8 @@ msgstr "Nje"
 
 #: templates/facilities_detail.html:54 templates/facilities_list.html:19
 #: templates/facilities_ordering.html:15 templates/select_location.html:13
-msgid "Name"
-msgstr "Jina"
+msgid "name"
+msgstr "jina"
 
 #: templates/facilities_detail.html:55 templates/message_history.html:14
 #: templates/note_history.html:13
@@ -254,8 +254,8 @@ msgid "Email"
 msgstr "Barua pepe"
 
 #: templates/facilities_detail.html:58
-msgid "Primary"
-msgstr "Mhusika mkuu"
+msgid "primary"
+msgstr "mhusika mkuu"
 
 #: templates/facilities_detail.html:64 templates/message_history.html:23
 #: templates/note_history.html:22
@@ -497,8 +497,8 @@ msgstr "Maelekezo kwa vituo vya %(name)s"
 msgid "Change language"
 msgstr "Mabadiliko ya lugha"
 
-msgid "Language"
-msgstr "Lugha"
+msgid "language"
+msgstr "lugha"
 
 msgid "Sorry, %(language)ss could not understand your message."
 msgstr "Samahani, %(language)ss could not understand your message."
@@ -562,5 +562,20 @@ msgstr "Asante kwa kuutumia mfumo wa ILSGateway!"
 msgid "see all users"
 msgstr "Ona watumiaji wote"
 
-msgid "Service Delivery Point"
+msgid "service_delivery_point"
 msgstr "kituo cha kutolea huduma"
+
+msgid "Facility Detail"
+msgstr "Taarifa za kituo"
+
+msgid "Last updated on"
+msgstr "Imebadilishwa mara ya mwisho"
+
+msgid "Save Contact"
+msgstr "Sajili mawasiliano"
+
+msgid "Yes"
+msgstr "Ndio"
+
+msgid "No"
+msgstr "Hapana"

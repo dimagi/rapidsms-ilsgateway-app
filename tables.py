@@ -12,12 +12,18 @@ def _edit_link(cell):
         "registration_edit",
         args=[cell.row.pk])
 
+def _get_yes_no(cell):
+    if  cell.object.primary:
+        return _("Yes")
+    else:
+        return _("No")
+
 class ContactDetailTable(Table):
     name = Column(link=_edit_link)
     language = Column()
     #role = Column()
     service_delivery_point = Column()
-    primary = Column()
+    primary = Column(value=_get_yes_no)
 
     class Meta:
         order_by = 'service_delivery_point__name'

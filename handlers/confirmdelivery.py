@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
@@ -69,5 +69,4 @@ class ConfirmDeliveryReceived(KeywordHandler):
                 st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_quantities_reported")[0:1].get()
                 ns = ServiceDeliveryPointStatus(service_delivery_point=service_delivery_point, status_type=st, status_date=datetime.now())
                 ns.save()
-                self.respond(_('You reported %(reply_list)s. If incorrect, please resend.'), reply_list=','.join(reply_list))
-                #self.respond(_('Thank you %(contact_name)s for reporting your delivery for %(facility_name)s'), contact_name=self.msg.contact.name, facility_name=service_delivery_point.name)             
+                self.respond(_('Thank you, you reported a delivery of %(reply_list)s. If incorrect, please resend.'), reply_list=','.join(reply_list))             

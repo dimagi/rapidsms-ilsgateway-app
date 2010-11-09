@@ -15,6 +15,7 @@ from django.contrib.contenttypes.models import ContentType
 from dateutil.relativedelta import relativedelta
 from django.db.models import Max
 from re import match
+from django.utils.translation import ugettext as _
 
 class DeliveryGroupManager(models.Manager):    
     def get_by_natural_key(self, name):
@@ -318,7 +319,7 @@ class ContactRole(models.Model):
         verbose_name = "Role"
 
     def __unicode__(self):
-        return self.name
+        return _(self.name)
 
 class ContactDetail(Contact):
     user = models.OneToOneField(User, null=True, blank=True)

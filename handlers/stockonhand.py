@@ -47,7 +47,7 @@ class StockOnHandHandler(KeywordHandler):
                     self.respond(_('Samahani, kodi ya kifaa sio sahihi %(product_code)s'), product_code=product_code.upper())
                     return
                 reported_products.append(product.sms_code)
-                reply_list.append('%s %s' % (quantity, product.sms_code) )
+                reply_list.append('%s %s' % (product.sms_code, quantity) )
                 sdp.report_product_status(product=product,report_type=report_type,quantity=quantity, message=self.msg.logger_msg)
             now = datetime.now()
             all_products = []
@@ -63,6 +63,4 @@ class StockOnHandHandler(KeywordHandler):
                           'product_list': ', '.join(missing_product_list)}
                 self.respond(_('Thank you %(contact_name)s for reporting your stock on hand for %(facility_name)s.  Still missing %(product_list)s.'), **kwargs)
             else:    
-                #you reported 100 Injectables,101 Condoms,102 IUD,103 Combined Oral Contraceptive,104 Progesterone Only Pill,105 Injectables. If incorrect, please resend.
-                self.respond(_('You reported %(reply_list)s. If incorrect, please resend.'), reply_list=','.join(reply_list))
-                #self.respond('Thank you %s for reporting your stock on hand for %s!' % (self.msg.contact.name, sdp.name))              
+                self.respond(_('Thank you, you reported you have %(reply_list)s. If incorrect, please resend.'), reply_list=','.join(reply_list))

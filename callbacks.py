@@ -9,6 +9,7 @@ from datetime import timedelta, datetime
 from utils import *
 from dateutil.relativedelta import *
 from django.db.models import Q
+from django.utils.translation import ugettext as _
 
 ######################
 # Callback Functions #
@@ -35,7 +36,7 @@ def district_delinquent_deliveries_summary(router):
                 service_delivery_point = contact_detail.service_delivery_point
                 if service_delivery_point.child_sdps_not_received_delivery_this_month() + service_delivery_point.child_sdps_not_responded_delivery_this_month() > 0:
                     m = OutgoingMessage(default_connection, 
-                                        "Facility deliveries for group %s (out of %d): %d haven't responded and %d have reported not receiving. See ilsgateway.com" % 
+                                        _("Facility deliveries for group %s (out of %d): %d haven't responded and %d have reported not receiving. See ilsgateway.com") % 
                                         (current_delivering_group(), 
                                          service_delivery_point.child_sdps().filter(delivery_group__name=current_delivering_group()).count(), 
                                          service_delivery_point.child_sdps_not_responded_delivery_this_month(), 
@@ -62,7 +63,7 @@ def facility_soh_reminder(router):
             if not contact_detail.service_delivery_point.received_reminder_after("soh_reminder_sent_facility", date_check):
                 default_connection = contact_detail.default_connection
                 if default_connection:
-                    m = OutgoingMessage(default_connection, "Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'")
+                    m = OutgoingMessage(default_connection, _("Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"))
                     m.send() 
                     st = ServiceDeliveryPointStatusType.objects.filter(short_name="soh_reminder_sent_facility")[0:1].get()
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
@@ -70,7 +71,7 @@ def facility_soh_reminder(router):
             elif not contact_detail.service_delivery_point.received_reminder_after("soh_reminder_sent_facility", now + relativedelta(days=-3)):
                 default_connection = contact_detail.default_connection
                 if default_connection:
-                    m = OutgoingMessage(default_connection, "Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'")
+                    m = OutgoingMessage(default_connection, _("Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"))
                     m.send() 
                     st = ServiceDeliveryPointStatusType.objects.filter(short_name="soh_reminder_sent_facility")[0:1].get()
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
@@ -86,7 +87,7 @@ def facility_randr_reminder(router):
             if not contact_detail.service_delivery_point.received_reminder_after("r_and_r_reminder_sent_facility", beginning_of_month(datetime.now().month)):
                 default_connection = contact_detail.default_connection
                 if default_connection:
-                    m = OutgoingMessage(default_connection, "Have you sent in your R&R form yet for this quarter?  Please reply \"submitted\" or \"not submitted\"")
+                    m = OutgoingMessage(default_connection, _("Have you sent in your R&R form yet for this quarter?  Please reply \"submitted\" or \"not submitted\""))
                     m.send() 
                     st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_reminder_sent_facility")[0:1].get()
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
@@ -102,7 +103,7 @@ def district_randr_reminder(router):
             if not contact_detail.service_delivery_point.received_reminder_after("r_and_r_reminder_sent_district", beginning_of_month(datetime.now().month)):
                 default_connection = contact_detail.default_connection
                 if default_connection:
-                    m = OutgoingMessage(default_connection, "It's time to submit group %s.  How many R&R forms have you submitted to MSD so far?  Reply with \"submitted 20 a 10 b 2 c\"." % current_submitting_group() )
+                    m = OutgoingMessage(default_connection, _("How many R&R forms have you submitted to MSD? Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'" % current_submitting_group() )
                     m.send() 
                     st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_reminder_sent_district")[0:1].get()
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
@@ -119,7 +120,8 @@ def facility_delivery_reminder(router):
                 for fic_cd in facility.primary_contacts():
                     c = fic_cd.default_connection
                     if c:
-                        m = OutgoingMessage(c, "Did you receive your delivery yet?  Please reply \"delivered inj 200 con 300 imp 10 pop 320 coc 232 iud 10\" or \"not delivered\"")
+                        m = OutgoingMessage(c,
+                        _("Did you receive your delivery yet? Please reply 'delivered <product> <amount> <product> <amount>...'"))
                         m.send() 
                         st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received_reminder_sent_facility")[0:1].get()
                         ns = ServiceDeliveryPointStatus(service_delivery_point=fic_cd.service_delivery_point, status_type=st, status_date=datetime.now())
@@ -137,7 +139,8 @@ def district_delivery_reminder(router):
                 for contact_detail in district.primary_contacts():
                     default_connection = contact_detail.default_connection
                     if default_connection:
-                        m = OutgoingMessage(default_connection, "%s: Did you receive your delivery yet?  Please reply \"delivered\" or \"not delivered\"" % (contact_detail.name))
+                        m = OutgoingMessage(default_connection, 
+                                            _("Did you receive your delivery yet? Please reply 'delivered' or 'not delivered'"))
                         m.send() 
                         st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received_reminder_sent_district")[0:1].get()
                         ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())

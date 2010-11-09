@@ -6,13 +6,14 @@ from django import forms
 from ilsgateway.models import ContactDetail, ServiceDeliveryPoint
 from rapidsms.models import Backend, Connection
 from rapidsms.conf import settings
+from django.utils.translation import ugettext as _
 
 class ContactDetailForm(forms.ModelForm):
-    primary = forms.BooleanField(initial=True, required=False)
-    phone = forms.CharField()
+    primary = forms.BooleanField(label=_("primary"), initial=True, required=False)
+    phone = forms.CharField(label=_("phone"))
     class Meta:
         model = ContactDetail
-        widgets = {'language': forms.Select(choices=( ('sw', 'Swahili'), ('en', 'English'), ) ),}
+        widgets = {_("language"): forms.Select(choices=( ('sw', 'Swahili'), ('en', 'English'), ) ),}
         exclude = ("user",)
     def __init__(self, service_delivery_point=None, **kwargs):
         super(ContactDetailForm, self).__init__(**kwargs)
