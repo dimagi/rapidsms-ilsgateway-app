@@ -51,7 +51,7 @@ def supervision(request):
         language = 'Swahili'
     elif request.LANGUAGE_CODE == 'es':
         language = 'Spanish'        
-    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], ['Supervision', ''] ]
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Supervision'), ''] ]
     notes = ServiceDeliveryPointNote.objects.filter(service_delivery_point__parent_id=sdp.id).order_by('-created_at')
     return render_to_response('supervision.html',
                               {'language': language,
