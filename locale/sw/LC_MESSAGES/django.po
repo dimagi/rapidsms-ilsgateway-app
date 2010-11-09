@@ -239,6 +239,9 @@ msgstr "Nje"
 msgid "name"
 msgstr "jina"
 
+msgid "Name"
+msgstr "Jina"
+
 #: templates/facilities_detail.html:55 templates/message_history.html:14
 #: templates/note_history.html:13
 msgid "role"
@@ -499,6 +502,9 @@ msgstr "Mabadiliko ya lugha"
 
 msgid "language"
 msgstr "lugha"
+
+msgid "Language"
+msgstr "Lugha"
 
 msgid "Sorry, %(language)ss could not understand your message."
 msgstr "Samahani, %(language)ss could not understand your message."
