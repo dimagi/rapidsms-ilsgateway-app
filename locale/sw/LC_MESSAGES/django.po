@@ -36,10 +36,11 @@ msgstr "Samahani, vifupisho vya vifaa sio sahihi %(code)s"
 
 #: handlers/confirmdelivery.py:72 handlers/stockonhand.py:62
 #, python-format
-msgid "You reported %(reply_list)s. If incorrect, please resend."
-msgstr ""
-"Umetoa taarifa kuwa umepokea %(reply_list)s. Kama sio sahihi, tafadhari tuma tena "
-"taarifa sahihi."
+msgid "Thank you, you reported you have %(reply_list)s. If incorrect, please resend."
+msgstr "Asante, umetoa taarifa una %(reply_list)s. Kama sio sahihi, tafadhari tuma tena taarifa sahihi."
+
+msgid "Thank you, you reported a delivery of %(reply_list)s. If incorrect, please resend."
+msgstr "Asante, umetoa taarifa kuwa umepokea %(reply_list)s. Kama sio sahihi, tafadhari tuma tena taarifa sahihi."
 
 #: handlers/confirmrandrsubmitted.py:17
 msgid "Please respond in the format \"submitted A <number of group A forms> B <number of group B forms> C <number of group C forms>.\""
@@ -98,7 +99,7 @@ msgstr "Kama haujatuma R&R fomu yako jibu \"sijatuma\", kama haujapokea vifaa ji
 
 #: handlers/not.py:22
 msgid "You have reported that you haven't yet received your delivery."
-msgstr "Umetoa taarifa kuwa haujapokea vifaa bado"
+msgstr "Asante, Umetoa taarifa kua haujapokea vifaa bado"
 
 #: handlers/not.py:28
 msgid "You have reported that you haven't yet sent in your R&R."
@@ -220,6 +221,18 @@ msgstr "Ona katika ramani"
 #: templates/facilities_detail.html:51
 msgid "Contacts"
 msgstr "Mawasiliano"
+
+msgid "User"
+msgstr "Mtumiaji"
+
+msgid "Direction"
+msgstr "Mwelekeo"
+
+msgid "In"
+msgstr "Ndani"
+
+msgid "Out"
+msgstr "Nje"
 
 #: templates/facilities_detail.html:54 templates/facilities_list.html:19
 #: templates/facilities_ordering.html:15 templates/select_location.html:13
@@ -540,4 +553,14 @@ msgstr "Wizara ya Afya na <br /> Ustawi wa Jamii"
 msgid "Product"
 msgstr "Vifaa"
 
+msgid "Please log in to ILSGateway"
+msgstr "Tafadhali ingia kwenye mfumo wa ILSGateway"
 
+msgid "Thanks for visiting ILSGateway!"
+msgstr "Asante kwa kuutumia mfumo wa ILSGateway!"
+
+msgid "see all users"
+msgstr "Ona watumiaji wote"
+
+msgid "Service Delivery Point"
+msgstr "kituo cha kutolea huduma"

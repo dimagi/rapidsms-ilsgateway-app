@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load djtables_tags %}
+{% load custom_table_tags %}
 
 {% block title %}{{ facility.name }} {% trans 'Message History' %}{{ block.super }}{% endblock %}
 
@@ -9,7 +11,12 @@
 <div class="module">
 
 {% if messages %}
-    {{ message_history_table.as_html }}
+    <table class="users">
+      {% table_cols message_history_table %}
+      {% message_history_table_head message_history_table %}
+      {% table_body message_history_table %}
+      {% table_foot message_history_table %}
+  </table>
 {% else %}
     <p>{% trans 'No messages' %}.</p>
 {% endif %}
