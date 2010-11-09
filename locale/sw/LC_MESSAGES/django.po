@@ -222,11 +222,11 @@ msgstr "Ona katika ramani"
 msgid "Contacts"
 msgstr "Mawasiliano"
 
-msgid "User"
-msgstr "Mtumiaji"
+msgid "contact"
+msgstr "mtumiaji"
 
-msgid "Direction"
-msgstr "Mwelekeo"
+msgid "direction"
+msgstr "mwelekeo"
 
 msgid "In"
 msgstr "Ndani"
@@ -241,13 +241,13 @@ msgstr "Jina"
 
 #: templates/facilities_detail.html:55 templates/message_history.html:14
 #: templates/note_history.html:13
-msgid "Role"
-msgstr "Cheo"
+msgid "role"
+msgstr "cheo"
 
 #: templates/facilities_detail.html:56 templates/message_history.html:15
 #: templates/note_history.html:14
-msgid "Phone"
-msgstr "Simu"
+msgid "phone"
+msgstr "simu"
 
 #: templates/facilities_detail.html:57
 msgid "Email"
@@ -336,8 +336,8 @@ msgstr "Hali ya R&R"
 
 #: templates/facilities_ordering.html:17 templates/facilities_ordering.html:19
 #: templates/message_history.html:16 templates/note_history.html:15
-msgid "Date"
-msgstr "Tarehe"
+msgid "date"
+msgstr "tarehe"
 
 #: templates/facilities_ordering.html:18
 msgid "Delivery Status"
@@ -453,8 +453,8 @@ msgid "Sender"
 msgstr "Mtumaji"
 
 #: templates/message_history.html:17 templates/note_history.html:16
-msgid "Text"
-msgstr "Ujumbe mfupi"
+msgid "text"
+msgstr "ujumbe mfupi"
 
 #: templates/message_history.html:32
 msgid "No messages"
