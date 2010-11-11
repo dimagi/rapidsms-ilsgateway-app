@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load djtables_tags %}
+{% load custom_table_tags %}
 
 {% block title %}{% trans "Current Stock Status" %}{{ block.super }}{% endblock %}
 
@@ -11,34 +13,12 @@
     <h2>{% trans 'Current Stock Status' %}</h2>
     <div class="toolbar">
         {% if view_type == 'inventory' %}<a href="/facilities/months_of_stock/">{% trans 'Show months of stock' %}</a>{% else %}<a href="/facilities/inventory/">{% trans 'Show inventory' %}</a>{% endif %}
-    </div>
-    <table>
-        <thead>
-            <th>{% trans 'MSD Code' %}</th>
-            <th>{% trans 'Delivery Group' %}</th>
-            <th>{% trans 'Name' %}</th>
-          {% for product in products %}
-            <th>{{ product.name }}</th>
-          {% endfor %}            
-        </thead>
-        <tbody>
-            {% for facility in facilities_dict %}
-            <tr>
-                <td>{{ facility.msd_code }}</td>
-                <td>{{ facility.delivery_group }}</td>
-                <td><a href="{% url ilsgateway.views.facilities_detail facility.id %}">{{ facility.name }}</a></td>
-            {% if view_type == 'inventory' %}
-                {% for quantity in facility.stock_levels %}
-                    <td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}insufficient_data{% endif %}{% endif %}">{% if quantity == None %}{% trans 'no data' %}{% else %}{{quantity}}{% endif %}</span></td>
-                {% endfor %}
-            {% else %}
-                {% for quantity in facility.stock_levels %}
-                    <td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}insufficient_data{% endif %}{% endif %}">{% if quantity == None %}{% trans 'insufficient data' %}{% else %}{{quantity}}{% endif %}</span></td>
-                {% endfor %}
-            {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
+    </div>    
+    <table class="stock">
+      {% table_cols status_table %}
+      {% translated_table_head status_table %}
+      {% stock_table_body status_table %}
+      {% table_foot status_table %}
     </table>
 </div>
 {% endblock %}

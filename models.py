@@ -16,6 +16,22 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Max
 from re import match
 from django.utils.translation import ugettext as _
+from djtables.cell import Cell
+from djtables.column import Column, DateColumn
+
+class ILSGatewayCell(Cell):
+    def unicode(self):
+        return unicode(self.column.render(self))
+
+class ILSGatewayColumn(Column):
+    def __init__(self, head_verbose=None, **kwargs):
+        self.head_verbose = head_verbose
+        super(ILSGatewayColumn, self).__init__(**kwargs)
+
+class ILSGatewayDateColumn(DateColumn):
+    def __init__(self, head_verbose=None, **kwargs):
+        self.head_verbose = head_verbose
+        super(ILSGatewayDateColumn, self).__init__(**kwargs)
 
 class DeliveryGroupManager(models.Manager):    
     def get_by_natural_key(self, name):
@@ -136,11 +152,18 @@ class ServiceDeliveryPoint(Location):
         sdp_dgr.save()        
         
     def randr_status(self):
-        status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
-        return status
+        try:
+            status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
+            return status
+        except:
+            return None
     
     def delivery_status(self):
-        return self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='delivery').latest()  
+        try:
+            status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='delivery').latest()
+            return status
+        except:
+            return None
         
     def get_products(self):
         return Product.objects.filter(servicedeliverypoint=self.id).distinct()
@@ -328,6 +351,16 @@ class ContactDetail(Contact):
     #TODO validate only one primary can exist (or auto change all others to non-primary when new primary selected)
     service_delivery_point = models.ForeignKey(ServiceDeliveryPoint,null=True,blank=True)
     primary = models.BooleanField(default=False)
+    
+    def allowed_to_edit(self, current_sdp):
+        parent_service_delivery_points_ids = []
+        while current_sdp is not None:
+            parent_service_delivery_points_ids.append(current_sdp.id)
+            current_sdp = current_sdp.parent 
+        return self.service_delivery_point.id in parent_service_delivery_points_ids
+    
+    def is_mohsw_level(self):
+        return self.role.name in ["MOHSW", "MSD"]
     
     def phone(self):
         if self.default_connection:

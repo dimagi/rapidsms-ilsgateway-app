@@ -247,10 +247,16 @@ msgstr "Jina"
 msgid "role"
 msgstr "cheo"
 
+msgid "Role"
+msgstr "Cheo"
+
 #: templates/facilities_detail.html:56 templates/message_history.html:15
 #: templates/note_history.html:14
 msgid "phone"
 msgstr "simu"
+
+msgid "Phone"
+msgstr "Simu"
 
 #: templates/facilities_detail.html:57
 msgid "Email"
@@ -259,6 +265,9 @@ msgstr "Barua pepe"
 #: templates/facilities_detail.html:58
 msgid "primary"
 msgstr "mhusika mkuu"
+
+msgid "Primary"
+msgstr "Mhusika mkuu"
 
 #: templates/facilities_detail.html:64 templates/message_history.html:23
 #: templates/note_history.html:22
@@ -473,6 +482,9 @@ msgstr "Maelezo"
 #: templates/select_location.html:4
 msgid "Choose Service Delivery Point"
 msgstr "Chagua kituo cha kupokelea huduma"
+
+msgid "Service Delivery Point"
+msgstr "kituo cha kutolea huduma"
 
 #: templates/select_location.html:10
 msgid "Change Location"

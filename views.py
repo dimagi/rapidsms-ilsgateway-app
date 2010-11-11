@@ -12,7 +12,7 @@ from django.utils.translation import ugettext as _
 from rapidsms.contrib.messagelog.models import Message
 from utils import *
 from forms import NoteForm, SelectLocationForm
-from ilsgateway.tables import MessageHistoryTable
+from ilsgateway.tables import MessageHistoryTable, CurrentStockStatusTable, CurrentMOSTable, OrderingTable
 
 from httplib import HTTPSConnection, HTTPConnection
 from django.shortcuts import render_to_response
@@ -65,7 +65,7 @@ def dashboard(request):
     contact_detail = ContactDetail.objects.get(user=request.user)
     #TODO this should be based on values in the DB
     is_allowed_to_change_location = False
-    if contact_detail.role.id == 3:
+    if contact_detail.role.id in [3,4,5,6]:
         is_allowed_to_change_location = True
             
     #endTODO
@@ -77,8 +77,12 @@ def dashboard(request):
             sdp_id = form.cleaned_data['location']
             request.session['current_sdp_id'] = sdp_id      
     sdp = _get_current_sdp(request)
-    form = SelectLocationForm(service_delivery_point = my_sdp,
-                              initial={'location': sdp.id}) 
+    if contact_detail.is_mohsw_level():
+        form = SelectLocationForm(service_delivery_point = my_sdp,
+                                  initial={'location': ServiceDeliveryPoint.objects.get(pk=1)})         
+    else:
+        form = SelectLocationForm(service_delivery_point = my_sdp,
+                                  initial={'location': sdp.id}) 
     language = ''
     if request.LANGUAGE_CODE == 'en':
         language = 'English'
@@ -156,7 +160,7 @@ def dashboard(request):
                                'facilities_without_primary_contacts': facilities_without_primary_contacts,
                                'randr_inquiry_date': randr_inquiry_date,
                                'delivery_inquiry_date': delivery_inquiry_date,
-                               'max_stockout_graph': sdp.child_sdps().count() * 1.5,
+                               'max_stockout_graph': sdp.child_sdps().count(),
                                'stockouts_by_product': stockouts_by_product,
                                'is_allowed_to_change_location': is_allowed_to_change_location,
                                'breadcrumbs': breadcrumbs
@@ -222,13 +226,22 @@ def facilities_index(request, view_type='inventory'):
             elif view_type == "months_of_stock":
                 facility_dict['stock_levels'].append(facility.months_of_stock(product.sms_code))
         facilities_dict.append(facility_dict)
+        
+    if view_type=="inventory":    
+        status_table = CurrentStockStatusTable(facilities, 
+                                               request=request)
+    else:
+        status_table = CurrentMOSTable(facilities, 
+                                       request=request)
+        
     return render_to_response("facilities_list.html", 
                               {"facilities": facilities,
                                "facilities_dict": facilities_dict,
                                "products": products,
                                "sdp": sdp,
                                "breadcrumbs": breadcrumbs,
-                               "view_type": view_type },
+                               "view_type": view_type,
+                               "status_table": status_table},
                               context_instance=RequestContext(request),)
 
 @login_required
@@ -245,7 +258,8 @@ def facilities_ordering(request):
                               {"facilities": facilities,
                                "products": products,
                                "breadcrumbs": breadcrumbs,
-                               "sdp": sdp},
+                               "sdp": sdp,
+                               "ordering_table": OrderingTable(facilities, request=request),                               },
                               context_instance=RequestContext(request),)
 
 @login_required
@@ -262,8 +276,8 @@ def select_location(request):
 @login_required
 def facilities_detail(request, facility_id,view_type='inventory'):
     try:
-        f = ServiceDeliveryPoint.objects.get(pk=facility_id)
-    except ServiceDeliveryPoint.DoesNotExist:
+        f = Facility.objects.get(pk=facility_id)
+    except Facility.DoesNotExist:
         raise Http404
     products = Product.objects.all()
     breadcrumbs = [[f.parent.parent.name], [f.parent.name, ''], [f.name, ''], [_('Facility Detail')] ]  
@@ -378,7 +392,8 @@ def docdownload(request, facility_id):
         most_recent_doc = None
 
         if not feed.entry:
-            return HttpResponse('No entries in feed.')
+            link = reverse("ilsgateway.views.facilities_detail", args=[sdp.id])
+            return HttpResponse('Sorry, there is no recent R&R for this facility. Click <a href="%s">here to return to %s facility detail.</a>.' % (link, sdp.name))
         else:
             for entry in feed.entry:
                 if not most_recent_doc:
@@ -405,11 +420,16 @@ def _get_current_sdp(request):
     if not request.session.get('current_sdp_id'):
         my_sdp = _get_my_sdp(request)
         if my_sdp.service_delivery_point_type.name == "MOHSW":
-            request.session['current_sdp_id'] = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="DISTRICT")[0].id
-        if my_sdp.service_delivery_point_type.name == "REGION":
+            sdp = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="DISTRICT")[0]
+            request.session['current_sdp_id'] = sdp.id
+        elif my_sdp.service_delivery_point_type.name == "REGION":
             #TODO: hacky, no real region views so we set the default to be the first child
-            request.session['current_sdp_id'] = my_sdp.child_sdps()[0].id       
+            sdp = my_sdp.child_sdps()[0]
+            request.session['current_sdp_id'] = sdp.id       
         else:
-            request.session['current_sdp_id'] = my_sdp.id       
-    return ServiceDeliveryPoint.objects.get(id=request.session.get('current_sdp_id'))
+            sdp = my_sdp
+            request.session['current_sdp_id'] = sdp.id
+    else:
+        sdp = ServiceDeliveryPoint.objects.get(id=request.session.get('current_sdp_id'))
+    return sdp
     

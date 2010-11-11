@@ -197,3 +197,25 @@ ul.stats {
     width: 50%;
 }
 
+#mapLegend {
+    padding: 20px 0 20px 445px;
+}
+#mapLegend span {
+    padding-right: 15px;
+    margin-left: 20px;
+}
+
+#mapLegend span.stockedOut {
+    background-image: url(/static/ilsgateway/images/stockout.png);
+    background-repeat: no-repeat;                         
+}
+
+#mapLegend span.notStockedOut {
+    background-image: url(/static/ilsgateway/images/no_stockout.png);
+    background-repeat: no-repeat;                         
+}
+
+#mapLegend span.noData {
+    background-image: url(/static/ilsgateway/images/no_data.png);
+    background-repeat: no-repeat;                         
+}

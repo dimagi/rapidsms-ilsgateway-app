@@ -43,37 +43,6 @@
                 </tbody>
             </table>            
         </div>    
-        <div class="module">
-            <h2 class="contactGroup">{% trans "Registration" %}</h2>
-            <div class="toolbar">
-                <a href="{% url registration %}">{% trans 'see all users' %}</a>
-            </div>
-            {% for group_name, contacts in contact_groups %}
-            <div class="contactGroupHeader">{{ group_name }} {% trans 'Contacts' %}</div>
-            <table>
-                <thead>
-                    <th>{% trans 'Name' %}</th>
-                    <th>{% trans 'Role' %}</th>
-                    <th>{% trans 'Phone' %}</th>
-                    <th>{% trans 'Email' %}</th>
-                    <th>{% trans 'Primary' %}</th>
-                </thead>
-                <tbody>
-                    {% for contact in contacts %}
-                    <tr class="">
-                        <td>{{ contact.name }}</td>
-                        <td>{% blocktrans with contact.role as role%}{{ role }}{% endblocktrans %}</td>
-                        <td>{{ contact.phone }}</td>
-                        <td>{{ contact.email }}</td>
-                        <td><input type="checkbox" {% if contact.primary %}checked{% endif %} DISABLED /></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endfor %}
-            <br />
-            <span style="margin-top:10px;"><a href="{% url registration %}">{% trans 'Add a contact' %} &raquo;</a></span>
-        </div>
     </div>
     <div class="right">
         <div class="module">
@@ -114,5 +83,38 @@
             </form>
         </div>
     </div>
+    <div style="clear:both;">&nbsp;</div>
+    <div class="module">
+        <h2 class="contactGroup">{% trans "Registration" %}</h2>
+        <div class="toolbar">
+            <a href="{% url registration %}">{% trans 'see all users' %}</a>
+        </div>
+        {% for group_name, contacts in contact_groups %}
+        <div class="contactGroupHeader">{{ group_name }} {% trans 'Contacts' %}</div>
+        <table>
+            <thead>
+                <th>{% trans 'Name' %}</th>
+                <th>{% trans 'Role' %}</th>
+                <th>{% trans 'Phone' %}</th>
+                <th>{% trans 'Email' %}</th>
+                <th>{% trans 'Primary' %}</th>
+            </thead>
+            <tbody>
+                {% for contact in contacts %}
+                <tr class="">
+                    <td>{{ contact.name }}</td>
+                    <td>{% blocktrans with contact.role as role%}{{ role }}{% endblocktrans %}</td>
+                    <td>{{ contact.phone }}</td>
+                    <td>{{ contact.email }}</td>
+                    <td><input type="checkbox" {% if contact.primary %}checked{% endif %} DISABLED /></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endfor %}
+        <br />
+        <span style="margin-top:10px;"><a href="{% url registration %}">{% trans 'Add a contact' %} &raquo;</a></span>
+    </div>
 </div>
+
 {% endblock %}
