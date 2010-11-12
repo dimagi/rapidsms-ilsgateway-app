@@ -345,7 +345,7 @@ class ContactRole(models.Model):
         return _(self.name)
 
 class ContactDetail(Contact):
-    user = models.OneToOneField(User, null=True, blank=True)
+    user = models.OneToOneField(User, null=True, blank=True, help_text="The user associated with this Contact Detail.  Not every Contact Detail has the ability to login, so assigning or creating a username for a Contact Detail gives the user the ability to login to the sytem.")
     role = models.ForeignKey(ContactRole, null=True, blank=True)
     email = models.EmailField(blank=True)
     #TODO validate only one primary can exist (or auto change all others to non-primary when new primary selected)

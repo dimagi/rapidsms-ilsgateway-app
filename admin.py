@@ -66,7 +66,6 @@ admin.site.register(ServiceDeliveryPointProductReport, ServiceDeliveryPointProdu
 admin.site.register(ContactRole, ContactRoleAdmin)
 admin.site.unregister(Contact)
 admin.site.register(ContactDetail, ContactDetailAdmin)
-admin.site.register(ServiceDeliveryPoint, DistrictAdmin)
 admin.site.register(ServiceDeliveryPointStatus, ServiceDeliveryPointStatusAdmin)
 admin.site.register(ServiceDeliveryPointStatusType, ServiceDeliveryPointStatusTypeAdmin)
 admin.site.register(Point, PointAdmin)

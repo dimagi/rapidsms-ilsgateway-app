@@ -4,7 +4,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from datetime import datetime
-from ilsgateway.models import ServiceDeliveryPoint, Product, Facility, ServiceDeliveryPointStatus, ServiceDeliveryPointNote, ContactDetail
+from ilsgateway.models import ServiceDeliveryPoint, Product, Facility, ServiceDeliveryPointStatus, ServiceDeliveryPointNote, ContactDetail, ILSGatewayCell
 from django.http import Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -65,7 +65,7 @@ def dashboard(request):
     contact_detail = ContactDetail.objects.get(user=request.user)
     #TODO this should be based on values in the DB
     is_allowed_to_change_location = False
-    if contact_detail.role.id in [3,4,5,6]:
+    if contact_detail.role.id in [3,5,6]:
         is_allowed_to_change_location = True
             
     #endTODO
@@ -259,7 +259,8 @@ def facilities_ordering(request):
                                "products": products,
                                "breadcrumbs": breadcrumbs,
                                "sdp": sdp,
-                               "ordering_table": OrderingTable(facilities, request=request),                               },
+                               "ordering_table": OrderingTable(facilities, request=request, cell_class=ILSGatewayCell),                               
+                               },
                               context_instance=RequestContext(request),)
 
 @login_required
