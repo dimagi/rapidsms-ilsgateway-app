@@ -6,6 +6,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "Have you received supervision this month? Please reply 'supervision yes' or 'supervision no'"
+msgstr "Je umefanyiwa usimamizi kwa mwezi huu? Tafadhari jibu 'usimamizi ndiyo' au 'usimamizi hapana'"
+
+msgid "Supervision reminders will come monthly, and you can respond 'supervision yes' if you have received supervision or 'supervision no' if you have not"
+msgstr "Ujumbe wa usimamizi hutumwa kila mwisho wa mwezi, tafadhari jibu 'usimamizi ndiyo' kama umefanyiwa usimamizi au 'usimamizi hapana' kama haujafanyiwa usimamizi."
+
+msgid "You have reported that you have not yet received supervision this month."
+msgstr "Umetoa taarifa kuwa haujafanyiwa usimazi kwa mwezi huu."
+
+msgid "Thank you for reporting that you have received supervision this month."
+msgstr "Asante, umetoa taarifa kuwa 'usimamizi ndiyo'"
+
 msgid "help"
 msgstr "msaada"
 
@@ -574,7 +586,7 @@ msgstr "Vifaa"
 msgid "Please log in to ILSGateway"
 msgstr "Tafadhali ingia kwenye mfumo wa ILSGateway"
 
-msgid "Thanks for visiting ILSGateway!"
+msgid "Thank you for visiting ILSGateway!"
 msgstr "Asante kwa kuutumia mfumo wa ILSGateway!"
 
 msgid "see all users"

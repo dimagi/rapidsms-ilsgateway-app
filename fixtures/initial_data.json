@@ -52,4 +52,7 @@
   {"pk": 10, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Stock on hand reminder sent to Facility", "short_name": "soh_reminder_sent_facility"}},
   {"pk": 11, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Delivery received", "short_name": "delivery_received_district"}},
   {"pk": 12, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Delivery received", "short_name": "delivery_not_received_district"}},
-  {"pk": 13, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Waiting Delivery Confirmation", "short_name": "delivery_received_reminder_sent_district"}}]
+  {"pk": 13, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Waiting Delivery Confirmation", "short_name": "delivery_received_reminder_sent_district"}},
+  {"pk": 14, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision reminder sent", "short_name": "supervision_reminder_sent_facility"}},  
+  {"pk": 15, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision received", "short_name": "supervision_received_facility"}},
+  {"pk": 16, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision not received", "short_name": "supervision_not_received_facility"}}]

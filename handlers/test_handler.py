@@ -24,6 +24,17 @@ class TestReminder(KeywordHandler):
         if not sdp:
             self.respond("Invalid msd code %s" % parameter)
             return
+        if command in ['supervision']:
+            for contact_detail in contact_details_to_remind:
+                default_connection = contact_detail.default_connection
+                if default_connection:
+                    m = OutgoingMessage(default_connection, _("Have you received supervision this month? Please reply 'supervision yes' or 'supervision no'"))
+                    m.send() 
+                    st = ServiceDeliveryPointStatusType.objects.filter(short_name="supervision_reminder_sent_facility")[0:1].get()
+                    ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
+                    ns.save()
+                    ns.save()
+            self.respond("Sent")
         if command in ['soh','hmk']:
             for contact_detail in contact_details_to_remind:
                 default_connection = contact_detail.default_connection
