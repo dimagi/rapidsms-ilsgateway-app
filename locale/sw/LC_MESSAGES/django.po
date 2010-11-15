@@ -26,7 +26,7 @@ msgstr "msaada"
 msgid ""
 "Thank you %(contact_name)s for reporting your delivery for %(facility_name)s"
 msgstr ""
-"Asante %(contact_name)s kwa kutuma taarifa ya kupokea vifaa ya "
+"Asante %(contact_name)s kwa kutuma taarifa ya kupokea vifaa vya "
 "%(facility_name)s"
 
 #: handlers/confirmdelivery.py:30
@@ -34,12 +34,12 @@ msgid ""
 "To record a delivery, respond with \"delivered product amount product "
 "amount...\""
 msgstr ""
-"Kutuma taarifa za kupokea vifaa, jibu  \"nimepokea<acha nafasi><jina la vifaa><acha nafasi><idadi ya vifaa><acha nafasi>...\""
-
+"Kutuma taarifa za kupokea vifaa, jibu  \"nimepokea<acha nafasi><jina la kifaa><acha nafasi><idadi ya kifaa><acha nafasi>...\""
+ 
 #: handlers/confirmdelivery.py:44 handlers/confirmdelivery.py:57
 msgid ""
 "Sorry, invalid format.  The message should be in the format 'delivered product amount product amount'"
-msgstr "Samahani, Mpangilio sio sahihi. Ujumbe uwe katika mpangilio huu 'nimepokea <jina la vifaa> <idadi> <jina la vifaa> <idadi>...'"
+msgstr "Samahani, Mpangilio sio sahihi. Ujumbe uwe katika mpangilio huu 'nimepokea <jina la vifaa> <idadi> <jina la kifaa> <idadi>...'"
 
 #: handlers/confirmdelivery.py:64
 #, python-format
@@ -49,11 +49,11 @@ msgstr "Samahani, vifupisho vya vifaa sio sahihi %(code)s"
 #: handlers/confirmdelivery.py:72 handlers/stockonhand.py:62
 #, python-format
 msgid "Thank you, you reported you have %(reply_list)s. If incorrect, please resend."
-msgstr "Asante, umetoa taarifa una %(reply_list)s. Kama sio sahihi, tafadhari tuma tena taarifa sahihi."
+msgstr "Asante, umetoa taarifa una %(reply_list)s. Kama sio sahihi, tafadhali tuma tena taarifa sahihi."
 
 msgid "Thank you, you reported a delivery of %(reply_list)s. If incorrect, please resend."
-msgstr "Asante, umetoa taarifa kuwa umepokea %(reply_list)s. Kama sio sahihi, tafadhari tuma tena taarifa sahihi."
-
+msgstr "Asante, umetoa taarifa kuwa umepokea %(reply_list)s. Kama sio sahihi, tafadhali tuma tena taarifa sahihi."
+	    
 #: handlers/confirmrandrsubmitted.py:17
 msgid "Please respond in the format \"submitted A <number of group A forms> B <number of group B forms> C <number of group C forms>.\""
 msgstr "Tafadhari, jibu kwa mpangilio huu 'nimetuma a <idadi ya R&R form za group a> b <idadi ya R&R form za group b> c <idadi ya R&R form za group c>'"
@@ -95,7 +95,7 @@ msgid ""
 "submitted, not submitted"
 msgstr ""
 "Karibu katika mfumo wa ILSGateway, maneno yanayotambulika na mfumo huu ni "
-"hmk, nimepokea, sijapokea, nimetuma, sijatuma"
+"hmk, nimepokea, sijapokea, nimetuma, sijatuma,acha, lugha, marekebisho, sw, en, usimamizi"
 
 #: handlers/help.py:15
 msgid ""
