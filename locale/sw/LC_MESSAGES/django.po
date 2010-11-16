@@ -7,11 +7,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Have you received supervision this month? Please reply 'supervision yes' or 'supervision no'"
-msgstr "Je umefanyiwa usimamizi kwa mwezi huu? Tafadhari jibu 'usimamizi ndiyo' au 'usimamizi hapana'"
-
+msgstr "Je umefanyiwa usimamizi kwa mwezi huu? Tafadhali jibu 'usimamizi ndiyo' au 'usimamizi hapana'"
+		
 msgid "Supervision reminders will come monthly, and you can respond 'supervision yes' if you have received supervision or 'supervision no' if you have not"
-msgstr "Ujumbe wa usimamizi hutumwa kila mwisho wa mwezi, tafadhari jibu 'usimamizi ndiyo' kama umefanyiwa usimamizi au 'usimamizi hapana' kama haujafanyiwa usimamizi."
-
+msgstr "Ujumbe wa usimamizi hutumwa kila mwisho wa mwezi, tafadhali jibu 'usimamizi ndiyo' kama umefanyiwa usimamizi au 'usimamizi hapana' kama haujafanyiwa usimamizi."
+		
 msgid "You have reported that you have not yet received supervision this month."
 msgstr "Umetoa taarifa kuwa haujafanyiwa usimazi kwa mwezi huu."
 
@@ -56,7 +56,7 @@ msgstr "Asante, umetoa taarifa kuwa umepokea %(reply_list)s. Kama sio sahihi, ta
 	    
 #: handlers/confirmrandrsubmitted.py:17
 msgid "Please respond in the format \"submitted A <number of group A forms> B <number of group B forms> C <number of group C forms>.\""
-msgstr "Tafadhari, jibu kwa mpangilio huu 'nimetuma a <idadi ya R&R form za group a> b <idadi ya R&R form za group b> c <idadi ya R&R form za group c>'"
+msgstr "Tafadhali, jibu kwa mpangilio huu 'nimetuma a <idadi ya R&R form za group a> b <idadi ya R&R form za group b> c <idadi ya R&R form za group c>'"
 
 #: handlers/confirmrandrsubmitted.py:24 handlers/confirmrandrsubmitted.py:79
 #, python-format
@@ -71,12 +71,12 @@ msgstr "Samahani, Mpangilio sio sahihi. Ujumbe uwe katika mpangilio huu 'nimetum
 #: handlers/confirmrandrsubmitted.py:55
 #, python-format
 msgid "Sorry, invalid Delivery Group %(delivery_group_name)s. Please try again"
-msgstr "Samahani, kundi la upokeaji %(delivery_group_name)s sio sahihi"
-
+msgstr "Samahani, kundi la upokeaji %(delivery_group_name)s sio sahihi. Tafadhali jaribu tena."
+	    
 #: handlers/confirmrandrsubmitted.py:60
 #, python-format
 msgid "You reported %(quantity)s forms submitted for group %(delivery_group_name)s, which is more than the number of facilities in group %(delivery_group_name)s. Please try again."
-msgstr "umetoa taarifa kuwa umetuma fomu %(quantity)s kwa kundi %(delivery_group_name)s, ambayo ni idadi kubwa kuliko idadi ya vituo vya afya vilivyoko katika kundi %(delivery_group_name)s. Tafadhari jaribu tena"
+msgstr "umetoa taarifa kuwa umetuma fomu %(quantity)s kwa kundi %(delivery_group_name)s, ambayo ni idadi kubwa kuliko idadi ya vituo vya afya vilivyoko katika kundi %(delivery_group_name)s. Tafadhali jaribu tena"
 
 #: handlers/confirmrandrsubmitted.py:66
 #, python-format
@@ -92,10 +92,10 @@ msgstr "Samahani, Unatakiwa kujisajili kwanza"
 #: handlers/help.py:13
 msgid ""
 "Welcome to ILSGateway. Available commands are soh, delivered, not delivered, "
-"submitted, not submitted"
+"submitted, not submitted, language sw, language en, stop, supervision, la"
+
 msgstr ""
-"Karibu katika mfumo wa ILSGateway, maneno yanayotambulika na mfumo huu ni "
-"hmk, nimepokea, sijapokea, nimetuma, sijatuma,acha, lugha, marekebisho, sw, en, usimamizi"
+"Karibu kwenye mfumo wa ILSGateway.maneno yaliyopo ya kuambrisha ni hmk, nimepokea, sijapokea, nimetuma, sijatuma, lugha sw, lugha en, acha, usimamizi, la"
 
 #: handlers/help.py:15
 msgid ""
@@ -111,18 +111,18 @@ msgstr "Kama haujatuma R&R fomu yako jibu \"sijatuma\", kama haujapokea vifaa ji
 
 #: handlers/not.py:22
 msgid "You have reported that you haven't yet received your delivery."
-msgstr "Asante, Umetoa taarifa kua haujapokea vifaa bado"
-
+msgstr "Asante, Umetoa taarifa kuwa haujapokea vifaa bado"
+	    
 #: handlers/not.py:28
 msgid "You have reported that you haven't yet sent in your R&R."
-msgstr "Umetoa taarifa kua haujatuma R&R fomu zako."
-
+msgstr "Umetoa taarifa kuwa haujatuma R&R fomu zako."
+		
 #: handlers/stockonhand.py:16 handlers/test_handler.py:25
 #, fuzzy
 msgid ""
 "Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"
 msgstr ""
-"Tafadhali tuma hesabu ya mkono ya vifaaa iliyopo katika mpangilio huu 'hmk <jina la vifaa> <idadi> <jina la vifaa> <idadi>...'"
+"Tafadhali tuma hesabu ya mkono ya vifaaa vilivyopo katika mpangilio huu 'hmk <jina la vifaa> <idadi> <jina la vifaa> <idadi>...'"
 
 #: handlers/stockonhand.py:21
 #, fuzzy
@@ -140,7 +140,7 @@ msgid ""
 "Thank you %(contact_name)s for reporting your stock on hand for "
 "%(facility_name)s.  Still missing %(product_list)s."
 msgstr ""
-"Asante %(contact_name)s kwa kutuma taarifa za hesabu ya mkono ya vifaa vilivyopo ya %(facility_name)s, bado %(product_list)s"
+"Asante %(contact_name)s kwa kutuma taarifa za akiba ya vifaa vilivyopo vya %(facility_name)s, bado taarifa za %(product_list)s"
 
 #: handlers/test_handler.py:18
 msgid ""
@@ -157,20 +157,20 @@ msgstr ""
 
 #: handlers/test_handler.py:47
 msgid "Did you receive your delivery yet? Please reply 'delivered <product> <amount> <product> <amount>...'"
-msgstr "Je? Umekwishapokea vifaa ulivyoagiza kota hii, kama umepokea jibu 'nimepokea <jina la vifaa> <idadi ya vifaa>...', kama haujapokea jibu 'sijapokea'"
-
+msgstr "Je? Umekwishapokea vifaa ulivyoagiza robo mwaka huu, kama umepokea jibu 'nimepokea <jina la vifaa> <idadi ya vifaa>...', kama haujapokea jibu 'sijapokea'"
+	    
 msgid "If you have received you R&R, respond \"submitted\".  If you have received your delivery, respond \"delivered\""
 msgstr ""
 
 msgid "Did you receive your delivery yet? Please reply 'delivered' or 'not delivered'"
-msgstr "Je? Umekwishapokea vifaa ulivyoagiza kota hii, kama umepokea jibu 'nimepokea', kama haujapokea jibu 'sijapokea'"
-
+msgstr "Je? Umekwishapokea vifaa ulivyoagiza robo mwaka huu, kama umepokea jibu 'nimepokea', kama haujapokea jibu 'sijapokea'"
+		
 #: handlers/test_handler.py:54
 #, python-format
 msgid ""
 "How many R&R forms have you submitted to MSD? Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"
 msgstr ""
-"Ni R&R fomu ngapi umetuma MSD mpaka sasa? tafadhari jibu 'nimetuma A <idadi ya R&R fomu za kundi a> B <idadi ya R&R fomu za kundi B>...'"
+"Ni R&R fomu ngapi umetuma MSD mpaka sasa? tafadhali jibu 'nimetuma A <idadi ya R&R fomu za kundi a> B <idadi ya R&R fomu za kundi B>...'"
 
 #: handlers/test_handler.py:62
 msgid ""
@@ -348,7 +348,7 @@ msgstr "kundi la upokeaji"
 
 #: templates/facilities_list.html:36
 msgid "insufficient data"
-msgstr "data"
+msgstr "taarifa haijajitosheleza"
 
 #: templates/facilities_ordering.html:10
 msgid "Ordering Status"
@@ -387,27 +387,27 @@ msgstr "Vituo"
 #: templates/ilsgateway_dashboard.html:81
 msgid "have reported not submitting their R&amp;R form as of today."
 msgstr "vimetoa taarifa kuwa havijatuma R&amp;R fomu za vituo vyao kwa leo"
-
+		
 #: templates/ilsgateway_dashboard.html:82
 msgid ""
 "did not respond to the SMS asking if they had submitted their R&amp;R form."
 msgstr "havijajibu ujumbe unaouliza kama vimetuma R&R fomu zao"
-
+		
 #: templates/ilsgateway_dashboard.html:83
 msgid "have not reported their stock levels for last month."
 msgstr "havijatoa taarifa ya akiba ya vifaa kwa mwezi uliopita "
-
+		
 #: templates/ilsgateway_dashboard.html:84
 msgid "have reported not receiving their deliveries as of today."
 msgstr "vimetoa taarifa leo kuwa havijapokea vifaa"
-
+		
 msgid "Deliveries"
 msgstr "Wamepokea"
 
 #: templates/ilsgateway_dashboard.html:85
 msgid "did not respond to the SMS asking if they had received their delivery."
 msgstr "havijajibu ujumbe unaouliza kama vimepokea vifaa"
-
+		
 #: templates/ilsgateway_dashboard.html:87
 #, python-format
 msgid "%(name)s is stocked out of %(product)s"
@@ -452,7 +452,7 @@ msgstr "Zimetuma"
 
 #: templates/ilsgateway_dashboard.html:130
 msgid "Processing"
-msgstr "Zinashughurikiwa"
+msgstr "Zinashughulikiwa"
 
 #: templates/ilsgateway_dashboard.html:131
 #, python-format
@@ -522,7 +522,7 @@ msgid "Notes for Facilities in %(name)s"
 msgstr "Maelekezo kwa vituo vya %(name)s"
 
 msgid "Change language"
-msgstr "Mabadiliko ya lugha"
+msgstr "Badilisha lugha"
 
 msgid "language"
 msgstr "lugha"
@@ -581,7 +581,7 @@ msgid "Tanzania Ministry of Health<br /> and Social Welfare"
 msgstr "Wizara ya Afya na <br /> Ustawi wa Jamii"
 
 msgid "Product"
-msgstr "Vifaa"
+msgstr "Kifaa"
 
 msgid "Please log in to ILSGateway"
 msgstr "Tafadhali ingia kwenye mfumo wa ILSGateway"
@@ -602,7 +602,7 @@ msgid "Last updated on"
 msgstr "Imebadilishwa mara ya mwisho"
 
 msgid "Save Contact"
-msgstr "Sajili mawasiliano"
+msgstr "Hifadhi mawasiliano"
 
 msgid "Yes"
 msgstr "Ndio"
