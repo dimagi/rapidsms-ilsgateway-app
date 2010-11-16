@@ -13,15 +13,12 @@ class StockOnHandHandler(KeywordHandler):
     """
     keyword = "soh|hmk"
     def help(self):
-        # swahili hack - not translating some reason
-        self.respond(_("Tafadhali tuma akiba ya vifaaa iliyopo katika mpangilio huu  \"soh inj kiafa con kiafa imp kiafa pop kiafa coc kiafa iud kiafa\""))
-        #self.respond(_("Please send in your stock on hand information in the format \"soh inj 200 con 300 imp 10 pop 320 coc 232 iud 10\""))
+        self.respond(_("Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"))
 
     def handle(self, text):
         product_list = text.split()
         if len(product_list) > 0 and len(product_list) % 2 != 0:
-             #self.respond(_("Sorry, invalid format. The message should be in the format '<product> <amount> <product> <amount>...'"))
-             self.respond(_("Kutuma taarifa za kupokea vifaa, jibu 'hmk <jina la vifaa> <idadi ya vifaa>...'"))
+             self.respond(_("Sorry, invalid format.  The message should be in the format 'delivered product amount product amount'"))
              return
         else:    
             reported_products = []
@@ -36,15 +33,13 @@ class StockOnHandHandler(KeywordHandler):
                         product_code = quantity
                         quantity = temp
                     else:                        
-                        #self.respond(_("Sorry, invalid format. The message should be in the format '<product> <amount> <product> <amount>...'"))
-                        self.respond(_("Kutuma taarifa za kupokea vifaa, jibu 'delivered <jina la vifaa> <idadi ya vifaa>...'"))
+                        self.respond(_("Sorry, invalid format.  The message should be in the format 'delivered product amount product amount'"))
                         return
                 report_type = ProductReportType.objects.filter(sms_code='soh')[0:1].get()
                 try:
                     product = Product.objects.filter(sms_code__iexact=product_code)[0:1].get()   
                 except Product.DoesNotExist:
-                    #self.respond(_('Sorry, invalid product code %(product_code)s'), product_code=product_code)
-                    self.respond(_('Samahani, kodi ya kifaa sio sahihi %(product_code)s'), product_code=product_code.upper())
+                    self.respond(_("Sorry, invalid product code %(code)s"), code=product_code.upper())
                     return
                 reported_products.append(product.sms_code)
                 reply_list.append('%s %s' % (product.sms_code, quantity) )

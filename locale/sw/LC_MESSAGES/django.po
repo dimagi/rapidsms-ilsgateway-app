@@ -68,8 +68,6 @@ msgstr "Asante %(contact_name)s kwa kuwasilisha R & R fomu kwa %(sdp_name)s"
 msgid "Sorry, invalid format.  The message should be in the format 'submitted A <quantity  of R&R forms for group A> B <quantity  of R&R forms for group B>...'"
 msgstr "Samahani, Mpangilio sio sahihi. Ujumbe uwe katika mpangilio huu 'nimetuma a <idadi ya R&R form za group a> b <idadi ya R&R form za group b>...'"
 
-#: handlers/confirmrandrsubmitted.py:55
-#, python-format
 msgid "Sorry, invalid Delivery Group %(delivery_group_name)s. Please try again"
 msgstr "Samahani, kundi la upokeaji %(delivery_group_name)s sio sahihi. Tafadhali jaribu tena."
 	    
@@ -118,7 +116,7 @@ msgid "You have reported that you haven't yet sent in your R&R."
 msgstr "Umetoa taarifa kuwa haujatuma R&R fomu zako."
 		
 #: handlers/stockonhand.py:16 handlers/test_handler.py:25
-#, fuzzy
+#
 msgid ""
 "Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"
 msgstr ""
@@ -544,8 +542,8 @@ msgid ""
 msgstr ""
 "Asante kwa kujisajili katika %(sdp_name)s, %(msd_code)s, %(contact_name)s"
 
-msgid "I will speak to you in Swahili."
-msgstr "Nitaongea na wewe kwa kiswahili."
+msgid "I will speak to you in %(language)s."
+msgstr "Nitaongea na wewe kwa %(language)s."
 
 msgid "Dashboard"
 msgstr "Ubaoni"
