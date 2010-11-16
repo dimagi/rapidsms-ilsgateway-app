@@ -6,6 +6,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "Please send in your adjustments in the format 'la <product> +-<amount> +-<product> +-<amount>...'"
+msgstr "Tafadhali tuma taarifa za marekebisho katika mpangilio ufuatao, 'la <kifaa> +-<idadi> <kifaa> +-<idadi>'"
+
+msgid "Sorry, invalid format.  The message should be in the format 'la <product> +-<amount> +-<product> +-<amount>..."
+msgstr "Kutuma taarifa za kupokea vifaa, jibu 'la <kifaa> +-<idadi> <kifaa> +-<idadi>...'"
+
+msgid "Thank you, you reported your losses/adjustments: %(reply_list)s. If incorrect, please resend."
+msgstr "Asante, umetoa taarifa kuwa marekebisho: %(reply_list)s.  Kama sio sahihi, tafadhali tuma tena taarifa sahihi."
+
 msgid "Have you received supervision this month? Please reply 'supervision yes' or 'supervision no'"
 msgstr "Je umefanyiwa usimamizi kwa mwezi huu? Tafadhali jibu 'usimamizi ndiyo' au 'usimamizi hapana'"
 		

@@ -40,6 +40,7 @@
   {"pk": 6, "model": "ilsgateway.contactrole", "fields": {"name": "MSD"}},
   {"pk": 1, "model": "ilsgateway.productreporttype", "fields": {"sms_code": "soh", "name": "Stock on hand"}}, 
   {"pk": 2, "model": "ilsgateway.productreporttype", "fields": {"sms_code": "dlvd", "name": "Delivery"}}, 
+  {"pk": 3, "model": "ilsgateway.productreporttype", "fields": {"sms_code": "la", "name": "Lost/Adjusted"}}, 
   {"pk": 1, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Delivery received", "short_name": "delivery_received_facility"}}, 
   {"pk": 2, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Delivery quantities reported", "short_name": "delivery_quantities_reported"}}, 
   {"pk": 3, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "R&R Submitted from District to MSD", "short_name": "r_and_r_submitted_district_to_msd"}}, 
@@ -55,4 +56,5 @@
   {"pk": 13, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Waiting Delivery Confirmation", "short_name": "delivery_received_reminder_sent_district"}},
   {"pk": 14, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision reminder sent", "short_name": "supervision_reminder_sent_facility"}},  
   {"pk": 15, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision received", "short_name": "supervision_received_facility"}},
-  {"pk": 16, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision not received", "short_name": "supervision_not_received_facility"}}]
+  {"pk": 16, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision not received", "short_name": "supervision_not_received_facility"}},
+  {"pk": 17, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Lost/Adjusted reminder sent to Facility", "short_name": "lost_adjusted_reminder_sent_facility"}}]
