@@ -589,8 +589,8 @@ msgstr "Hakuna taarifa ya kuishiwa vifaa"
 msgid "You have requested to stop reminders to this number.  Send 'help' to this number for instructions on how to reactivate."
 msgstr "Umesitisha kukumbushwa kwenye hii namba. tafadhali tuma 'msaada' kupata maelekezo jinsi ya kujiunga tena"
 
-msgid "Facility deliveries for group %s (out of %d): %d haven't responded and %d have reported not receiving. See ilsgateway.com"
-msgstr "Vituo vya kundi la upokeaji %s (kati ya %d): %d havijajibu na %d vimetoa taarifa kua havijapokea vifaa. Tizama kwenye ilsgateway.com"
+msgid "Facility deliveries for group %(group_name)s (out of %(group_total)d): %(not_responded_count)d haven't responded and %(not_received_count)d have reported not receiving. See ilsgateway.com"
+msgstr "Vituo vya kundi la upokeaji %(group_name)s (kati ya %(group_total)d): %(not_responded_count)d havijajibu na %(not_received_count)d vimetoa taarifa kua havijapokea vifaa. Tizama kwenye ilsgateway.com"
 
 msgid "Tanzania Ministry of Health<br /> and Social Welfare"
 msgstr "Wizara ya Afya na <br /> Ustawi wa Jamii"

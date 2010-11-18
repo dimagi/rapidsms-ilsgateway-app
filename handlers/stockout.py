@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 class StockOut(KeywordHandler):
     """
     """
-    keyword = "so|stockout|hakuna"
+    keyword = "stockout|hakuna"
     def help(self):
         self.respond(_("Please send in stockout reports in the form 'so <product>'"))
 

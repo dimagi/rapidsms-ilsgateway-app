@@ -50,9 +50,7 @@ class TestReminder(KeywordHandler):
             for contact_detail in contact_details_to_remind:
                 default_connection = contact_detail.default_connection
                 if default_connection:
-                    #hack
-                    #m = OutgoingMessage(default_connection, _("Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"))
-                    m = OutgoingMessage(default_connection, _("Tafadhali tuma hesabu ya mkono ya vifaaa iliyopo katika mpangilio huu 'hmk <jina la vifaa> <idadi> <jina la vifaa> <idadi>...'"))
+                    m = OutgoingMessage(default_connection, _("Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"))
                     m.send() 
                     st = ServiceDeliveryPointStatusType.objects.filter(short_name="soh_reminder_sent_facility")[0:1].get()
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
@@ -96,13 +94,13 @@ class TestReminder(KeywordHandler):
                 default_connection = contact_detail.default_connection
                 if default_connection:
                     service_delivery_point = contact_detail.service_delivery_point
-                    #"Facility deliveries for group %s (out of %d): %d haven't responded and %d have reported not receiving. See ilsgateway.com" %
+                    kwargs = {"group_name": current_delivering_group(), 
+                              "group_total": service_delivery_point.child_sdps().filter(delivery_group__name=current_delivering_group()).count(), 
+                              "not_responded_count": service_delivery_point.child_sdps_not_responded_delivery_this_month(), 
+                              "not_received_count": service_delivery_point.child_sdps_not_received_delivery_this_month()}
                     m = OutgoingMessage(default_connection, 
-                                        "Vituo vya kundi la upokeaji %s (kati ya %d): %d havijajibu na %d vimetoa taarifa kua havijapokea vifaa. Tizama kwenye ilsgateway.com" % 
-                                        (current_delivering_group(), 
-                                         service_delivery_point.child_sdps().filter(delivery_group__name=current_delivering_group()).count(), 
-                                         service_delivery_point.child_sdps_not_responded_delivery_this_month(), 
-                                         service_delivery_point.child_sdps_not_received_delivery_this_month()))
+                                        _("Facility deliveries for group %(group_name)s (out of %(group_total)d): %(not_responded_count)d haven't responded and %(not_received_count)d have reported not receiving. See ilsgateway.com"),
+                                        **kwargs) 
                     m.send()         
             self.respond("Sent")
                         
