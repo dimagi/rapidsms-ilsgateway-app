@@ -8,6 +8,7 @@ from rapidsms.models import Backend, Connection
 from rapidsms.conf import settings
 from django.utils.translation import ugettext as _
 from django.db.models import Q
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 class ContactDetailForm(forms.ModelForm):
     name = forms.CharField()
@@ -80,11 +81,11 @@ class SelectLocationForm(forms.Form):
     
     
 
-class ILSGatewayUserCreationForm(forms.ModelForm):
+class ILSGatewayUserCreationForm(UserCreationForm):
     class Meta:
         model = ILSGatewayUser
 
-class ILSGatewayUserChangeForm(forms.ModelForm):
+class ILSGatewayUserChangeForm(UserChangeForm):
     class Meta:
         model = ILSGatewayUser
 

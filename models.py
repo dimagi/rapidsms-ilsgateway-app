@@ -20,8 +20,8 @@ from djtables.cell import Cell
 from djtables.column import Column, DateColumn
 
 class ILSGatewayUser(User):
-    service_delivery_point = models.ForeignKey("ServiceDeliveryPoint", null=False)    
-    role = models.ForeignKey('ContactRole', null=False)
+    service_delivery_point = models.ForeignKey("ServiceDeliveryPoint", null=False, default=1)    
+    role = models.ForeignKey('ContactRole', null=False, default=5)
 
 class ILSGatewayCell(Cell):
     def unicode(self):
