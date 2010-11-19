@@ -6,6 +6,9 @@ from rapidsms.admin import *
 from ilsgateway.models import *
 from rapidsms.models import Connection
 from rapidsms.contrib.locations.models import Point
+from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import ugettext, ugettext_lazy as _
+from ilsgateway.forms import ILSGatewayUserCreationForm, ILSGatewayUserChangeForm, ILSGatewayAdminPasswordChangeForm
 
 class DistrictAdmin(admin.ModelAdmin):
     list_display = ('name', 'service_delivery_point_type_name')
@@ -60,6 +63,19 @@ class RegionAdmin(admin.ModelAdmin):
 class DeliveryGroupAdmin(admin.ModelAdmin):
     model = DeliveryGroup
     
+class ILSGatewayUserAdmin(UserAdmin):
+    fieldsets = (
+        (None, {'fields': ('username', 'password', 'service_delivery_point', 'role')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser', 'user_permissions')}),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+        (_('Groups'), {'fields': ('groups',)}),
+    )
+    
+    form = ILSGatewayUserChangeForm
+    add_form = ILSGatewayUserCreationForm
+
+    
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductReportType, ProductReportTypeAdmin)
 admin.site.register(ServiceDeliveryPointProductReport, ServiceDeliveryPointProductReportAdmin)
@@ -73,5 +89,7 @@ admin.site.register(Facility, FacilityAdmin)
 admin.site.register(District, DistrictAdmin)
 admin.site.register(Region, RegionAdmin)
 admin.site.register(DeliveryGroup, DeliveryGroupAdmin)
+admin.site.unregister(User)
+admin.site.register(ILSGatewayUser, ILSGatewayUserAdmin)
 
 

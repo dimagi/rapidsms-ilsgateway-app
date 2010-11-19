@@ -19,6 +19,10 @@ from django.utils.translation import ugettext as _
 from djtables.cell import Cell
 from djtables.column import Column, DateColumn
 
+class ILSGatewayUser(User):
+    service_delivery_point = models.ForeignKey("ServiceDeliveryPoint", null=False)    
+    role = models.ForeignKey('ContactRole', null=False)
+
 class ILSGatewayCell(Cell):
     def unicode(self):
         return unicode(self.column.render(self))
@@ -93,6 +97,15 @@ class ServiceDeliveryPoint(Location):
         """
         return unicode(self)
     
+    objects = ServiceDeliveryPointManager()
+    name = models.CharField(max_length=100, blank=True)
+    active = models.BooleanField(default=True)
+    delivery_group = models.ForeignKey(DeliveryGroup, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    products = models.ManyToManyField(Product, through='ServiceDeliveryPointProductReport')
+    msd_code = models.CharField(max_length=100, blank=True, null=True)
+    service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType)    
+    
     def stock_levels_array(self):
         soh_array = []
         for product in Product.objects.all():
@@ -106,16 +119,7 @@ class ServiceDeliveryPoint(Location):
                 mos_value = self.months_of_stock(product.sms_code)
             soh_array.append([product.sms_code, soh_value, mos_value])
         return soh_array
-    
-    objects = ServiceDeliveryPointManager()
-    name = models.CharField(max_length=100, blank=True)
-    active = models.BooleanField(default=True)
-    delivery_group = models.ForeignKey(DeliveryGroup, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    products = models.ManyToManyField(Product, through='ServiceDeliveryPointProductReport')
-    msd_code = models.CharField(max_length=100, blank=True, null=True)
-    service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType)
-        
+            
     def contacts(self, contact_type='all'):
         if contact_type == 'all':
             return ContactDetail.objects.filter(service_delivery_point=self)
@@ -345,7 +349,7 @@ class ContactRole(models.Model):
         return _(self.name)
 
 class ContactDetail(Contact):
-    user = models.OneToOneField(User, null=True, blank=True, help_text="The user associated with this Contact Detail.  Not every Contact Detail has the ability to login, so assigning or creating a username for a Contact Detail gives the user the ability to login to the sytem.")
+    user = models.OneToOneField(ILSGatewayUser, null=True, blank=True, help_text="The user associated with this Contact Detail.  Not every Contact Detail has the ability to login, so assigning or creating a username for a Contact Detail gives the user the ability to login to the sytem.")
     role = models.ForeignKey(ContactRole, null=True, blank=True)
     email = models.EmailField(blank=True)
     #TODO validate only one primary can exist (or auto change all others to non-primary when new primary selected)

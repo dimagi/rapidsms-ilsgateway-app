@@ -17,7 +17,6 @@ from ilsgateway.tables import MessageHistoryTable, CurrentStockStatusTable, Curr
 from httplib import HTTPSConnection, HTTPConnection
 from django.shortcuts import render_to_response
 from django.conf import settings
-from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 import iso8601
 import re
@@ -62,10 +61,10 @@ def supervision(request):
     
 @login_required
 def dashboard(request):
-    contact_detail = ContactDetail.objects.get(user=request.user)
+    contact_detail = ContactDetail.objects.get(user=request.user.ilsgatewayuser)
     #TODO this should be based on values in the DB
     is_allowed_to_change_location = False
-    if contact_detail.role.id in [3,5,6]:
+    if _get_role(request).id in [3,5,6]:
         is_allowed_to_change_location = True
             
     #endTODO
@@ -250,7 +249,7 @@ def facilities_ordering(request):
     if sdp_id:
         sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
     else:
-        sdp = ServiceDeliveryPoint.objects.filter(contactdetail__user__id=request.user.id)[0:1].get()
+        sdp = request.user.ilsgatewayuser.service_delivery_point
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Ordering Status')] ]
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
     products = Product.objects.all()
@@ -296,7 +295,7 @@ def facilities_detail(request, facility_id,view_type='inventory'):
              n = ServiceDeliveryPointNote()
              n.text = form.cleaned_data['text']
              n.service_delivery_point = f
-             n.contact_detail_id = request.user.id
+             n.contact_detail_id = request.user.ilsgatewayuser.id
              n.save()
              form = NoteForm()                
     else:
@@ -413,8 +412,8 @@ def docdownload(request, facility_id):
     return response
 
 def _get_my_sdp(request):    
-    contact_detail = ContactDetail.objects.get(user=request.user)
-    my_sdp = ServiceDeliveryPoint.objects.get(contactdetail=contact_detail)
+    contact_detail = ContactDetail.objects.get(user=request.user.ilsgatewayuser.id)
+    my_sdp = request.user.ilsgatewayuser.service_delivery_point
     return my_sdp
 
 def _get_current_sdp(request):
@@ -433,4 +432,7 @@ def _get_current_sdp(request):
     else:
         sdp = ServiceDeliveryPoint.objects.get(id=request.session.get('current_sdp_id'))
     return sdp
+
+def _get_role(request):
+    return request.user.ilsgatewayuser.role
     

@@ -17,6 +17,13 @@
       "date_joined": "2010-10-02 10:12:19"
     }
   },
+  {
+    "pk": 1, 
+    "model": "ilsgateway.ilsgatewayuser", 
+    "fields": {
+    	"service_delivery_point": 1
+    }
+  },
   {"pk": 1, "model": "ilsgateway.servicedeliverypointtype", "fields": {"name": "MOHSW"}},
   {"pk": 2, "model": "ilsgateway.servicedeliverypointtype", "fields": {"name": "REGION"}},
   {"pk": 3, "model": "ilsgateway.servicedeliverypointtype", "fields": {"name": "DISTRICT"}},
@@ -57,4 +64,5 @@
   {"pk": 14, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision reminder sent", "short_name": "supervision_reminder_sent_facility"}},  
   {"pk": 15, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision received", "short_name": "supervision_received_facility"}},
   {"pk": 16, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision not received", "short_name": "supervision_not_received_facility"}},
-  {"pk": 17, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Lost/Adjusted reminder sent to Facility", "short_name": "lost_adjusted_reminder_sent_facility"}}]
+  {"pk": 17, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Lost/Adjusted reminder sent to Facility", "short_name": "lost_adjusted_reminder_sent_facility"}}
+  {"pk": 18, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Delinquent deliveries summary sent to District", "short_name": "delinquent_deliveries_summary_sent_district"}}]

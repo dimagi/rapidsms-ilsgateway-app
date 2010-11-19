@@ -28,4 +28,4 @@ class StockOut(KeywordHandler):
         kwargs = {'contact_name': self.msg.contact.name,
                   'facility_name': sdp.name,
                   'product_name': product.name}
-        self.respond(_('Thank you %(contact_name)s for reporting a stockout in %(product_name)s for %(facility_name)s.'), **kwargs)
+        self.respond(_('Thank you %(contact_name)s for reporting a stockout of %(product_name)s for %(facility_name)s.'), **kwargs)

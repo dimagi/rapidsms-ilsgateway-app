@@ -3,7 +3,7 @@
 
 
 from django import forms
-from ilsgateway.models import ContactDetail, ServiceDeliveryPoint, ContactRole
+from ilsgateway.models import ContactDetail, ServiceDeliveryPoint, ContactRole, ILSGatewayUser
 from rapidsms.models import Backend, Connection
 from rapidsms.conf import settings
 from django.utils.translation import ugettext as _
@@ -79,4 +79,16 @@ class SelectLocationForm(forms.Form):
                 self.fields['location'].choices = ServiceDeliveryPoint.objects.filter(parent_id=service_delivery_point.id).order_by("name").values_list('id', 'name')
     
     
+
+class ILSGatewayUserCreationForm(forms.ModelForm):
+    class Meta:
+        model = ILSGatewayUser
+
+class ILSGatewayUserChangeForm(forms.ModelForm):
+    class Meta:
+        model = ILSGatewayUser
+
+class ILSGatewayAdminPasswordChangeForm(forms.ModelForm):
+    class Meta:
+        model = ILSGatewayUser
     
