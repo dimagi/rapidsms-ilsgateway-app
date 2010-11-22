@@ -13,7 +13,8 @@ from rapidsms.contrib.messagelog.models import Message
 from utils import *
 from forms import NoteForm, SelectLocationForm
 from ilsgateway.tables import MessageHistoryTable, CurrentStockStatusTable, CurrentMOSTable, OrderingTable
-
+from django.contrib.auth.admin import UserAdmin
+from django.views.decorators.csrf import csrf_protect
 from httplib import HTTPSConnection, HTTPConnection
 from django.shortcuts import render_to_response
 from django.conf import settings
@@ -22,6 +23,8 @@ import iso8601
 import re
 from django.core.urlresolvers import reverse
 import random
+from django.contrib.auth.forms import PasswordChangeForm
+
 
 #gdata
 import gdata.docs.data
@@ -38,6 +41,39 @@ def change_language(request):
         language = 'Spanish'   
     return render_to_response('change_language.html',
                               {'language': language},
+                              context_instance=RequestContext(request))
+
+@csrf_protect
+@login_required
+def account(request, template_name='account.html',
+                    post_change_redirect=None, password_change_form=PasswordChangeForm):
+    language = ''
+    if request.LANGUAGE_CODE == 'en':
+        language = 'English'
+    elif request.LANGUAGE_CODE == 'sw':
+        language = 'Swahili'
+    if post_change_redirect is None:
+        post_change_redirect = reverse('ilsgateway.views.password_change_done')
+    if request.method == "POST":
+        form = password_change_form(user=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(post_change_redirect)
+    else:
+        form = password_change_form(user=request.user)
+    return render_to_response(template_name, {
+        'form': form,
+        'language': language,
+    }, context_instance=RequestContext(request))
+
+def password_change_done(request, template_name='password_change_done.html'):
+    language = ''
+    if request.LANGUAGE_CODE == 'en':
+        language = 'English'
+    elif request.LANGUAGE_CODE == 'sw':
+        language = 'Swahili'
+    return render_to_response(template_name, 
+                              {'language': language}, 
                               context_instance=RequestContext(request))
 
 def supervision(request):
