@@ -23,8 +23,9 @@ import iso8601
 import re
 from django.core.urlresolvers import reverse
 import random
-from django.contrib.auth.forms import PasswordChangeForm
-
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.models import Site
 
 #gdata
 import gdata.docs.data
@@ -43,9 +44,84 @@ def change_language(request):
                               {'language': language},
                               context_instance=RequestContext(request))
 
+# 4 views for password reset:
+# - password_reset sends the mail
+# - password_reset_done shows a success message for the above
+# - password_reset_confirm checks the link the user clicked and 
+#   prompts for a new password
+# - password_reset_complete shows a success message for the above
+
+@csrf_protect
+def password_reset(request, is_admin_site=False, template_name='accounts/password_reset_form.html',
+        email_template_name='accounts/password_reset_email.html',
+        password_reset_form=PasswordResetForm, token_generator=default_token_generator,
+        post_reset_redirect=None):
+    if post_reset_redirect is None:
+        post_reset_redirect = reverse('ilsgateway.views.password_reset_done')
+    if request.method == "POST":
+        form = password_reset_form(request.POST)
+        if form.is_valid():
+            opts = {}
+            opts['use_https'] = request.is_secure()
+            opts['token_generator'] = token_generator
+            if is_admin_site:
+                opts['domain_override'] = request.META['HTTP_HOST']
+            else:
+                opts['email_template_name'] = email_template_name
+                if not Site._meta.installed:
+                    opts['domain_override'] = RequestSite(request).domain
+            form.save(**opts)
+            return HttpResponseRedirect(post_reset_redirect)
+    else:
+        form = password_reset_form()
+    return render_to_response(template_name, {
+        'form': form,
+    }, context_instance=RequestContext(request))
+
+def password_reset_done(request, template_name='accounts/password_reset_done.html'):
+    return render_to_response(template_name, context_instance=RequestContext(request))
+
+# Doesn't need csrf_protect since no-one can guess the URL
+def password_reset_confirm(request, uidb36=None, token=None, template_name='accounts/password_reset_confirm.html',
+                           token_generator=default_token_generator, set_password_form=SetPasswordForm,
+                           post_reset_redirect=None):
+    """
+    View that checks the hash in a password reset link and presents a
+    form for entering a new password.
+    """
+    assert uidb36 is not None and token is not None # checked by URLconf
+    if post_reset_redirect is None:
+        post_reset_redirect = reverse('ilsgateway.views.password_reset_complete')
+    try:
+        uid_int = base36_to_int(uidb36)
+    except ValueError:
+        raise Http404
+
+    user = get_object_or_404(User, id=uid_int)
+    context_instance = RequestContext(request)
+
+    if token_generator.check_token(user, token):
+        context_instance['validlink'] = True
+        if request.method == 'POST':
+            form = set_password_form(user, request.POST)
+            if form.is_valid():
+                form.save()
+                return HttpResponseRedirect(post_reset_redirect)
+        else:
+            form = set_password_form(None)
+    else:
+        context_instance['validlink'] = False
+        form = None
+    context_instance['form'] = form
+    return render_to_response(template_name, context_instance=context_instance)
+
+def password_reset_complete(request, template_name='accounts/password_reset_complete.html'):
+    return render_to_response(template_name, context_instance=RequestContext(request,
+                                                                             {'login_url': settings.LOGIN_URL}))
+
 @csrf_protect
 @login_required
-def account(request, template_name='account.html',
+def password_change(request, template_name='accounts/password_change.html',
                     post_change_redirect=None, password_change_form=PasswordChangeForm):
     language = ''
     if request.LANGUAGE_CODE == 'en':
@@ -66,7 +142,7 @@ def account(request, template_name='account.html',
         'language': language,
     }, context_instance=RequestContext(request))
 
-def password_change_done(request, template_name='password_change_done.html'):
+def password_change_done(request, template_name='accounts/password_change_done.html'):
     language = ''
     if request.LANGUAGE_CODE == 'en':
         language = 'English'

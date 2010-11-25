@@ -9,7 +9,7 @@ class Stop(KeywordHandler):
     Stop handler for when a user wants to stop receiving reminders
     """
 
-    keyword = "stop|acha"    
+    keyword = "stop|acha|hapo"    
 
     def help(self):
         self.respond(_("You have requested to stop reminders to this number.  Send 'help' to this number for instructions on how to reactivate."))

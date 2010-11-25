@@ -105,12 +105,8 @@ msgid "Sorry, you need to register."
 msgstr "Samahani, Unatakiwa kujisajili kwanza"
 
 #: handlers/help.py:13
-msgid ""
-"Welcome to ILSGateway. Available commands are soh, delivered, not delivered, "
-"submitted, not submitted, language sw, language en, stop, supervision, la"
-
-msgstr ""
-"Karibu kwenye mfumo wa ILSGateway.maneno yaliyopo ya kuambrisha ni hmk, nimepokea, sijapokea, nimetuma, sijatuma, lugha sw, lugha en, acha, usimamizi, la"
+msgid "Welcome to ILSGateway. Available commands are soh, delivered, not delivered, submitted, not submitted, language, sw, en, stop, supervision, la"
+msgstr "Karibu kwenye mfumo wa ILSGateway.maneno yaliyopo ya kuambrisha ni hmk, nimepokea, sijapokea, nimetuma, sijatuma, lugha sw, lugha en, acha, usimamizi, hu"
 
 #: handlers/help.py:15
 msgid ""
@@ -545,8 +541,8 @@ msgstr "lugha"
 msgid "Language"
 msgstr "Lugha"
 
-msgid "Sorry, %(language)ss could not understand your message."
-msgstr "Samahani, %(language)ss could not understand your message."
+msgid "Sorry, I couldn't understand your message.  Try 'help' for assistance"
+msgstr "Samahani, sijaelewa ujumbe wako. Tafadhali tuma 'msaada' kwa maelezo zaidi"
 
 msgid "I didn't recognize your msd code.  To register, send register <name> <msd code>. example: register Peter Juma d34002"
 msgstr "msd code yako haitambuliki, Kujisajili, andika 'sajili<nafasi><jina lako><nafasi><msd code ya kituo chako>. Mfano 'sajili Peter Juma d34002'"

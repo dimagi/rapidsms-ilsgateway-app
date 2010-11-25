@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 class LostAdjusted(KeywordHandler):
     """
     """
-    keyword = "la"
+    keyword = "la|um"
     def help(self):
         self.respond(_("Please send in your adjustments in the format 'la <product> +-<amount> +-<product> +-<amount>...'"))
 
