@@ -4,146 +4,281 @@
 import logging
 from rapidsms.models import Connection 
 from rapidsms.messages import OutgoingMessage
-from ilsgateway.models import ContactDetail, ServiceDeliveryPointStatusType, ServiceDeliveryPointStatus, ServiceDeliveryPoint
-from datetime import timedelta, datetime
+from ilsgateway.models import ContactDetail, ServiceDeliveryPointStatusType, ServiceDeliveryPointStatus, ServiceDeliveryPoint, Facility, District
+from datetime import timedelta, datetime, time
 from utils import *
 from dateutil.relativedelta import *
 from django.db.models import Q
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
+from dateutil.rrule import *
+from dateutil.parser import *
+from django.db.models import Count, Max
 
 ######################
 # Callback Functions #
 ######################
 
 TEST_MODE = False
+#  Next steps: 
+#  1) collapse into a single callback method
+#  2) change to a config dict
+#  3) move to database settings
 
-def is_weekend():  
-    return False
-    if datetime.now().date().weekday() in [5,6]:
-        return True
-    else:
-        return False
-
-def district_delinquent_deliveries_summary(router):
+def _send_reminders(router,
+                    reminder_name,
+                    monthday,
+                    byhour,
+                    byminute,                    
+                    additional_reminders_to_send,
+                    default_query=ServiceDeliveryPoint.objects.all(),
+                    bysetpos=-1,
+                    message_kwargs={}):
+    
     now = datetime.now()
-    # run seven days before the last day of the current month
-    if TEST_MODE or (now.day == now + relativedelta(day=31,days=-7)):
-        contact_details_to_remind = ContactDetail.objects.filter(primary=True,
-                                                                 service_delivery_point__service_delivery_point_type__name="DISTRICT")
+    additional_reminders_to_send_count = len(additional_reminders_to_send)
+    sdp_status_type = ServiceDeliveryPointStatusType.objects.filter(short_name=reminder_name)[0:1].get()
+    
+    #create a date rule (for business day logic) - last weekday prior to monthday, 31 means the end of any month
+    if monthday:
+        rr1 = rrule(MONTHLY, 
+                    interval=1, 
+                    dtstart=now + relativedelta(months=-2), 
+                    until=  now + relativedelta(months=+2), 
+                    byweekday=(MO,TU,WE,TH,FR), 
+                    byhour=byhour, 
+                    bysetpos=bysetpos,
+                    byminute=byminute,
+                    bymonthday=(monthday-2, monthday-1, monthday))
+    else:
+        rr1 = rrule(MONTHLY, 
+                    interval=1, 
+                    dtstart=now + relativedelta(months=-2), 
+                    until=  now + relativedelta(months=+2), 
+                    byweekday=(MO,TU,WE,TH,FR), 
+                    byhour=byhour, 
+                    bysetpos=bysetpos,
+                    byminute=byminute)
+        
+    start_time = rr1.before(now)
+    end_time = rr1.after(now)
+    
+
+    # query for sdps with no reminders sent 
+    q_no_reminders = default_query.exclude(servicedeliverypointstatus__status_date__range=(start_time, end_time),
+                                           servicedeliverypointstatus__status_type=sdp_status_type) 
+    
+    # query for sdps with reminders sent: annotate to count the number of reminders sent
+    q_reminders = default_query.filter(servicedeliverypointstatus__status_date__range=(start_time, end_time),
+                                        servicedeliverypointstatus__status_type=sdp_status_type) \
+                                        .annotate(last_status_date=Max('servicedeliverypointstatus__status_date'),
+                                                  status_count=Count('servicedeliverypointstatus'))
+    q_reminders = q_reminders.filter(status_count__lt=additional_reminders_to_send_count)
+            
+    #logging.debug("No reminder sent query: %s, count %d" % (q_no_reminders, len(q_no_reminders)))
+    #logging.debug("Reminders already sent query: %s, count %d" % (q_reminders, len(q_reminders)))
+    logging.debug("Sending Reminders for %s:" % reminder_name)
+    logging.debug("  Reminder start window: %s" % start_time)
+    logging.debug("  Reminder end window: %s" % end_time)
+    logging.debug("  Sending initial reminders:")
+    for sdp in q_no_reminders:
+        contact_details_to_remind = sdp.contacts('primary')
+        sent = False
         for contact_detail in contact_details_to_remind:
             default_connection = contact_detail.default_connection
             if default_connection:
-                service_delivery_point = contact_detail.service_delivery_point
-                if service_delivery_point.child_sdps_not_received_delivery_this_month() + service_delivery_point.child_sdps_not_responded_delivery_this_month() > 0:
-                    m = OutgoingMessage(default_connection, 
-                                        _("Facility deliveries for group %s (out of %d): %d haven't responded and %d have reported not receiving. See ilsgateway.com") % 
-                                        (current_delivering_group(), 
-                                         service_delivery_point.child_sdps().filter(delivery_group__name=current_delivering_group()).count(), 
-                                         service_delivery_point.child_sdps_not_responded_delivery_this_month(), 
-                                         service_delivery_point.child_sdps_not_received_delivery_this_month()))
-                    m.send()         
-                    
-        logging.info("District delivery reminder sent to all PRIMARY district contacts")
+                m = get_message(contact_detail, reminder_name, **message_kwargs)
+                if m:
+                    logging.debug("    sdp %s (delivery group: %s) hasn't yet received their %s reminder, contact detail %s" % (sdp, 
+                                                                                                                            sdp.delivery_group, 
+                                                                                                                            reminder_name, 
+                                                                                                                            contact_detail))
+                    m.send()
+                    sent = True
+        if sent:
+            ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, 
+                                            status_type=sdp_status_type, 
+                                            status_date=datetime.now())
+            ns.save()
+    
+    logging.debug("  Sending followup reminders:")
+    for sdp in q_reminders:
+        next_reminder = additional_reminders_to_send[sdp.status_count]
+        #TODO: Do we want a check to see whether the reminder has gone out already today (if the server was down, or some other reason?)
+#        if sdp.last_status_date > start_time:
+#            start_time = sdp.last_status_date
+        rr2 = rrule(DAILY, 
+            dtstart=start_time, 
+            count=next_reminder['additional_business_days'],
+            byhour=next_reminder['hour'],
+            byminute=next_reminder['minute'],
+            bysecond=0,
+            byweekday=(MO,TU,WE,TH,FR))            
+        next_reminder_date = list(rr2).pop()
+        
+        logging.debug("    Last status date: %s" % sdp.last_status_date)
+        if datetime.now() > next_reminder_date:
+            contact_details_to_remind = sdp.contacts('primary')
+            sent = False
+            for contact_detail in contact_details_to_remind:
+                default_connection = contact_detail.default_connection
+                if default_connection:
+                    logging.debug("      %s %s" % (contact_detail, default_connection))
+                    m = get_message(contact_detail, reminder_name, **message_kwargs)
+                    if m:
+                        m.send()
+                        sent = True           
+            if sent:
+                ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, 
+                                                status_type=sdp_status_type, 
+                                                status_date=datetime.now())
+                ns.save()     
+                logging.debug("    SDP %s (delivery group %s) has already received %d %s reminders and is past reminder date %s for %s, sending reminder to the following contacts" % ( \
+                         sdp, 
+                         sdp.delivery_group, 
+                         sdp.status_count,
+                         reminder_name,
+                         next_reminder_date, 
+                         reminder_name))
+        else:
+                logging.debug("    SDP %s (delivery group %s) has already received %d %s reminders, next one is set for %s" % ( \
+                             sdp, 
+                             sdp.delivery_group, 
+                             sdp.status_count,
+                             reminder_name,
+                             next_reminder_date))
+
+    logging.info("%s (%s) sent to all PRIMARY contacts" % (sdp_status_type.name, sdp_status_type.short_name))
+
+def district_delinquent_deliveries_summary(router):
+    reminder_name = "alert_delinquent_delivery_sent_district"
+
+    # 7 days prior to the last day of the month - we leave off monthday because rrule barfs on setpos/monthday conflicts
+    bysetpos=     -7
+    # 2pm
+    byhour =      8 
+    byminute =    0
+
+    # additional reminders
+    additional_reminders_to_send = [{"additional_business_days":1, "hour": 8, "minute": 0},
+                                    {"additional_business_days":1, "hour": 14, "minute": 0}]
+    
+    #send them out
+    _send_reminders(router,
+                    reminder_name,
+                    None, #leave out monthday
+                    byhour,
+                    byminute,                    
+                    additional_reminders_to_send,
+                    District.objects.all(),
+                    bysetpos=bysetpos)
 
 def facility_soh_reminder(router):
-    now = datetime.now()
-    # last day of the month and check for the first 4 days of the next month
-    if TEST_MODE or now.day == (now + relativedelta(day=31)).day or now.day < 5:
-        #TODO: This query needs to be pared down
-        contact_details_to_remind = ContactDetail.objects.filter(primary=True,
-                                                                 service_delivery_point__service_delivery_point_type__name="FACILITY")
-        for contact_detail in contact_details_to_remind:
-            if now.day < 5:
-                #last day of last month
-                date_check = now + relativedelta(day=31, months=-1)
-            else:
-                #last day of this month (today)
-                date_check = now + relativedelta(day=31)
-                
-            if not contact_detail.service_delivery_point.received_reminder_after("soh_reminder_sent_facility", date_check):
-                default_connection = contact_detail.default_connection
-                if default_connection:
-                    m = OutgoingMessage(default_connection, _("Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"))
-                    m.send() 
-                    st = ServiceDeliveryPointStatusType.objects.filter(short_name="soh_reminder_sent_facility")[0:1].get()
-                    ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
-                    ns.save()
-            elif not contact_detail.service_delivery_point.received_reminder_after("soh_reminder_sent_facility", now + relativedelta(days=-3)):
-                default_connection = contact_detail.default_connection
-                if default_connection:
-                    m = OutgoingMessage(default_connection, _("Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"))
-                    m.send() 
-                    st = ServiceDeliveryPointStatusType.objects.filter(short_name="soh_reminder_sent_facility")[0:1].get()
-                    ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
-                    ns.save()
+    #Reminder window: the last weekday of the month at 2pm to the last weekday of the following month at 2pm 
+    monthday=31
     
-        logging.info("Stock on hand reminder message sent to all PRIMARY facility in-charges")
+    reminder_name = "soh_reminder_sent_facility"
+    
+    # 2pm
+    byhour =      14 
+    byminute =    0
+    
+    # additional reminders
+    additional_reminders_to_send = [{"additional_business_days":1, "hour": 8, "minute": 15},
+                                    {"additional_business_days":5, "hour": 8, "minute": 15}]
+    
+    #send them out
+    _send_reminders(router,
+                    reminder_name,
+                    monthday,
+                    byhour,
+                    byminute,                    
+                    additional_reminders_to_send,
+                    Facility.objects.all())
 
 def facility_randr_reminder(router):
-    # Send a reminder on the first business day after the 5th
-    if TEST_MODE or (not is_weekend() and datetime.now().day >= 5):
-        all_current_submitting_contact_details = ContactDetail.objects.filter(service_delivery_point__delivery_group__name=current_submitting_group(), primary=True)
-        for contact_detail in all_current_submitting_contact_details:
-            if not contact_detail.service_delivery_point.received_reminder_after("r_and_r_reminder_sent_facility", beginning_of_month(datetime.now().month)):
-                default_connection = contact_detail.default_connection
-                if default_connection:
-                    m = OutgoingMessage(default_connection, _("Have you sent in your R&R form yet for this quarter?  Please reply \"submitted\" or \"not submitted\""))
-                    m.send() 
-                    st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_reminder_sent_facility")[0:1].get()
-                    ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
-                    ns.save()
+    reminder_name = "r_and_r_reminder_sent_facility"
     
-        logging.info("R&R reminder message sent to all PRIMARY facility in-charges")
+    # 5th business day of the month
+    monthday =    5
+    
+    # 2pm
+    byhour =      14 
+    byminute =    0
+    
+    # additional reminders
+    additional_reminders_to_send = [{"additional_business_days":5, "hour": 8, "minute": 0},
+                                    {"additional_business_days":7, "hour": 8, "minute": 0}]
+    #send them out
+    _send_reminders(router,
+                    reminder_name,
+                    monthday,
+                    byhour,
+                    byminute,                    
+                    additional_reminders_to_send,
+                    Facility.objects.filter(delivery_group__name=current_submitting_group()))
         
 def district_randr_reminder(router):
-    #Send a reminder the first business day after the 15th
-    if TEST_MODE or (not is_weekend() and datetime.now().day >= 15): 
-        district_contact_details = ContactDetail.objects.filter(role__name__exact='DMO', primary=True)
-        for contact_detail in district_contact_details:
-            if not contact_detail.service_delivery_point.received_reminder_after("r_and_r_reminder_sent_district", beginning_of_month(datetime.now().month)):
-                default_connection = contact_detail.default_connection
-                if default_connection:
-                    m = OutgoingMessage(default_connection, _("How many R&R forms have you submitted to MSD? Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'" % current_submitting_group() )
-                    m.send() 
-                    st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_reminder_sent_district")[0:1].get()
-                    ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
-                    ns.save()
+    reminder_name = "r_and_r_reminder_sent_district"
+
+    #The last weekday of the month prior to the 13th
+    monthday =    13
     
-        logging.info("R&R reminder message sent to all PRIMARY district in-charges")        
+    # 2pm
+    byhour =      8 
+    byminute =    0
+
+    # additional reminders
+    additional_reminders_to_send = [{"additional_business_days":2, "hour": 8, "minute": 0},
+                                    {"additional_business_days":3, "hour": 14, "minute": 0}]
+    #send them out
+    _send_reminders(router,
+                    reminder_name,
+                    monthday,
+                    byhour,
+                    byminute,                    
+                    additional_reminders_to_send,
+                    District.objects.all())
         
 def facility_delivery_reminder(router):
-    # Reminder on the 15th regardless of weekend
-    if TEST_MODE or (datetime.now().day >= 15): 
-        all_current_delivery_facilities = ServiceDeliveryPoint.objects.filter(delivery_group__name=current_delivering_group())
-        for facility in all_current_delivery_facilities:
-            if not facility.received_reminder_after("delivery_received_reminder_sent_facility", beginning_of_month(datetime.now().month)):
-                for fic_cd in facility.primary_contacts():
-                    c = fic_cd.default_connection
-                    if c:
-                        m = OutgoingMessage(c,
-                        _("Did you receive your delivery yet? Please reply 'delivered <product> <amount> <product> <amount>...'"))
-                        m.send() 
-                        st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received_reminder_sent_facility")[0:1].get()
-                        ns = ServiceDeliveryPointStatus(service_delivery_point=fic_cd.service_delivery_point, status_type=st, status_date=datetime.now())
-                        ns.save()
-                
-        logging.info("Delivery reminder message sent to all PRIMARY facility in-charges")                  
-        
+    reminder_name = "delivery_received_reminder_sent_facility"
+
+    #The last weekday of the month prior to the 15th
+    monthday =    15
+    
+    # 2pm
+    byhour =      14 
+    byminute =    0
+
+    # additional reminders
+    additional_reminders_to_send = [{"additional_business_days":2, "hour": 8, "minute": 0},
+                                    {"additional_business_days":3, "hour": 14, "minute": 0},
+                                    {"additional_business_days":5, "hour": 14, "minute": 0}]
+    #send them out
+    _send_reminders(router,
+                    reminder_name,
+                    monthday,
+                    byhour,
+                    byminute,
+                    additional_reminders_to_send,
+                    Facility.objects.filter(delivery_group__name=current_delivering_group()))
+    
 def district_delivery_reminder(router):
-    # Reminder on the first business day after the 15th
-    if TEST_MODE or (not is_weekend() and datetime.now().day >= 15):
-        # TODO: This should skip districts that don't have any deliveries expected - for example, if there are no facilities in Group C then there won't be deliveries expected in March 
-        all_districts = ServiceDeliveryPoint.objects.filter(service_delivery_point_type__name="DISTRICT")
-        for district in all_districts:
-            if not district.received_reminder_after("delivery_received_reminder_sent_district", beginning_of_month(datetime.now().month)):
-                for contact_detail in district.primary_contacts():
-                    default_connection = contact_detail.default_connection
-                    if default_connection:
-                        m = OutgoingMessage(default_connection, 
-                                            _("Did you receive your delivery yet? Please reply 'delivered' or 'not delivered'"))
-                        m.send() 
-                        st = ServiceDeliveryPointStatusType.objects.filter(short_name="delivery_received_reminder_sent_district")[0:1].get()
-                        ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
-                        ns.save()
-                
-        logging.info("Delivery reminder message sent to all PRIMARY district contacts")                          
+    # TODO: This should skip districts that don't have any deliveries expected - for example, if there are no facilities in Group C then there won't be deliveries expected in March 
+    reminder_name = "delivery_received_reminder_sent_district"
+
+    #The last weekday of the month prior to the 13th at 2pm
+    monthday =    13
+    byhour =      14 
+    byminute =    0
+
+    # additional reminders
+    additional_reminders_to_send = [{"additional_business_days":7, "hour": 14, "minute": 0},
+                                    {"additional_business_days":15, "hour": 14, "minute": 0}]
+    #send them out
+    _send_reminders(router,
+                    reminder_name,
+                    monthday,
+                    byhour,
+                    byminute,                    
+                    additional_reminders_to_send,
+                    District.objects.all())

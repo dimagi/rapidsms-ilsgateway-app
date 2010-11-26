@@ -11,6 +11,19 @@ from django.utils.translation import ugettext as _
 
 class ConfirmRandRSubmitted(KeywordHandler):
     keyword = "submitted|nimetuma"
+
+    def _send_randr_alert_to_facilities(self, sdp):
+        reminder_name = "alert_parent_district_sent_randr"
+        contact_details_to_remind = ContactDetail.objects.filter(service_delivery_point__in=sdp.child_sdps_submitting(),
+                                                                 primary=True)
+        for contact_detail in contact_details_to_remind:
+            default_connection = contact_detail.default_connection
+            if default_connection:
+                kwargs = {'sdp': sdp}
+                m = get_message(contact_detail, reminder_name, **kwargs)
+                logging.debug("Sending alert to all facilities under %s that R&R forms were sent to MSD" % sdp.name)
+                m.send()    
+    
     def help(self):
         service_delivery_point=self.msg.contact.contactdetail.service_delivery_point
         if service_delivery_point.service_delivery_point_type.name == "DISTRICT":
@@ -65,11 +78,7 @@ class ConfirmRandRSubmitted(KeywordHandler):
             kwargs = {'contact_name': self.msg.contact.name,
                       'sdp_name': self.msg.contact.contactdetail.service_delivery_point.name}
             self.respond(_('Thank you %(contact_name)s for reporting your R&R form submissions for %(sdp_name)s'), **kwargs)
-#            contacts_to_notify = ContactDetail.objects.filter(parent_id=service_delivery_point.id, primary=True, service_delivery_point__delivery_group__name='A')
-#            for contact in contacts_to_notify:
-#                m = OutgoingMessage(contact.connection(), "%s: Your R&R forms have been sent from %s to MSD" % (contact.name(), contact.service_delivery_point.parent_service_delivery_point.name))
-#                m.send() 
-            
+            self._send_randr_alert_to_facilities(service_delivery_point)
             return
         elif service_delivery_point.service_delivery_point_type.name == "FACILITY":
             st = ServiceDeliveryPointStatusType.objects.filter(short_name="r_and_r_submitted_facility_to_district")[0:1].get()

@@ -1,4 +1,10 @@
 from datetime import datetime, timedelta
+from django.utils.translation import ugettext as _
+from rapidsms.messages import OutgoingMessage
+
+#temp
+import logging
+
 
 def crumb(service_delivery_point):
     return "<div><a href="">this is a test | </a></div>"
@@ -31,3 +37,50 @@ def is_number(s):
         return True
     except ValueError:
         return False
+    
+def get_message(contact_detail, msg_code, **kwargs):
+    str = ''
+    message_dict = {}
+    if msg_code == "alert_parent_district_delivery_received_sent_facility":
+        if kwargs['sdp']:                
+            message_dict['district_name'] = kwargs['sdp'].name
+            str = "District %(district_name)s has reported that they received their delivery from MSD."    
+    if msg_code == "alert_parent_district_sent_randr":
+        if kwargs['sdp']:                
+            message_dict['district_name'] = kwargs['sdp'].name
+            str = "District %(district_name)s has reported that they sent their R&R forms to MSD."    
+    if msg_code == "lost_adjusted_reminder_sent_facility":
+        str = "Please send in your adjustments in the format 'la <product> +-<amount> +-<product> +-<amount>...'"
+    if msg_code == "soh_reminder_sent_facility":
+        str = "Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"
+    if msg_code == "r_and_r_reminder_sent_district":
+        str=  "How many R&R forms have you submitted to MSD? Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"
+    if msg_code == "delivery_received_reminder_sent_facility":
+        str =  "Did you receive your delivery yet? Please reply 'delivered <product> <amount> <product> <amount>...'"
+    if msg_code == "delivery_received_reminder_sent_district":
+        str = "Did you receive your delivery yet? Please reply 'delivered' or 'not delivered'"
+    if msg_code == "alert_delinquent_delivery_sent_district":
+        sdp = contact_detail.service_delivery_point
+        message_dict = {
+           'not_responded_count': sdp.child_sdps_not_responded_delivery_this_month(),
+           'not_received_count': sdp.child_sdps_not_received_delivery_this_month()}
+        total = sum([i for i in message_dict.values()])
+        if total:
+            message_dict['group_name'] = current_delivering_group()
+            message_dict['group_total'] = sdp.child_sdps_receiving().count(),
+            str = "Facility deliveries for group %(group_name)s (out of %(group_total)d): %(not_responded_count)d haven't responded and %(not_received_count)d have reported not receiving. See ilsgateway.com"
+        else:
+            str = ''
+    if str != '':
+        m = OutgoingMessage(contact_detail.default_connection, str, **message_dict)
+    else:
+        m = None
+    return m 
+    
+    
+    
+    
+    
+    
+    
+    
