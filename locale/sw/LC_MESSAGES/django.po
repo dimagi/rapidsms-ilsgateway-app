@@ -153,6 +153,9 @@ msgid ""
 msgstr ""
 "Asante %(contact_name)s kwa kutuma taarifa za akiba ya vifaa vilivyopo vya %(facility_name)s, bado taarifa za %(product_list)s"
 
+msgid "Thank you, you reported your losses/adjustments: %(reply_list)s. Still missing %(product_list)s."
+msgstr "Asante, umetoa taarifa kuwa marekebisho: %(reply_list)s, bado taarifa za %(product_list)s"
+
 #: handlers/test_handler.py:18
 msgid ""
 "To test a reminder, send \"test reminder [remindername]\"; valid tests are "

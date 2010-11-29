@@ -64,5 +64,5 @@
   {"pk": 14, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision reminder sent", "short_name": "supervision_reminder_sent_facility"}},  
   {"pk": 15, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision received", "short_name": "supervision_received_facility"}},
   {"pk": 16, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Supervision not received", "short_name": "supervision_not_received_facility"}},
-  {"pk": 17, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Lost/Adjusted reminder sent to Facility", "short_name": "lost_adjusted_reminder_sent_facility"}}
-  {"pk": 18, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Delinquent deliveries summary sent to District", "short_name": "delinquent_deliveries_summary_sent_district"}}]
+  {"pk": 17, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Lost/Adjusted reminder sent to Facility", "short_name": "lost_adjusted_reminder_sent_facility"}},
+  {"pk": 18, "model": "ilsgateway.servicedeliverypointstatustype", "fields": {"name": "Delinquent deliveries summary sent to District", "short_name": "alert_delinquent_delivery_sent_district"}}]

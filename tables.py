@@ -65,7 +65,7 @@ class CurrentMOSTable(Table):
     delivery_group = Column()
     name = Column(link=lambda cell: reverse("ilsgateway.views.facilities_detail", args=[cell.row.pk]))
     for product in Product.objects.all():
-        exec("%s = ILSGatewayColumn(name='%s', value=_get_mos_value, head_verbose='%s', sortable=False)" % (product.sms_code, product.sms_code, product.name))
+        exec("%s = ILSGatewayColumn(name='%s', value=_get_mos_value, head_verbose='%s', sortable=False, is_product=True)" % (product.sms_code, product.sms_code, product.name))
 
 def _get_latest_randr_status(cell):
     if cell.object.randr_status():

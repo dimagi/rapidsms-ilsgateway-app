@@ -2,11 +2,12 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from ilsgateway.models import ServiceDeliveryPoint, Product, ProductReportType, ContactDetail
+from ilsgateway.models import ServiceDeliveryPoint, Product, ProductReportType, ContactDetail, ServiceDeliveryPointStatus, ServiceDeliveryPointStatusType
 from ilsgateway.utils import *
 from dateutil.relativedelta import *
 from django.db.models import Q
 from django.utils.translation import ugettext as _
+from rapidsms.messages import OutgoingMessage
 
 class StockOnHandHandler(KeywordHandler):
     """
@@ -59,3 +60,8 @@ class StockOnHandHandler(KeywordHandler):
                 self.respond(_('Thank you %(contact_name)s for reporting your stock on hand for %(facility_name)s.  Still missing %(product_list)s.'), **kwargs)
             else:    
                 self.respond(_('Thank you, you reported you have %(reply_list)s. If incorrect, please resend.'), reply_list=','.join(reply_list))
+            self.respond(_("Please send in your adjustments in the format 'la <product> +-<amount> +-<product> +-<amount>...'"))
+            st = ServiceDeliveryPointStatusType.objects.filter(short_name="lost_adjusted_reminder_sent_facility")[0:1].get()
+            ns = ServiceDeliveryPointStatus(service_delivery_point=sdp, status_type=st, status_date=datetime.now())
+            ns.save()
+        

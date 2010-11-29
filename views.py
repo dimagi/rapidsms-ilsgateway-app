@@ -320,37 +320,24 @@ def facilities_index(request, view_type='inventory'):
     else:
         sdp = _get_my_sdp(request)
     
-    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Current Stock Status')] ]
+    if view_type == 'inventory':
+        breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Stock on Hand')] ]
+    else:
+        breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Months of Stock')] ]
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
-    products = Product.objects.all()
-    facilities_dict = []
-    for facility in facilities:
-        facility_dict = {}
-        facility_dict['msd_code'] = facility.msd_code
-        facility_dict['delivery_group'] = facility.delivery_group.name
-        facility_dict['id'] = facility.id
-        facility_dict['name'] = facility.name
-        facility_dict['stock_levels'] = []
-        for product in products:
-            if view_type == "inventory":
-                facility_dict['stock_levels'].append(facility.stock_on_hand(product.sms_code))
-            elif view_type == "months_of_stock":
-                facility_dict['stock_levels'].append(facility.months_of_stock(product.sms_code))
-        facilities_dict.append(facility_dict)
         
     if view_type=="inventory":    
         status_table = CurrentStockStatusTable(facilities, 
-                                               request=request)
+                                               request=request,
+                                               cell_class=ILSGatewayCell)
     else:
         status_table = CurrentMOSTable(facilities, 
-                                       request=request)
+                                       request=request,
+                                       cell_class=ILSGatewayCell)
+                                       
         
     return render_to_response("facilities_list.html", 
-                              {"facilities": facilities,
-                               "facilities_dict": facilities_dict,
-                               "products": products,
-                               "sdp": sdp,
-                               "breadcrumbs": breadcrumbs,
+                              {"breadcrumbs": breadcrumbs,
                                "view_type": view_type,
                                "status_table": status_table},
                               context_instance=RequestContext(request),)

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
-
+import logging
+from dateutil.rrule import *
 from django.db import models
 from django.db.models import Q
 from rapidsms.models import ExtensibleModelBase
@@ -28,8 +29,9 @@ class ILSGatewayCell(Cell):
         return unicode(self.column.render(self))
 
 class ILSGatewayColumn(Column):
-    def __init__(self, head_verbose=None, **kwargs):
+    def __init__(self, head_verbose=None, is_product=False, **kwargs):
         self.head_verbose = head_verbose
+        self.is_product = is_product
         super(ILSGatewayColumn, self).__init__(**kwargs)
 
 class ILSGatewayDateColumn(DateColumn):
@@ -106,19 +108,19 @@ class ServiceDeliveryPoint(Location):
     msd_code = models.CharField(max_length=100, blank=True, null=True)
     service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType)    
     
-    def stock_levels_array(self):
-        soh_array = []
-        for product in Product.objects.all():
-            if self.stock_on_hand(product.sms_code) == None:
-                soh_value = "No data"
-            else:
-                soh_value = self.stock_on_hand(product.sms_code)
-            if self.months_of_stock(product.sms_code) == None:
-                mos_value = "Insufficient data"
-            else:
-                mos_value = self.months_of_stock(product.sms_code)
-            soh_array.append([product.sms_code, soh_value, mos_value])
-        return soh_array
+#    def stock_levels_array(self):
+#        soh_array = []
+#        for product in Product.objects.all():
+#            if self.stock_on_hand(product.sms_code) == None:
+#                soh_value = "No data"
+#            else:
+#                soh_value = self.stock_on_hand(product.sms_code)
+#            if self.months_of_stock(product.sms_code) == None:
+#                mos_value = "Insufficient data"
+#            else:
+#                mos_value = self.months_of_stock(product.sms_code)
+#            soh_array.append([product.sms_code, soh_value, mos_value])
+#        return soh_array
             
     def contacts(self, contact_type='all'):
         if contact_type == 'all':
@@ -172,9 +174,6 @@ class ServiceDeliveryPoint(Location):
     def get_products(self):
         return Product.objects.filter(servicedeliverypoint=self.id).distinct()
     
-    def months_of_stock(self, sms_code):
-        return None
-
     def last_message_received(self):
         reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id, report_type__id=1).order_by('-report_date')
         if reports:
@@ -295,10 +294,98 @@ class ServiceDeliveryPoint(Location):
             percentage = 0
         return "%d " % percentage
     
+    def lost_adjusted(self, sms_code):
+        reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
+                                                product__sms_code=sms_code,
+                                                report_type__sms_code="la") 
+        if reports:
+            return reports[0].quantity                                 
+        else:
+            return 0        
+
+    def months_of_stock(self, sms_code):
+        if self.stock_on_hand(sms_code) and self.calculate_monthly_consumption(sms_code):
+            return self.stock_on_hand(sms_code) / self.calculate_monthly_consumption(sms_code)
+        else:
+            return None
+        
+    def calculate_monthly_consumption(self, sms_code):
+        # This maybe become be a performance hog, could a) cache or b) refactor
+        
+        #TODO This needs to be a setting or a db value
+        months_to_calculate = 6
+        # Calculate consumption for the X months prior, then calculate latest stock levels divided by avg monthly consumption
+        now = datetime.now()
+        rr1 = rrule(MONTHLY, 
+                    interval=1, 
+                    dtstart=now + relativedelta(months=-(months_to_calculate+1)), 
+                    count=months_to_calculate+2,
+                    byweekday=(MO,TU,WE,TH,FR), 
+                    byhour=14, 
+                    bysecond=0,
+                    bysetpos=-1,
+                    byminute=0)
+            
+        reports = ServiceDeliveryPointProductReport.objects.filter(Q(service_delivery_point__id=self.id,
+                                                                  report_type__sms_code__in=['soh', 'la', 'dlvd'],
+                                                                  product__sms_code=sms_code,
+                                                                  report_date__range=(rr1[0], now))).order_by('report_date')
+        if reports:
+            logging.debug(list(rr1))
+            consumption_list = []
+            for i in range(months_to_calculate):
+                current_month_vals = {}
+                logging.debug("Calcing consumption for period %s to %s" % (rr1[i+1], rr1[i+2]))
+                # calc closing balance from last month (current cycles' opening balance)
+                report_type = 'soh'
+                current_month_reports = reports.filter(report_date__range=(rr1[i], rr1[i+1]),
+                                                       report_type__sms_code=report_type)
+                if current_month_reports:
+                    latest_report = current_month_reports.latest('report_date')
+                    logging.debug("  Closing balance for period ending %s reported on %s: %s" % (rr1[i], latest_report.report_date, latest_report.quantity))
+                    if report_type == 'soh':
+                        current_month_vals['opening_balance'] = latest_report.quantity
+                    elif report_type == 'la':
+                        current_month_vals['adjustments'] = latest_report.quantity
+                else:                        
+                    if report_type == 'soh':
+                        current_month_vals['opening_balance'] = 0
+                    elif report_type == 'la':
+                        current_month_vals['adjustments'] = 0
+                
+                # calculate received, adjustments and opening balance for the next month        
+                for report_type in ['soh', 'dlvd', 'la']:                        
+                    current_month_reports = reports.filter(report_date__range=(rr1[i+1], rr1[i+2]),
+                                                           report_type__sms_code=report_type)
+                    if current_month_reports:
+                        latest_report = current_month_reports.latest('report_date')
+                        logging.debug("  %s for period ending %s reported on %s: %s" % (report_type, rr1[i+1], latest_report.report_date, latest_report.quantity))
+                        current_month_vals[report_type] = latest_report.quantity
+                    else:                        
+                        current_month_vals[report_type] = 0
+
+                if current_month_vals['opening_balance'] == 0 or current_month_vals['soh'] == 0:
+                    consumption = None
+                else:
+                    consumption = current_month_vals['opening_balance'] + current_month_vals['dlvd'] + current_month_vals['la'] - current_month_vals['soh'] 
+                if consumption is not None:
+                    consumption_list.append(consumption)
+                    logging.debug("  Consumption %s" % consumption) 
+            logging.debug("  %s" % consumption_list)
+            if len(consumption_list) > 0:
+                avg_consumption =  sum([i for i in consumption_list]) / float(len(consumption_list))
+                if avg_consumption > 0:
+                    print "Avg consumption for %s: %s" % (self.name, avg_consumption)
+                    return avg_consumption
+                else:
+                    return None 
+            else:
+                return None
+
     def stock_on_hand(self, sms_code):
         reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
                                                 product__sms_code=sms_code,
-                                                report_type__id=1) 
+                                                report_type__sms_code="soh") 
         if reports:
             return reports[0].quantity                                 
         else:

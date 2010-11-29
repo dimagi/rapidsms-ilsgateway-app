@@ -48,6 +48,11 @@ span.no_delivery_status_reported {
    color: red;
 }
 
+span.exceeds_max, 
+span.under_min {
+   color: orange;
+}
+
 span.not_reported,
 span.insufficient_data {
    color: gray;

@@ -53,6 +53,7 @@ class PointAdmin(admin.ModelAdmin):
 
 class FacilityAdmin(admin.ModelAdmin):
     model = Facility
+    list_display = ('name', 'parent')
 
 class DistrictAdmin(admin.ModelAdmin):
     model = District

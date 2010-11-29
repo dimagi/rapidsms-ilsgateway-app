@@ -17,7 +17,11 @@
     <table class="stock">
       {% table_cols status_table %}
       {% translated_table_head status_table %}
-      {% stock_table_body status_table %}
+      {% if view_type == 'inventory' %}
+      	{% inventory_table_body status_table %}
+      {% else %}
+      	{% months_of_stock_table_body status_table %}
+      {% endif %}
       {% table_foot status_table %}
     </table>
 </div>

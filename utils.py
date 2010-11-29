@@ -57,6 +57,8 @@ def get_message(contact_detail, msg_code, **kwargs):
         str=  "How many R&R forms have you submitted to MSD? Reply with 'submitted A <number of R&Rs submitted for group A> B <number of R&Rs submitted for group B>'"
     if msg_code == "delivery_received_reminder_sent_facility":
         str =  "Did you receive your delivery yet? Please reply 'delivered <product> <amount> <product> <amount>...'"
+    if msg_code == "supervision_reminder_sent_facility":
+        str =  "Have you received supervision this month? Please reply 'supervision yes' or 'supervision no'"
     if msg_code == "delivery_received_reminder_sent_district":
         str = "Did you receive your delivery yet? Please reply 'delivered' or 'not delivered'"
     if msg_code == "alert_delinquent_delivery_sent_district":
@@ -67,7 +69,7 @@ def get_message(contact_detail, msg_code, **kwargs):
         total = sum([i for i in message_dict.values()])
         if total:
             message_dict['group_name'] = current_delivering_group()
-            message_dict['group_total'] = sdp.child_sdps_receiving().count(),
+            message_dict['group_total'] = sdp.child_sdps_receiving().count()
             str = "Facility deliveries for group %(group_name)s (out of %(group_total)d): %(not_responded_count)d haven't responded and %(not_received_count)d have reported not receiving. See ilsgateway.com"
         else:
             str = ''

@@ -38,7 +38,7 @@
                 </thead>
                 <tbody>
                 {% for product, quantity in product_counts %}
-                    <tr><td>{{ product }}</td><td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}insufficient_data{% endif %}{% endif %}">{% if quantity == None %}{% trans 'no data' %}{% else %}{{quantity}}{% endif %}</span></td></tr>    
+                    <tr><td>{{ product }}</td><td><span class="{% if quantity == 0 %}zero_count{% else %}{% if not quantity %}insufficient_data{% endif %}{% endif %}">{% if quantity == None %}{% trans 'no data' %}{% else %}{{ quantity|floatformat }}{% endif %}</span></td></tr>    
                 {% endfor %}                
                 </tbody>
             </table>            
