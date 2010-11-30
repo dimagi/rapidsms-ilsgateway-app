@@ -8,6 +8,7 @@ from dateutil.relativedelta import *
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 from rapidsms.messages import OutgoingMessage
+from re import sub
 
 class StockOnHandHandler(KeywordHandler):
     """
@@ -26,8 +27,8 @@ class StockOnHandHandler(KeywordHandler):
             sdp = self.msg.contact.contactdetail.service_delivery_point
             reply_list = []
             while len(product_list) >= 2:
-                product_code = product_list.pop(0)
-                quantity = product_list.pop(0)
+                product_code = sub('\.', '', product_list.pop(0))
+                quantity = sub('\.', '', product_list.pop(0))
                 if not is_number(quantity):
                     if is_number(product_code):
                         temp = product_code
