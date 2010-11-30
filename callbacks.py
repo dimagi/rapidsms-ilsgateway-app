@@ -19,7 +19,7 @@ from django.db.models import Count, Max
 ######################
 
 OFFSET = relativedelta(days=+17)
-TEST_MODE = True
+TEST_MODE = False
 #  Next steps: 
 #  1) collapse into a single callback method DONE
 #  2) change to a config dict
@@ -49,9 +49,9 @@ def run_reminders(router):
     
     
     
-    logging.debug("Current date: %s.  Total statuses %s" % (_get_current_time(), ServiceDeliveryPointStatus.objects.count()) )
+    logging.info("Current time: %s.  Total statuses %s" % (_get_current_time(), ServiceDeliveryPointStatus.objects.count()) )
     for status_type in ServiceDeliveryPointStatusType.objects.all():
-        logging.debug("Total statuses for %s: %s" % (status_type, ServiceDeliveryPointStatus.objects.filter(status_type=status_type).count()))
+        logging.info("Total statuses for %s: %s" % (status_type, ServiceDeliveryPointStatus.objects.filter(status_type=status_type).count()))
 
 def _send_reminders(router,
                     reminder_name,
@@ -110,8 +110,8 @@ def _send_reminders(router,
     # add 1 to the count to include the initial reminder
     q_reminders = q_reminders.filter(status_count__lt=additional_reminders_to_send_count+1)
             
-    logging.debug("No reminder sent query: %s, count %d" % (q_no_reminders, len(q_no_reminders)))
-    logging.debug("Reminders already sent query: %s, count %d" % (q_reminders, len(q_reminders)))
+    #logging.debug("No reminder sent query: %s, count %d" % (q_no_reminders, len(q_no_reminders)))
+    #logging.debug("Reminders already sent query: %s, count %d" % (q_reminders, len(q_reminders)))
     logging.debug("Sending Reminders for %s:" % reminder_name)
     logging.debug("  Reminder start window: %s" % start_time)
     logging.debug("  Reminder end window: %s" % end_time)
@@ -151,7 +151,7 @@ def _send_reminders(router,
             bysecond=0,
             byweekday=(MO,TU,WE,TH,FR))            
         next_reminder_date = list(rr2).pop()
-        logging.debug("    Reminder RRUle: %s" % list(rr2))
+        #logging.debug("    Reminder RRUle: %s" % list(rr2))
         logging.debug("    Last status date: %s" % sdp.last_status_date)
         if now > next_reminder_date:
             contact_details_to_remind = sdp.contacts('primary')
