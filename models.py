@@ -313,7 +313,7 @@ class ServiceDeliveryPoint(Location):
         # This maybe become be a performance hog, could a) cache or b) refactor
         
         #TODO This needs to be a setting or a db value
-        months_to_calculate = 6
+        months_to_calculate = 3
         # Calculate consumption for the X months prior, then calculate latest stock levels divided by avg monthly consumption
         now = datetime.now()
         rr1 = rrule(MONTHLY, 

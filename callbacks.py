@@ -18,7 +18,7 @@ from django.db.models import Count, Max
 # Callback Functions #
 ######################
 
-OFFSET = relativedelta(days=+17)
+OFFSET = relativedelta(days=+1)
 TEST_MODE = False
 #  Next steps: 
 #  1) collapse into a single callback method DONE
@@ -65,7 +65,6 @@ def _send_reminders(router,
                     message_kwargs={}):
     
     now = _get_current_time()
-    logging.debug(now)
         
     additional_reminders_to_send_count = len(additional_reminders_to_send)
     sdp_status_type = ServiceDeliveryPointStatusType.objects.filter(short_name=reminder_name)[0:1].get()
@@ -243,7 +242,6 @@ def facility_adjustments_reminder(router):
     byminute =    0
     
     # additional reminders
-    # first one gets discounted since a reminder goes out with first soh reminder
     additional_reminders_to_send = [{"additional_business_days":1, "hour": 8, "minute": 0}]
     
     #send them out
@@ -285,8 +283,8 @@ def facility_randr_reminder(router):
     # 5th business day of the month
     monthday =    5
     
-    # 2pm
-    byhour =      14 
+    # 8am
+    byhour =      8 
     byminute =    0
     
     # additional reminders
