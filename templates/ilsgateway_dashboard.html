@@ -74,7 +74,7 @@
                },
                xaxis: { 
                        ticks: {{ bar_ticks|safe }},
-                       max: 12
+                       max: {{ max_product_count }}
                       }, 
                legend: {show: true, container: $("#legend"), noColumns: 3},
                yaxis: {max: {{ max_stockout_graph }},

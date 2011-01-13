@@ -18,12 +18,15 @@ class TestReminder(KeywordHandler):
         self.respond(_("To test a reminder, send \"test [remindername] [msd code]\"; valid tests are soh, delivery, randr. Remember to setup your contact details!"))
 
     def handle(self, text):
-        command, parameter = text.lower().split()
-        sdp = ServiceDeliveryPoint.objects.get(msd_code=parameter.upper())
-        contact_details_to_remind = ContactDetail.objects.filter(service_delivery_point=sdp)
-        if not sdp:
-            self.respond("Invalid msd code %s" % parameter)
-            return
+        command, msd_code, addl_parameter = text.lower().split()
+        if command != 'send_inquiry_message':
+            try:
+                sdp = ServiceDeliveryPoint.objects.get(msd_code=msd_code.upper())
+            except:
+                self.respond("Invalid msd code %s" % msd_code)
+                return
+            contact_details_to_remind = ContactDetail.objects.filter(service_delivery_point=sdp)
+
         if command in ['la']:
             for contact_detail in contact_details_to_remind:
                 default_connection = contact_detail.default_connection
@@ -54,6 +57,59 @@ class TestReminder(KeywordHandler):
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
                     ns.save()
             self.respond("Sent")
+        elif command in ['si']:
+            product = Product.objects.get(product_code=addl_parameter)
+            if not product:
+                self.respond("Invalid product code %s" % addl_parameter)
+                return
+            if sdp.service_delivery_point_type.name == "FACILITY":
+                contact_details_to_remind = ContactDetail.objects.filter(service_delivery_point=sdp)                
+                for contact_detail in contact_details_to_remind:
+                    default_connection = contact_detail.default_connection
+                    if default_connection:
+                        m = OutgoingMessage(default_connection, _("How much %s (msd code %s) do you have in stock?  Please respond 'si %s <amount>'" % (product.name, addl_parameter, addl_parameter) ))
+                        m.send() 
+                self.respond("Sent")
+            else:
+                self.respond("Can only initiate product inquiry for a single facility via SMS - %s is a %s" % (sdp.name, sdp.service_delivery_point_type.name) )
+                return
+                
+        elif command in ['send_inquiry_message']:
+            product = Product.objects.get(product_code=addl_parameter)
+            if not product:
+                self.respond("Invalid product code %s" % addl_parameter)
+                return
+            try:
+                sdp = ServiceDeliveryPoint.objects.get(id=msd_code)
+            except:
+                self.respond("Invalid ID %s" % msd_code)
+                return
+            
+            if sdp.service_delivery_point_type.name == "FACILITY":
+                contact_details_to_remind = ContactDetail.objects.filter(service_delivery_point=sdp)                
+                for contact_detail in contact_details_to_remind:
+                    default_connection = contact_detail.default_connection
+                    if default_connection:
+                        m = OutgoingMessage(default_connection, _("How much %s (msd code %s) do you have in stock?  Please respond 'si %s <amount>'" % (product.name, addl_parameter, addl_parameter) ))
+                        m.send() 
+            elif sdp.service_delivery_point_type.name == "DISTRICT":
+                for facility_sdp in sdp.child_sdps():
+                    contact_details_to_remind = ContactDetail.objects.filter(service_delivery_point=facility_sdp)                
+                    for contact_detail in contact_details_to_remind:
+                        default_connection = contact_detail.default_connection
+                        if default_connection:
+                            m = OutgoingMessage(default_connection, _("How much %s (msd code %s) do you have in stock?  Please respond 'si %s <amount>'" % (product.name, addl_parameter, addl_parameter) ))
+                            m.send() 
+            elif sdp.service_delivery_point_type.name == "REGION":
+                for district_sdp in sdp.child_sdps():
+                    for facility_sdp in district_sdp.child_sdps:
+                        contact_details_to_remind = ContactDetail.objects.filter(service_delivery_point=facility_sdp)                
+                        for contact_detail in contact_details_to_remind:
+                            default_connection = contact_detail.default_connection
+                            if default_connection:
+                                m = OutgoingMessage(default_connection, _("How much %s (msd code %s) do you have in stock?  Please respond 'si %s <amount>'" % (product.name, addl_parameter, addl_parameter) ))
+                                m.send()
+
         elif command in ['randr']:
             for contact_detail in contact_details_to_remind:
                 default_connection = contact_detail.default_connection

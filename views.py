@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from rapidsms.contrib.messagelog.models import Message
 from utils import *
-from forms import NoteForm, SelectLocationForm
+from forms import NoteForm, SelectLocationForm, StockInquiryForm
 from ilsgateway.tables import MessageHistoryTable, CurrentStockStatusTable, CurrentMOSTable, OrderingTable
 from django.contrib.auth.admin import UserAdmin
 from django.views.decorators.csrf import csrf_protect
@@ -26,6 +26,11 @@ import random
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import Site
+from rapidsms.messages import OutgoingMessage
+
+from django.utils.functional import curry
+from rapidsms.contrib.ajax.utils import call_router
+
 
 #gdata
 import gdata.docs.data
@@ -116,6 +121,15 @@ def password_reset_confirm(request, uidb36=None, token=None, template_name='acco
     return render_to_response(template_name, context_instance=context_instance)
 
 def password_reset_complete(request, template_name='accounts/password_reset_complete.html'):
+    return render_to_response(template_name, context_instance=RequestContext(request,
+                                                                             {'login_url': settings.LOGIN_URL}))
+
+def sms_password_complete(request, template_name='accounts/sms_password_done.html'):
+    contact_detail = ContactDetail.objects.get(user=request.user.ilsgatewayuser)    
+    default_connection = contact_detail.default_connection
+    if default_connection:    
+        m = OutgoingMessage(default_connection, _("Your password is: password"))
+        m.send() 
     return render_to_response(template_name, context_instance=RequestContext(request,
                                                                              {'login_url': settings.LOGIN_URL}))
 
@@ -273,6 +287,8 @@ def dashboard(request):
                                'delivery_inquiry_date': delivery_inquiry_date,
                                'max_stockout_graph': sdp.child_sdps().count(),
                                'stockouts_by_product': stockouts_by_product,
+                               #'max_product_count': products.count() * 2,
+                               'max_product_count': 12, #limits to 6 products
                                'is_allowed_to_change_location': is_allowed_to_change_location,
                                'breadcrumbs': breadcrumbs
                               },
@@ -358,6 +374,42 @@ def facilities_ordering(request):
                                "breadcrumbs": breadcrumbs,
                                "sdp": sdp,
                                "ordering_table": OrderingTable(facilities, request=request, cell_class=ILSGatewayCell),                               
+                               },
+                              context_instance=RequestContext(request),)
+
+@login_required
+def stock_inquiry(request):
+    sdp_id = request.session.get('current_sdp_id')
+    if sdp_id:
+        sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
+    else:
+        sdp = request.user.ilsgatewayuser.service_delivery_point
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Ordering Status')] ]
+    message = ''
+    if request.method == 'POST': 
+        form = StockInquiryForm(request.POST) 
+        if form.is_valid():
+            product = form.cleaned_data['product']
+            facilities = form.cleaned_data['facilities']
+            districts = form.cleaned_data['districts']
+            regions = form.cleaned_data['regions']
+#            sdp = ServiceDeliveryPoint.objects.get(msd_code=form.cleaned_data['location'].upper())
+#            product = Product.objects.get(product_code=form.cleaned_data['product'])
+            for sdps in [facilities, districts, regions]:
+                for sdp in sdps:
+                    send_test_message = curry(call_router, "httptester", "send")
+                    msg_text = 'test send_inquiry_message %s %s' % (sdp.id, product.product_code)
+                    send_test_message(identity='11111', text=msg_text)
+            message = "Inquiry successfully sent to Facility %s regarding Product %s (%s)" % (sdp.name, product.name, product.product_code)        
+            form = StockInquiryForm()                
+    else:
+            form = StockInquiryForm()                        
+   
+    return render_to_response("stock_inquiry.html", 
+                              {"breadcrumbs": breadcrumbs,
+                               "sdp": sdp,
+                              'form': form,
+                              'message': message
                                },
                               context_instance=RequestContext(request),)
 

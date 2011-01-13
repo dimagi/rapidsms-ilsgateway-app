@@ -3,7 +3,7 @@
 
 
 from django import forms
-from ilsgateway.models import ContactDetail, ServiceDeliveryPoint, ContactRole, ILSGatewayUser
+from ilsgateway.models import ContactDetail, ServiceDeliveryPoint, ContactRole, ILSGatewayUser, Facility, Product, District, Region
 from rapidsms.models import Backend, Connection
 from rapidsms.conf import settings
 from django.utils.translation import ugettext as _
@@ -64,6 +64,13 @@ class ContactDetailForm(forms.ModelForm):
             conn.save()
             print conn
         return model            
+
+class StockInquiryForm(forms.Form):
+    facilities = forms.ModelMultipleChoiceField(queryset=Facility.objects.all(), required=False)
+    districts = forms.ModelMultipleChoiceField(queryset=District.objects.all(), required=False)
+    regions = forms.ModelMultipleChoiceField(queryset=Region.objects.all(), required=False)           
+    product = forms.ModelChoiceField(help_text="(If you don't see the product you are expecting, go to product administration and add a Product Code/MSD Code" ,
+                                     queryset=Product.objects.exclude(Q(product_code__isnull=True) | Q(product_code__exact='')).order_by('name'))
 
 class NoteForm(forms.Form):
     text = forms.CharField(widget=forms.Textarea,label="", help_text="", max_length=500)

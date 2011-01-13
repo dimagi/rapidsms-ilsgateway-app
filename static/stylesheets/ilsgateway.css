@@ -224,3 +224,10 @@ ul.stats {
     background-image: url(/static/ilsgateway/images/no_data.png);
     background-repeat: no-repeat;                         
 }
+
+div.highlightedMessage {
+  background: green;
+  font-weight: bold;
+  margin: 50px;
+  padding: 10px;                        
+}
