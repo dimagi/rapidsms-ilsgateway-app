@@ -18,7 +18,7 @@ class TestReminder(KeywordHandler):
         self.respond(_("To test a reminder, send \"test [remindername] [msd code]\"; valid tests are soh, delivery, randr. Remember to setup your contact details!"))
 
     def handle(self, text):
-        command, msd_code, addl_parameter = text.lower().split()
+        command, msd_code = text.lower().split()
         if command != 'send_inquiry_message':
             try:
                 sdp = ServiceDeliveryPoint.objects.get(msd_code=msd_code.upper())
