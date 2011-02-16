@@ -108,19 +108,17 @@ class ServiceDeliveryPoint(Location):
     msd_code = models.CharField(max_length=100, blank=True, null=True)
     service_delivery_point_type = models.ForeignKey(ServiceDeliveryPointType)    
     
-#    def stock_levels_array(self):
-#        soh_array = []
-#        for product in Product.objects.all():
-#            if self.stock_on_hand(product.sms_code) == None:
-#                soh_value = "No data"
-#            else:
-#                soh_value = self.stock_on_hand(product.sms_code)
-#            if self.months_of_stock(product.sms_code) == None:
-#                mos_value = "Insufficient data"
-#            else:
-#                mos_value = self.months_of_stock(product.sms_code)
-#            soh_array.append([product.sms_code, soh_value, mos_value])
-#        return soh_array
+    def stock_levels_array(self):
+        soh_array = []
+        for product in Product.objects.all():
+            soh_value = self.stock_on_hand(product.sms_code)
+            if soh_value == None:
+                soh_value = "No data"
+            mos_value = self.months_of_stock(product.sms_code)
+            if mos_value == None:
+                mos_value = "Insufficient data"
+            soh_array.append([product.sms_code, soh_value, mos_value])
+        return soh_array
             
     def contacts(self, contact_type='all'):
         if contact_type == 'all':
@@ -304,8 +302,10 @@ class ServiceDeliveryPoint(Location):
             return 0        
 
     def months_of_stock(self, sms_code):
-        if self.stock_on_hand(sms_code) and self.calculate_monthly_consumption(sms_code):
-            return self.stock_on_hand(sms_code) / self.calculate_monthly_consumption(sms_code)
+        monthly_consumption = self.calculate_monthly_consumption(sms_code)
+        stock_on_hand = self.stock_on_hand(sms_code)
+        if stock_on_hand and monthly_consumption:
+            return round(stock_on_hand / monthly_consumption, 1)
         else:
             return None
         
@@ -375,7 +375,7 @@ class ServiceDeliveryPoint(Location):
             if len(consumption_list) > 0:
                 avg_consumption =  sum([i for i in consumption_list]) / float(len(consumption_list))
                 if avg_consumption > 0:
-                    print "Avg consumption for %s: %s" % (self.name, avg_consumption)
+                    print "Avg consumption for %s (%s): %s" % (self.name, sms_code, avg_consumption)
                     return avg_consumption
                 else:
                     return None 
