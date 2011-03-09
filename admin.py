@@ -63,7 +63,10 @@ class RegionAdmin(admin.ModelAdmin):
 
 class DeliveryGroupAdmin(admin.ModelAdmin):
     model = DeliveryGroup
-    
+
+class ContactDetailInline(admin.TabularInline):
+    model = ContactDetail
+        
 class ILSGatewayUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password', 'service_delivery_point', 'role')}),
@@ -75,6 +78,9 @@ class ILSGatewayUserAdmin(UserAdmin):
     
     form = ILSGatewayUserChangeForm
     add_form = ILSGatewayUserCreationForm
+    inlines = [
+        ContactDetailInline,
+    ]
 
     
 admin.site.register(Product, ProductAdmin)
