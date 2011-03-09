@@ -3,7 +3,7 @@
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
-from datetime import datetime
+from datetime import datetime, date
 from ilsgateway.models import ServiceDeliveryPoint, Product, Facility, ServiceDeliveryPointStatus, ServiceDeliveryPointNote, ContactDetail, ILSGatewayCell
 from django.http import Http404
 from django.template import RequestContext
@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from rapidsms.contrib.messagelog.models import Message
 from utils import *
-from forms import NoteForm, SelectLocationForm, StockInquiryForm
+from forms import NoteForm, SelectLocationForm, StockInquiryForm, SelectProductForm
 from ilsgateway.tables import MessageHistoryTable, CurrentStockStatusTable, CurrentMOSTable, OrderingTable
 from django.contrib.auth.admin import UserAdmin
 from django.views.decorators.csrf import csrf_protect
@@ -27,6 +27,7 @@ from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, Set
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import Site
 from rapidsms.messages import OutgoingMessage
+from dateutil.relativedelta import relativedelta
 
 from django.utils.functional import curry
 from rapidsms.contrib.ajax.utils import call_router
@@ -187,6 +188,27 @@ def supervision(request):
     
 @login_required
 def dashboard(request):
+    form_action = request.get_full_path()
+    month = int(request.GET.get('month', 0))
+    year = int(request.GET.get('year', 0))
+    now = datetime.now()
+    if month == 0:
+        month = now.month 
+            
+    if year == 0:
+        year = now.year 
+        
+    if year == now.year and month == datetime.now().month:
+        show_next_month = False
+    else:
+        show_next_month = True
+    report_date = date(year, month, now.day)
+    month_name = report_date.strftime('%B')
+    #this can't be right
+    next_month_date = report_date + relativedelta(months=+1)
+    previous_month_date = report_date + relativedelta(months=-1)
+    next_month_link = "/?month=%d&year=%d" % (next_month_date.month, next_month_date.year)
+    previous_month_link = "/?month=%d&year=%d" % (previous_month_date.month, previous_month_date.year) 
     contact_detail = ContactDetail.objects.get(user=request.user.ilsgatewayuser)
     #TODO this should be based on values in the DB
     is_allowed_to_change_location = False
@@ -195,19 +217,31 @@ def dashboard(request):
             
     #endTODO
     my_sdp = _get_my_sdp(request)
-    if request.method == 'POST': 
-        form = SelectLocationForm(data=request.POST,
-                                  service_delivery_point = my_sdp) 
-        if form.is_valid():
-            sdp_id = form.cleaned_data['location']
-            request.session['current_sdp_id'] = sdp_id      
-    sdp = _get_current_sdp(request)
-    if contact_detail.is_mohsw_level():
-        form = SelectLocationForm(service_delivery_point = my_sdp,
-                                  initial={'location': ServiceDeliveryPoint.objects.get(pk=1)})         
+    if request.session.get('products'):
+        products = request.session.get('products')
     else:
-        form = SelectLocationForm(service_delivery_point = my_sdp,
-                                  initial={'location': sdp.id}) 
+        products = Product.objects.all()
+    dict = {} 
+    for product in products: 
+        dict[product.id] = True 
+    select_product_form = SelectProductForm(initial={'products': dict,})
+    if request.method == 'POST': 
+        if 'change_product' in request.POST:
+            select_product_form = SelectProductForm(data=request.POST)
+            if select_product_form.is_valid():
+                products = select_product_form.cleaned_data['products']  
+                request.session['products'] = products
+            else:
+                select_product_form = SelectProductForm({'products': dict,})          
+        elif 'change_location' in request.POST:
+            form = SelectLocationForm(data=request.POST,
+                                      service_delivery_point = my_sdp) 
+            if form.is_valid():
+                sdp_id = form.cleaned_data['location']
+                request.session['current_sdp_id'] = sdp_id      
+    sdp = _get_current_sdp(request)
+    form = SelectLocationForm(service_delivery_point = my_sdp,
+                              initial={'location': sdp.id}) 
     language = ''
     if request.LANGUAGE_CODE == 'en':
         language = 'English'
@@ -216,30 +250,34 @@ def dashboard(request):
     elif request.LANGUAGE_CODE == 'es':
         language = 'Spanish'        
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''] ]
+    
     facilities_without_primary_contacts = sdp.child_sdps_without_contacts()
     counts = {}
-    counts['current_submitting_group'] = sdp.child_sdps().filter(delivery_group__name=current_submitting_group() ).count()
-    counts['current_processing_group'] = sdp.child_sdps().filter(delivery_group__name=current_processing_group() ).count()
-    counts['current_delivering_group'] = sdp.child_sdps().filter(delivery_group__name=current_delivering_group).count()
+    counts['current_submitting_group'] = sdp.child_sdps().filter(delivery_group__name=current_submitting_group(report_date.month) ).count()
+    counts['current_processing_group'] = sdp.child_sdps().filter(delivery_group__name=current_processing_group(report_date.month) ).count()
+    counts['current_delivering_group'] = sdp.child_sdps().filter(delivery_group__name=current_delivering_group(report_date.month)).count()
     counts['total'] = counts['current_submitting_group'] + counts['current_processing_group'] + counts['current_delivering_group']
     groups = {}
-    groups['current_submitting_group'] = current_submitting_group()
-    groups['current_processing_group'] = current_processing_group()
-    groups['current_delivering_group'] = current_delivering_group()
+    groups['current_submitting_group'] = current_submitting_group(report_date.month)
+    groups['current_processing_group'] = current_processing_group(report_date.month)
+    groups['current_delivering_group'] = current_delivering_group(report_date.month)
     d1 = []
     d2 = []
     d3 = []
     ticks = []
     index = 1
-    products = Product.objects.all()
     stockouts_by_product = []
     for product in products:
-        stockouts_by_product.append([product.name, sdp.child_sdps_stocked_out(product.sms_code)])
-        d1.append([index, sdp.child_sdps_stocked_out(product.sms_code).count()])
-        d2.append([index, sdp.child_sdps_not_stocked_out(product.sms_code) ])
-        d3.append([index, sdp.child_sdps_no_stock_out_data(product.sms_code) ])
-        ticks.append([ index + .5, str( '<span title="%s">%s</span>' % (product.name, product.sms_code.upper()) ) ])
-        index = index + 2
+        stockouts_by_product.append([product.name, sdp.child_sdps_stocked_out(product.sms_code,
+                                                                              report_date)])
+        d1.append([index, sdp.child_sdps_stocked_out(product.sms_code,
+                                                     report_date).count()])
+        d2.append([index, sdp.child_sdps_not_stocked_out(product.sms_code,
+                                                         report_date) ])
+        d3.append([index, sdp.child_sdps_no_stock_out_data(product.sms_code,
+                                                           report_date) ])
+        ticks.append([ index, str( '<span title="%s">%s</span>' % (product.name, product.sms_code.upper()) ) ])
+        index = index + 1
     bar_data = [
                           {"data" : d1,
                           "label": str(_("Stocked out")), 
@@ -257,22 +295,27 @@ def dashboard(request):
                           }
                   ]
     
-    now = datetime.now()
     message_dates_dict = {}
     randr_inquiry_date = None
     soh_inquiry_date = None
     delivery_inquiry_date = None
 
     randr_statuses = ServiceDeliveryPointStatus.objects.filter(status_type__short_name="r_and_r_reminder_sent_facility", 
-                                                               status_date__range=( beginning_of_month(), end_of_month() ) )
+                                                               status_date__range=( beginning_of_month(report_date.month), end_of_month(report_date.month) ) )
     if randr_statuses:
         randr_inquiry_date = randr_statuses[0].status_date
           
     delivery_statuses = ServiceDeliveryPointStatus.objects.filter(status_type__short_name="delivery_received_reminder_sent_facility", 
-                                                                  status_date__range=( beginning_of_month(), end_of_month() ) )
+                                                                  status_date__range=( beginning_of_month(report_date.month), end_of_month(report_date.month) ) )
     if delivery_statuses:
         delivery_inquiry_date = delivery_statuses[0].status_date
 
+    monthly_data = {'submitted': sdp.child_sdps_submitted_randr_this_month(report_date),
+                    'not_submitted': sdp.child_sdps_not_submitted_randr_this_month(report_date),
+                    'not_responded': sdp.child_sdps_not_responded_randr_this_month(report_date),
+                    'randrs_sent_to_msd': sdp.child_sdps_processing_sent_to_msd(report_date),
+                    'received_delivery': sdp.child_sdps_received_delivery_this_month(report_date)
+                   }
 
     return render_to_response('ilsgateway_dashboard.html',
                               {'sdp': sdp,
@@ -280,15 +323,22 @@ def dashboard(request):
                                'counts': counts,
                                'groups': groups,
                                'form': form,
+                               'select_product_form': select_product_form,
                                'bar_data': bar_data,
                                'bar_ticks': ticks,
+                               'form_action': form_action,
                                'facilities_without_primary_contacts': facilities_without_primary_contacts,
                                'randr_inquiry_date': randr_inquiry_date,
                                'delivery_inquiry_date': delivery_inquiry_date,
                                'max_stockout_graph': sdp.child_sdps().count(),
                                'stockouts_by_product': stockouts_by_product,
-                               #'max_product_count': products.count() * 2,
                                'max_product_count': 12, #limits to 6 products
+                               'show_next_month': show_next_month,
+                               'next_month_link': next_month_link,
+                               'previous_month_link': previous_month_link,
+                               'child_sdps_submitting': sdp.child_sdps().filter(delivery_group__name=current_submitting_group(report_date.month) ).count(),
+                               'monthly_data': monthly_data,
+                               'report_date': report_date,
                                'is_allowed_to_change_location': is_allowed_to_change_location,
                                'breadcrumbs': breadcrumbs
                               },

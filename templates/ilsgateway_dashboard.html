@@ -11,11 +11,9 @@
     <script language="javascript">
         $(document).ready(function() {                                       
             var data = [
-                { label: "{% trans 'Submitted' %}",  data: {{ sdp.child_sdps_submitted_randr_this_month }}, color: "green", description: "This is a description"},
-                { label: "{% blocktrans %}Haven't Submitted{% endblocktrans %}",  data: {{ sdp.child_sdps_not_submitted_randr_this_month }}, color: "red" },
-                { label: "{% blocktrans %}Didn't Respond{% endblocktrans %}",  data: {{ sdp.child_sdps_not_responded_randr_this_month }}, color: "purple" },
-                //{ label: "{% trans 'No Contact Info' %}",  data: {{ sdp.count_child_sdps_submitting_no_primary_contact }}, color: "blue" },
-                { label: "{% trans 'No Reminder Sent' %}",  data: {{ sdp.count_child_sdps_no_randr_reminder_sent }}, color: "orange" }
+                { label: "{% trans 'Submitted' %}",  data: {{ monthly_data.submitted }}, color: "green", description: "This is a description"},
+                { label: "{% blocktrans %}Haven't Submitted{% endblocktrans %}",  data: {{ monthly_data.not_submitted }}, color: "red" },
+                { label: "{% blocktrans %}Didn't Respond{% endblocktrans %}",  data: {{ monthly_data.not_responded }}, color: "purple" }
             ]
             // Pie chart
             
@@ -36,7 +34,10 @@
                 }
             }
 
-            if({{ sdp.child_sdps_submitting.count }} > 0){
+            if({{ child_sdps_submitting }} > 0 ){
+              if( {{monthly_data.submitted}} == 0 && {{monthly_data.not_submitted}} == 0 && {{monthly_data.not_responded}} == 0 ){
+                  $('#placeholder').html("<h4 style=\"text-align:center;\">No data for this period</h4>");                                                               
+              }else
                 $.plot($("#placeholder"), data, 
                 {
                     series: {
@@ -47,7 +48,7 @@
                                 show: true,
                                 radius: .5,
                                 formatter: function(label, series){
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">'+label+'<br/>'+Math.round(series.percent)+'%</div>';
+                                    return '<div style="font-size:8pt;text-align:center;color:white;">'+label+'<br/>'+Math.round(series.percent)+'%</div>';
                                 },
                                 background: { opacity: 0.8 }
                             }                        
@@ -66,15 +67,15 @@
             $("#placeholder").bind("plothover", pieHover);
                                             
             // Bar chart
+            
             bar_options = {                     
                series: {
-                 stack: true,
+                 stack: 0,
                  lines: { show: false, steps: false },
-                 bars: { show: true, barWidth: 1 }
+                 bars: { show: true, barWidth: 0.75, align: 'center' }
                },
                xaxis: { 
-                       ticks: {{ bar_ticks|safe }},
-                       max: {{ max_product_count }}
+                       ticks: {{ bar_ticks|safe }}
                       }, 
                legend: {show: true, container: $("#legend"), noColumns: 3},
                yaxis: {max: {{ max_stockout_graph }},
@@ -82,8 +83,8 @@
                grid: {show: true,
                       tickColor: 'gray',
                       backgroundColor: '#FFFFFF',
-                      hoverable: true,
-                      autoHighlight:true}
+                      hoverable: false,
+                      autoHighlight:false}
             };
             $.plot($("#placeholder2"), {{ bar_data|safe }}, bar_options);    
         });
@@ -98,7 +99,7 @@
 <div>
     <form action="/" method="post">
     {% trans 'Change location' %}: {{ form.location }}
-    <input type="submit" value="{% trans "Change" %}" />
+    <input type="submit" name="change_location" value="{% trans "Change" %}" />
     </form>
 </div>
 {% endif %}
@@ -122,6 +123,10 @@
 </div>
 
 <div class="split-3">
+    <div style="text-align:center;">
+        <a name="charts">
+        <p><a href="{{ previous_month_link }}">&laquo; previous month</a><span style="font-weight:bold;"> {{ report_date|date:"F" }} {{ report_date|date:"Y" }} </span>{% if show_next_month %}<a href="{{ next_month_link }}">next month &raquo;</a>{% else %}<span style="color:gray;">next month &raquo;</span>{% endif %} </p>
+    </div>
     <div class="left">
         <div class="module">
             <h2>{% trans 'R&amp;R Submission Summary' %}</h2>
@@ -141,7 +146,16 @@
             <div id="legend" style="margin-bottom: 5px;">&nbsp;</div>
             <div>Number of Facilities</div>
             <a href="{% url ilsgateway.views.facilities_index %}"><div id="placeholder2" style="margin-left:10px;width:300px;height:300px;" title="{% trans "This graph represents the Product Availability Summary for the current district." %}"></div></a>
-            <div style="padding-top:7px;text-align:center;">Products</div>
+            <div style="padding:7px 0;text-align:center;">Products</div>
+            <form action="{{ form_action }}" method="post">
+                {% for field in select_product_form %}
+                    <div class="fieldWrapper">
+                        {{ field.errors }}
+                        {{ field.label_tag }}
+                        {{ field }}
+                    </div>
+                {% endfor %}
+            <div style="text-align:center;"><input type="submit" name="change_product" value="Update" /></div>
         </div>
     </div>
     <div class="right">
@@ -157,15 +171,15 @@
                 </li>
                 <li>
                     <div class="report">Group {{ groups.current_submitting_group }}: {% trans 'Submitting' %}</div>
-                    <div class="caption">{% blocktrans with sdp.child_sdps_submitted_randr_this_month as submitted and counts.current_submitting_group as count %}{{ submitted }} of {{ count }}{% endblocktrans %} <a href="{% url ordering %}">{% trans 'submitted' %}</a></div>
+                    <div class="caption">{% blocktrans with monthly_data.submitted as submitted and counts.current_submitting_group as count %}{{ submitted }} of {{ count }}{% endblocktrans %} <a href="{% url ordering %}">{% trans 'submitted' %}</a></div>
                 </li>
                 <li>
                     <div class="report">Group {{ groups.current_processing_group }}: {% trans 'Processing' %}</div>
-                    <div class="caption">{% blocktrans with sdp.child_sdps_processing_sent_to_msd as processed and counts.current_processing_group as count %}{{ processed }} of {{ count }} forms sent to MSD{% endblocktrans %}</div>
+                    <div class="caption">{% blocktrans with monthly_data.randrs_sent_to_msd as processed and counts.current_processing_group as count %}{{ processed }} of {{ count }} forms sent to MSD{% endblocktrans %}</div>
                 </li>
                 <li>
                     <div class="report">Group {{ groups.current_delivering_group }}: {% trans "Deliveries" %}</div>
-                    <div class="caption">{% blocktrans with sdp.child_sdps_received_delivery_this_month as delivered and counts.current_delivering_group as count %}{{ delivered }} of {{ count }}{% endblocktrans %} <a href="{% url ordering %}">{% trans 'delivered' %}</a></div>
+                    <div class="caption">{% blocktrans with monthly_data.received_delivery as delivered and counts.current_delivering_group as count %}{{ delivered }} of {{ count }}{% endblocktrans %} <a href="{% url ordering %}">{% trans 'delivered' %}</a></div>
                 </li>
             </ul>
         </div>

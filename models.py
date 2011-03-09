@@ -184,15 +184,18 @@ class ServiceDeliveryPoint(Location):
     def child_sdps_receiving(self):
         return self.child_sdps().filter(delivery_group__name=current_delivering_group())
 
-    def child_sdps_received_delivery_this_month(self):
-        return self._sdps_with_latest_status_this_month_is("delivery_received_facility").count() + \
-               self._sdps_with_latest_status_this_month_is("delivery_quantities_reported").count()
+    def child_sdps_received_delivery_this_month(self,
+                                                report_date=datetime.now() ):
+        return self._sdps_with_latest_status("delivery_received_facility", report_date).count() + \
+               self._sdps_with_latest_status("delivery_quantities_reported", report_date).count()
 
-    def child_sdps_not_received_delivery_this_month(self):
-        return self._sdps_with_latest_status_this_month_is("delivery_not_received_facility").count()
+    def child_sdps_not_received_delivery_this_month(self,
+                                                    report_date=datetime.now() ):
+        return self._sdps_with_latest_status("delivery_not_received_facility", report_date).count()
 
-    def child_sdps_not_responded_delivery_this_month(self):
-        return self._sdps_with_latest_status_this_month_is("delivery_received_reminder_sent_facility").count()
+    def child_sdps_not_responded_delivery_this_month(self,
+                                                     report_date=datetime.now() ):
+        return self._sdps_with_latest_status("delivery_received_reminder_sent_facility", report_date).count()
 
     #R&R
     def child_sdps_submitting(self):
@@ -204,19 +207,26 @@ class ServiceDeliveryPoint(Location):
         return self.child_sdps_submitting().exclude(servicedeliverypointstatus__status_type__short_name__startswith="r_and_r",
                                                     servicedeliverypointstatus__status_date__range=(start_time, end_time)).count()
 
-    def child_sdps_submitted_randr_this_month(self):
-        return self._sdps_with_latest_status_this_month_is("r_and_r_submitted_facility_to_district").count()
+    def child_sdps_submitted_randr_this_month(self,
+                                              report_date=datetime.now() ):
+        return self._sdps_with_latest_status("r_and_r_submitted_facility_to_district",
+                                             report_date).count()
 
-    def child_sdps_not_submitted_randr_this_month(self):
-        return self._sdps_with_latest_status_this_month_is("r_and_r_not_submitted_facility_to_district").count()
+    def child_sdps_not_submitted_randr_this_month(self,
+                                                  report_date=datetime.now() ):
+        return self._sdps_with_latest_status("r_and_r_not_submitted_facility_to_district",
+                                             report_date).count()
 
-    def child_sdps_not_responded_randr_this_month(self):
-        return self._sdps_with_latest_status_this_month_is("r_and_r_reminder_sent_facility").count()
+    def child_sdps_not_responded_randr_this_month(self,
+                                                  report_date=datetime.now() ):
+        return self._sdps_with_latest_status("r_and_r_reminder_sent_facility",
+                                             report_date).count()
 
-    def _sdps_with_latest_status_this_month_is(self, 
-                                               status_short_name, 
-                                               start_time=datetime.now() + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1),
-                                               end_time= datetime.now()):
+    def _sdps_with_latest_status(self, 
+                                 status_short_name, 
+                                 report_date=datetime.now()):  
+        start_time=report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1)
+        end_time= report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999)
         if match('r_and_r', status_short_name):
             sdps = self.child_sdps_submitting()
             startswith = 'r_and_r'
@@ -234,9 +244,12 @@ class ServiceDeliveryPoint(Location):
                                                                status_type__id=status_type_id).distinct()
         return sdp_status
 
-    def child_sdps_processing_sent_to_msd(self, month=datetime.now().month):
+    def child_sdps_processing_sent_to_msd(self, report_date=datetime.now()):
+        start_time=report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1)
+        end_time= report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999)
+        
         sdp_dgr_list = ServiceDeliveryPointDGReport.objects.filter(delivery_group__name=current_processing_group(), 
-                                                                   report_date__range=( beginning_of_month(month), end_of_month(month) ),
+                                                                   report_date__range=( start_time, end_time ),
                                                                    service_delivery_point__id=self.id )
         if not sdp_dgr_list:
             return 0
@@ -250,27 +263,38 @@ class ServiceDeliveryPoint(Location):
         return self.child_sdps().filter(delivery_group__name=current_processing_group())
 
     #SOH
-    def child_sdps_not_responded_soh_this_month(self):
-        return self._sdps_with_latest_status_this_month_is("soh_reminder_sent_facility").count()
+    def child_sdps_not_responded_soh_this_month(self,
+                                                report_date=datetime.now() ):
+        return self._sdps_with_latest_status("soh_reminder_sent_facility",
+                                             report_date).count()
     
-    def child_sdps_responded_soh(self, month=datetime.now().month):
-        return self.child_sdps().filter(servicedeliverypointproductreport__report_date__range=( beginning_of_month(month), end_of_month(month) )).distinct().count()   
+    def child_sdps_responded_soh(self, report_date=datetime.now() ):
+        start_time=report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1)
+        end_time= report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999)        
+        
+        return self.child_sdps().filter(servicedeliverypointproductreport__report_date__range=( start_time, end_time )).distinct().count()   
     
     def child_sdps_stocked_out(self, 
-                               sms_code):
-        inner_qs = self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code) \
+                               sms_code,
+                               end_date=datetime.now()):
+        inner_qs = self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code,
+                                            servicedeliverypointproductreport__report_date__lt=end_date) \
                     .annotate(pk=Max('servicedeliverypointproductreport__id'))
         sdps = ServiceDeliveryPoint.objects.filter(servicedeliverypointproductreport__id__in=inner_qs.values('pk').query,
                                                    servicedeliverypointproductreport__quantity=0).distinct()
         return sdps
     
-    def child_sdps_not_stocked_out(self, sms_code):
+    def child_sdps_not_stocked_out(self, sms_code, report_date=datetime.now() ):
+        start_time=report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1)
+        end_time= report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999)
+        
         return self.child_sdps().filter(servicedeliverypointproductreport__product__sms_code=sms_code,
                                         servicedeliverypointproductreport__quantity__gt=0,
-                                        servicedeliverypointproductreport__report_date__range=( beginning_of_month(), end_of_month() )).distinct().count()
+                                        servicedeliverypointproductreport__report_date__range=( start_time, 
+                                                                                                end_time )).distinct().count()
     
-    def child_sdps_no_stock_out_data(self, sms_code):
-        return self.child_sdps().count() - self.child_sdps_not_stocked_out(sms_code) - self.child_sdps_stocked_out(sms_code).count()
+    def child_sdps_no_stock_out_data(self, sms_code, report_date):
+        return self.child_sdps().count() - self.child_sdps_not_stocked_out(sms_code, report_date) - self.child_sdps_stocked_out(sms_code, report_date).count()
 
     def child_sdps_percentage_reporting_stock_this_month(self):
         if self.child_sdps().count() > 0:
@@ -281,13 +305,10 @@ class ServiceDeliveryPoint(Location):
 
     def child_sdps_percentage_reporting_stock_last_month(self):
         now = datetime.now()
-        if now.month == 1:
-            last_month = 12
-        else:
-            last_month = now.month - 1
+        report_date =  now + relativedelta(months=-1)
 
         if self.child_sdps().count() > 0:
-            percentage = ( (self.child_sdps_responded_soh(last_month) * 100 ) / self.child_sdps().count() ) 
+            percentage = ( (self.child_sdps_responded_soh(report_date) * 100 ) / self.child_sdps().count() ) 
         else:
             percentage = 0
         return "%d " % percentage
@@ -375,7 +396,7 @@ class ServiceDeliveryPoint(Location):
             if len(consumption_list) > 0:
                 avg_consumption =  sum([i for i in consumption_list]) / float(len(consumption_list))
                 if avg_consumption > 0:
-                    print "Avg consumption for %s (%s): %s" % (self.name, sms_code, avg_consumption)
+                    #print "Avg consumption for %s (%s): %s" % (self.name, sms_code, avg_consumption)
                     return avg_consumption
                 else:
                     return None 

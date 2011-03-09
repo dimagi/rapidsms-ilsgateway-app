@@ -65,10 +65,17 @@ class ContactDetailForm(forms.ModelForm):
             print conn
         return model            
 
+class SelectProductForm(forms.Form):
+    products = forms.ModelMultipleChoiceField(Product.objects.all(), 
+                                              required=False, 
+                                              widget=forms.CheckboxSelectMultiple(), 
+                                              label='',
+                                              help_text="")    
+
 class StockInquiryForm(forms.Form):
-    facilities = forms.ModelMultipleChoiceField(queryset=Facility.objects.all(), required=False)
-    districts = forms.ModelMultipleChoiceField(queryset=District.objects.all(), required=False)
     regions = forms.ModelMultipleChoiceField(queryset=Region.objects.all(), required=False)           
+    districts = forms.ModelMultipleChoiceField(queryset=District.objects.all(), required=False)
+    facilities = forms.ModelMultipleChoiceField(queryset=Facility.objects.all(), required=False)
     product = forms.ModelChoiceField(help_text="(If you don't see the product you are expecting, go to product administration and add a Product Code/MSD Code" ,
                                      queryset=Product.objects.exclude(Q(product_code__isnull=True) | Q(product_code__exact='')).order_by('name'))
 

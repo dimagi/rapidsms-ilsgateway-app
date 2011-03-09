@@ -12,6 +12,7 @@
     {% if message %}<div class="highlightedMessage">{{ message }}</div>{% endif %}
     <h2>{% trans 'Stock Inquiry Form' %}</h2>
         <form action="{% url ilsgateway.views.stock_inquiry %}" method="post">
+        <p style="color:red;font-weight: bold;">{% trans 'Caution: stock inquiries will generate a message to ALL recipients at the selected locations' %}:</p>
         <p>{% trans 'Send a stock inquiry to a facility' %}:</p>
         {{ form.as_p }}
         <input type="submit" value="Submit" />
