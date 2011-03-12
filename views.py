@@ -167,6 +167,7 @@ def password_change_done(request, template_name='accounts/password_change_done.h
                               {'language': language}, 
                               context_instance=RequestContext(request))
 
+@login_required
 def supervision(request):
     sdp = _get_current_sdp(request)
     
