@@ -441,7 +441,8 @@ def facilities_index(request, view_type='inventory'):
         row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
                 'data': facility.msd_code},
                {'data': facility.delivery_group},
-               {'data': facility.name}]
+               {'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]),
+                'data': facility.name}]
         for product in Product.objects.all():
             if view_type=="inventory":
                 quantity = facility.stock_on_hand(product.sms_code, report_date)
