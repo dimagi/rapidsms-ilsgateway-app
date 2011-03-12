@@ -403,8 +403,9 @@ class ServiceDeliveryPoint(Location):
             else:
                 return None
 
-    def stock_on_hand(self, sms_code):
-        reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
+    def stock_on_hand(self, sms_code, end_date=datetime.now() ):
+        reports = ServiceDeliveryPointProductReport.objects.filter(report_date__lt=end_date,
+                                                service_delivery_point__id=self.id,
                                                 product__sms_code=sms_code,
                                                 report_type__sms_code="soh") 
         if reports:

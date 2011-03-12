@@ -380,6 +380,32 @@ def note_history(request, facility_id):
 
 @login_required
 def facilities_index(request, view_type='inventory'):
+    month = int(request.GET.get('month', 0))
+    year = int(request.GET.get('year', 0))
+    order_by = request.GET.get('order_by', 'delivery_group')
+
+    now = datetime.now()
+    if month == 0:
+        month = now.month 
+            
+    if year == 0:
+        year = now.year 
+        
+    if year == now.year and month == datetime.now().month:
+        show_next_month = False
+    else:
+        show_next_month = True
+    report_date = date(year, month, now.day)
+    month_name = report_date.strftime('%B')
+    #this can't be right
+    next_month_date = report_date + relativedelta(months=+1)
+    previous_month_date = report_date + relativedelta(months=-1)
+    next_month_link = "/facilities/%s/?month=%d&year=%d" % (view_type, next_month_date.month, next_month_date.year)
+    previous_month_link = "/facilities/%s/?month=%d&year=%d" % (view_type, previous_month_date.month, previous_month_date.year) 
+    if order_by:
+        next_month_link += '&order_by=msd_code'
+        previous_month_link += '&order_by=%s' % order_by
+
     sdp_id = request.session.get('current_sdp_id')
     if sdp_id:
         sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
@@ -390,22 +416,75 @@ def facilities_index(request, view_type='inventory'):
         breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Stock on Hand')] ]
     else:
         breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Months of Stock')] ]
-    facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
         
-    if view_type=="inventory":    
-        status_table = CurrentStockStatusTable(facilities, 
-                                               request=request,
-                                               cell_class=ILSGatewayCell)
-    else:
-        status_table = CurrentMOSTable(facilities, 
-                                       request=request,
-                                       cell_class=ILSGatewayCell)
-                                       
+    facilities = Facility.objects.filter(parent_id=sdp.id).order_by(order_by, "name")
+    data_table = [] 
+    headers = [ ['msd_code', 'MSD Code'],
+                ['delivery_group', 'Delivery Group'],
+                ['name', 'Facility Name'] ]
+    header_row = []
+    for header, header_name in headers:
+        link='?'
+        link += 'month=%d&year=%d' % (report_date.month, report_date.year)
+        link += '&order_by=-%s' % header if (order_by == header) else '&order_by=%s' % header                    
+        header_row.append({'sorted': 'sorted' if re.search(header, order_by) else None,
+                           'direction': 'desc' if re.search('-', order_by) else 'asc',
+                           'link': link,
+                           'data': header if not header_name else header_name})
+    
+    for product in Product.objects.all():
+        header_row.append({'data': product.name})
+
+    counter = 0
+    for facility in facilities:
+        row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
+                'data': facility.msd_code},
+               {'data': facility.delivery_group},
+               {'data': facility.name}]
+        for product in Product.objects.all():
+            if view_type=="inventory":
+                quantity = facility.stock_on_hand(product.sms_code, report_date)
+                cell_class = ''
+                if quantity == None:
+                    cell_class = 'insufficient_data'
+                    quantity = 'No data'
+                elif quantity == 0:
+                    cell_class = 'zero_count'
+                    
+                row.append({'data': quantity,
+                            'cell_class': cell_class})
+            elif view_type == "months_of_stock":
+                quantity = facility.months_of_stock(product.sms_code)
+                cell_class = ''
+                if quantity == None:
+                    cell_class = 'insufficient_data'
+                    quantity = 'Insufficient data'
+                elif quantity == 0:
+                    cell_class = 'zero_count'
+                elif quantity < settings.MONTHS_OF_STOCK_MIN:
+                    cell_class = 'under_min'                    
+                elif quantity > settings.MONTHS_OF_STOCK_MAX:                   
+                    cell_class = 'exceeds_max'
+                row.append({'data': quantity,
+                            'cell_class': cell_class})
+
+        data_table.append(row)
+        counter += 1
+             
+    status_table = CurrentMOSTable(facilities,
+                                           request,
+                                           cell_class=ILSGatewayCell)
         
     return render_to_response("facilities_list.html", 
                               {"breadcrumbs": breadcrumbs,
                                "view_type": view_type,
-                               "status_table": status_table},
+                               'show_next_month': show_next_month,
+                               'next_month_link': next_month_link,
+                               'previous_month_link': previous_month_link,
+                               'report_date': report_date,                               
+                               "status_table": status_table,
+                               "data_table": data_table,
+                               "header_row": header_row},
                               context_instance=RequestContext(request),)
 
 @login_required
