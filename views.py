@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from django.shortcuts import render_to_response
 from datetime import datetime, date
 from ilsgateway.models import ServiceDeliveryPoint, Product, Facility, ServiceDeliveryPointStatus, ServiceDeliveryPointNote, ContactDetail, ILSGatewayCell
@@ -381,30 +381,22 @@ def note_history(request, facility_id):
 
 @login_required
 def facilities_index(request, view_type='inventory'):
-    month = int(request.GET.get('month', 0))
-    year = int(request.GET.get('year', 0))
-    order_by = request.GET.get('order_by', 'delivery_group')
-
     now = datetime.now()
-    if month == 0:
-        month = now.month 
-            
-    if year == 0:
-        year = now.year 
-        
+    month = int(request.GET.get('month', now.month))
+    year = int(request.GET.get('year', now.year))
+    order_by = request.GET.get('order_by', 'delivery_group')
+    show_next_month = True
     if year == now.year and month == datetime.now().month:
         show_next_month = False
-    else:
-        show_next_month = True
+        
     report_date = date(year, month, now.day)
     month_name = report_date.strftime('%B')
-    #this can't be right
     next_month_date = report_date + relativedelta(months=+1)
     previous_month_date = report_date + relativedelta(months=-1)
     next_month_link = "/facilities/%s/?month=%d&year=%d" % (view_type, next_month_date.month, next_month_date.year)
     previous_month_link = "/facilities/%s/?month=%d&year=%d" % (view_type, previous_month_date.month, previous_month_date.year) 
     if order_by:
-        next_month_link += '&order_by=msd_code'
+        next_month_link += '&order_by=%s' % order_by
         previous_month_link += '&order_by=%s' % order_by
 
     sdp_id = request.session.get('current_sdp_id')
@@ -419,11 +411,20 @@ def facilities_index(request, view_type='inventory'):
         breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Months of Stock')] ]
         
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by(order_by, "name")
+    
+    link='?'
+    link += 'month=%d&year=%d' % (report_date.month, report_date.year)
+    link += '&order_by=%s' % order_by
+    # not sure why urlconf doesn't work here                    
+    mos_link = '/facilities/months_of_stock/' + link
+    inv_link = '/facilities/inventory/' + link
+
     data_table = [] 
     headers = [ ['msd_code', 'MSD Code'],
                 ['delivery_group', 'Delivery Group'],
                 ['name', 'Facility Name'] ]
     header_row = []
+
     for header, header_name in headers:
         link='?'
         link += 'month=%d&year=%d' % (report_date.month, report_date.year)
@@ -456,7 +457,7 @@ def facilities_index(request, view_type='inventory'):
                 row.append({'data': quantity,
                             'cell_class': cell_class})
             elif view_type == "months_of_stock":
-                quantity = facility.months_of_stock(product.sms_code)
+                quantity = facility.months_of_stock(product.sms_code, report_date)
                 cell_class = ''
                 if quantity == None:
                     cell_class = 'insufficient_data'
@@ -472,36 +473,119 @@ def facilities_index(request, view_type='inventory'):
 
         data_table.append(row)
         counter += 1
-             
-    status_table = CurrentMOSTable(facilities,
-                                           request,
-                                           cell_class=ILSGatewayCell)
-        
+                     
     return render_to_response("facilities_list.html", 
                               {"breadcrumbs": breadcrumbs,
                                "view_type": view_type,
                                'show_next_month': show_next_month,
                                'next_month_link': next_month_link,
                                'previous_month_link': previous_month_link,
-                               'report_date': report_date,                               
-                               "status_table": status_table,
-                               "data_table": data_table,
-                               "header_row": header_row},
+                               'report_date': report_date,           
+                               "header_row": header_row,
+                               "mos_link": mos_link,
+                               "inv_link": inv_link,
+                               "data_table": data_table},
                               context_instance=RequestContext(request),)
 
 @login_required
 def facilities_ordering(request):
+
+    #setup default facility from cookie
     sdp_id = request.session.get('current_sdp_id')
     if sdp_id:
         sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
     else:
         sdp = request.user.ilsgatewayuser.service_delivery_point
+        
+    #breadcrumbs
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Ordering Status')] ]
-    facilities = Facility.objects.filter(parent_id=sdp.id).order_by("delivery_group", "name")
+    
     products = Product.objects.all()
+
+    #date filtering
+    now = datetime.now()
+    month = int(request.GET.get('month', now.month))
+    year = int(request.GET.get('year', now.year))
+    order_by = request.GET.get('order_by', 'delivery_group')
+    show_next_month = True
+    if year == now.year and month == datetime.now().month:
+        show_next_month = False    
+    report_date = date(year, month, now.day)
+    month_name = report_date.strftime('%B')
+    next_month_date = report_date + relativedelta(months=+1)
+    previous_month_date = report_date + relativedelta(months=-1)
+
+    next_month_link = reverse('ordering') + "?month=%d&year=%d" % (next_month_date.month, next_month_date.year)
+    previous_month_link = reverse('ordering') + "?month=%d&year=%d" % (previous_month_date.month, previous_month_date.year) 
+    if order_by:
+        next_month_link += '&order_by=%s' % order_by
+        previous_month_link += '&order_by=%s' % order_by
+    
+    #setup the table
+    facilities = Facility.objects.filter(parent_id=sdp.id).order_by(order_by, "name")
+    data_table = [] 
+    headers = [ ['msd_code', 'MSD Code', True],
+                ['delivery_group', 'Delivery Group', True],
+                ['name', 'Facility Name', True],
+                ['randr_status', 'R&R Status', False],
+                ['date', 'Date', False],
+                ['delivery_status', 'Delivery Status', False],
+                ['date', 'Date', False] ]
+    header_row = []
+
+    for header, header_name, sortable in headers:
+        link = ''
+        if sortable:
+            link +='?'
+            link += 'month=%d&year=%d' % (report_date.month, report_date.year)
+            link += '&order_by=-%s' % header if (order_by == header) else '&order_by=%s' % header                    
+        header_row.append({'sorted': 'sorted' if re.search(header, order_by) else None,
+                           'direction': 'desc' if re.search('-', order_by) else 'asc',
+                           'link': link,
+                           'data': header if not header_name else header_name})
+    
+    counter = 0
+    for facility in facilities:
+        randr_status_name = ''
+        randr_status_date = ''
+        randr_status_code = ''
+        delivery_status_name = ''
+        delivery_status_date = ''
+        delivery_status_code = ''
+        randr_status = facility.randr_status(report_date)
+        delivery_status = facility.delivery_status(report_date)
+        
+        if randr_status:
+            randr_status_name = randr_status.status_type.name
+            randr_status_date = randr_status.status_date
+            randr_status_code = randr_status.status_type.short_name
+        if delivery_status:
+            delivery_status_name = delivery_status.status_type.name
+            delivery_status_date = delivery_status.status_date
+            delivery_status_code = delivery_status.status_type.short_name
+        row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
+                'data': facility.msd_code},
+               {'data': facility.delivery_group},
+               {'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]),
+                'data': facility.name},
+               {'data': randr_status_name, 'cell_class': randr_status_code},
+               {'data': randr_status_date, 'cell_class': randr_status_code},
+               {'data': delivery_status_name, 'cell_class': delivery_status_code},
+               {'data': delivery_status_date, 'cell_class': delivery_status_code}]
+
+        data_table.append(row)
+        counter += 1
+
+    
     return render_to_response("facilities_ordering.html", 
                               {"facilities": facilities,
                                "products": products,
+                               'show_next_month': show_next_month,
+                               'next_month_link': next_month_link,
+                               'previous_month_link': previous_month_link,
+                               'report_date': report_date,
+                               'data_table': data_table,                                          
+                               "header_row": header_row,                               
                                "breadcrumbs": breadcrumbs,
                                "sdp": sdp,
                                "ordering_table": OrderingTable(facilities, request=request, cell_class=ILSGatewayCell),                               

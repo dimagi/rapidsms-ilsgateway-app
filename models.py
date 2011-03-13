@@ -155,16 +155,20 @@ class ServiceDeliveryPoint(Location):
         sdp_dgr = ServiceDeliveryPointDGReport(service_delivery_point = self,  **kwargs)
         sdp_dgr.save()        
         
-    def randr_status(self):
+    def randr_status(self, report_date=datetime.now() ):
         try:
-            status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r').latest()
+            status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r',
+                                                                status_date__range=(report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1),
+                                                                                    report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999) )).latest()
             return status
         except:
             return None
     
-    def delivery_status(self):
+    def delivery_status(self, report_date=datetime.now() ):
         try:
-            status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='delivery').latest()
+            status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='delivery',
+                                                                status_date__range=(report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1),
+                                                                                    report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999) )).latest()
             return status
         except:
             return None
@@ -322,9 +326,9 @@ class ServiceDeliveryPoint(Location):
         else:
             return 0        
 
-    def months_of_stock(self, sms_code):
+    def months_of_stock(self, sms_code, report_date=datetime.now() ):
         monthly_consumption = self.calculate_monthly_consumption(sms_code)
-        stock_on_hand = self.stock_on_hand(sms_code)
+        stock_on_hand = self.stock_on_hand(sms_code, report_date)
         if stock_on_hand and monthly_consumption:
             return round(stock_on_hand / monthly_consumption, 1)
         else:
@@ -391,12 +395,10 @@ class ServiceDeliveryPoint(Location):
                     consumption = current_month_vals['opening_balance'] + current_month_vals['dlvd'] + current_month_vals['la'] - current_month_vals['soh'] 
                 if consumption is not None:
                     consumption_list.append(consumption)
-                    logging.debug("  Consumption %s" % consumption) 
-            logging.debug("  %s" % consumption_list)
             if len(consumption_list) > 0:
                 avg_consumption =  sum([i for i in consumption_list]) / float(len(consumption_list))
                 if avg_consumption > 0:
-                    #print "Avg consumption for %s (%s): %s" % (self.name, sms_code, avg_consumption)
+                    print "Avg consumption for %s (%s): %s" % (self.name, sms_code, avg_consumption)
                     return avg_consumption
                 else:
                     return None 
@@ -404,10 +406,10 @@ class ServiceDeliveryPoint(Location):
                 return None
 
     def stock_on_hand(self, sms_code, end_date=datetime.now() ):
-        reports = ServiceDeliveryPointProductReport.objects.filter(report_date__lt=end_date,
-                                                service_delivery_point__id=self.id,
-                                                product__sms_code=sms_code,
-                                                report_type__sms_code="soh") 
+        reports = ServiceDeliveryPointProductReport.objects.filter(report_date__range=(end_date + relativedelta(weeks=-1), end_date + relativedelta(weeks=+1) ),
+                                                                   service_delivery_point__id=self.id,
+                                                                   product__sms_code=sms_code,
+                                                                   report_type__sms_code="soh") 
         if reports:
             return reports[0].quantity                                 
         else:

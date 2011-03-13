@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load djtables_tags %}
-{% load custom_table_tags %}
 
 {% block title %}{% trans "Current Stock Status" %}{{ block.super }}{% endblock %}
 
@@ -13,7 +11,7 @@
 <div class="module">
     <h2>{% trans 'Current Stock Status' %}</h2>
     <div class="toolbar">
-        {% if view_type == 'inventory' %}<a href="/facilities/months_of_stock/">{% trans 'Show months of stock' %}</a>{% else %}<a href="/facilities/inventory/">{% trans 'Show inventory' %}</a>{% endif %}
+        {% if view_type == 'inventory' %}<a href="{{ mos_link }}">{% trans 'Show months of stock' %}</a>{% else %}<a href="{{ inv_link }}">{% trans 'Show inventory' %}</a>{% endif %}
     </div>    
     <table class="stock">
         <thead><tr>{% for cell in header_row %}<th class="{{ cell.sorted }} {{ cell.direction }}">{% if cell.link %}<a href="{{ cell.link }}">{% endif %}{{ cell.data }}{% if cell.link %}<span></span></a>{% endif %}</th>{% endfor %}</tr></thead>
