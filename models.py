@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
-
 import logging
 from dateutil.rrule import *
 from django.db import models
@@ -173,6 +170,15 @@ class ServiceDeliveryPoint(Location):
         except:
             return None
         
+    def supervision_status(self, report_date=datetime.now() ):
+        try:
+            status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='supervision',
+                                                                status_date__range=(report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1),
+                                                                                    report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999) )).latest()
+            return status
+        except:
+            return None
+    
     def get_products(self):
         return Product.objects.filter(servicedeliverypoint=self.id).distinct()
     

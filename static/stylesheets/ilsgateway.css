@@ -44,11 +44,14 @@ span.delivery_not_received_facility,
 span.r_and_r_reminder_sent_facility, 
 span.delivery_received_reminder_sent_facility,
 span.zero_count,
-span.no_delivery_status_reported {
+span.no_delivery_status_reported,
+span.supervision_not_received_facility,
+span.supervision_reminder_sent_facility {
    color: red;
 }
 
-span.exceeds_max { 
+span.exceeds_max,
+span.supervision_received_facility { 
    color: green;
 }
 

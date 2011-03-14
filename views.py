@@ -180,10 +180,76 @@ def supervision(request):
         language = 'Spanish'        
     breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Supervision'), ''] ]
     notes = ServiceDeliveryPointNote.objects.filter(service_delivery_point__parent_id=sdp.id).order_by('-created_at')
+    
+    #date filtering
+    now = datetime.now()
+    month = int(request.GET.get('month', now.month))
+    year = int(request.GET.get('year', now.year))
+    order_by = request.GET.get('order_by', 'delivery_group')
+    show_next_month = True
+    if year == now.year and month == datetime.now().month:
+        show_next_month = False    
+    report_date = date(year, month, now.day)
+    month_name = report_date.strftime('%B')
+    next_month_date = report_date + relativedelta(months=+1)
+    previous_month_date = report_date + relativedelta(months=-1)
+
+    next_month_link = reverse('supervision') + "?month=%d&year=%d" % (next_month_date.month, next_month_date.year)
+    previous_month_link = reverse('supervision') + "?month=%d&year=%d" % (previous_month_date.month, previous_month_date.year) 
+    if order_by:
+        next_month_link += '&order_by=%s' % order_by
+        previous_month_link += '&order_by=%s' % order_by
+    
+    #setup the table
+    facilities = Facility.objects.filter(parent_id=sdp.id).order_by(order_by, "name")
+    data_table = [] 
+    headers = [ ['msd_code', 'MSD Code', True],
+                ['delivery_group', 'Delivery Group', True],
+                ['name', 'Facility Name', True],
+                ['supervision_status', 'Supervision Status', False],
+                ['date', 'Date', False] ]
+    header_row = []
+
+    for header, header_name, sortable in headers:
+        link = ''
+        if sortable:
+            link +='?'
+            link += 'month=%d&year=%d' % (report_date.month, report_date.year)
+            link += '&order_by=-%s' % header if (order_by == header) else '&order_by=%s' % header                    
+        header_row.append({'sorted': 'sorted' if re.search(header, order_by) else None,
+                           'direction': 'desc' if re.search('-', order_by) else 'asc',
+                           'link': link,
+                           'data': header if not header_name else header_name})
+    
+    for facility in facilities:
+        supervision_status_name = ''
+        supervision_status_date = ''
+        supervision_status_code = ''
+        supervision_status = facility.supervision_status(report_date)
+        if supervision_status:
+            supervision_status_name = supervision_status.status_type.name
+            supervision_status_date = supervision_status.status_date
+            supervision_status_code = supervision_status.status_type.short_name
+        row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
+                'data': facility.msd_code},
+               {'data': facility.delivery_group},
+               {'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]),
+                'data': facility.name},
+               {'data': supervision_status_name, 'cell_class': supervision_status_code},
+               {'data': supervision_status_date, 'cell_class': supervision_status_code}]
+        
+        data_table.append(row)
+    
     return render_to_response('supervision.html',
                               {'language': language,
                                'breadcrumbs': breadcrumbs,
                                'notes': notes,
+                               'show_next_month': show_next_month,
+                               'next_month_link': next_month_link,
+                               'previous_month_link': previous_month_link,
+                               'report_date': report_date,           
+                               "header_row": header_row,
+                               "data_table": data_table,                               
                                'sdp': sdp},
                               context_instance=RequestContext(request))
     
