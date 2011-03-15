@@ -665,7 +665,7 @@ def stock_inquiry(request):
         sdp = ServiceDeliveryPoint.objects.get(id=sdp_id)
     else:
         sdp = request.user.ilsgatewayuser.service_delivery_point
-    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Ordering Status')] ]
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Stock inquiry')] ]
     message = ''
     if request.method == 'POST': 
         form = StockInquiryForm(request.POST) 
