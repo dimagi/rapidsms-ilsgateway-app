@@ -160,6 +160,30 @@ class ServiceDeliveryPoint(Location):
             return status
         except:
             return None
+
+    def randr_status_by_quarter(self, 
+                                report_date=datetime.now() ):
+        print report_date
+        try:
+            if report_date.month <= 3:
+                report_date_start = datetime(report_date.year, 1, 1)
+                report_date_end = datetime(report_date.year, 4, 1)
+            elif report_date.month <= 6:
+                report_date_start = datetime(report_date.year, 4, 1)
+                report_date_end = datetime(report_date.year, 7, 1)
+            elif report_date.month <= 9:
+                report_date_start = datetime(report_date.year, 7, 1)
+                report_date_end = datetime(report_date.year, 10, 1)
+            else:
+                report_date_start = datetime(report_date.year, 10, 1)
+                report_date_end = datetime(report_date.year+1, 1, 1)
+
+            status = self.servicedeliverypointstatus_set.filter(status_type__short_name__startswith='r_and_r',
+                                                                status_date__range=(report_date_start,
+                                                                                    report_date_end)).latest()
+            return status
+        except:
+            return None
     
     def delivery_status(self, report_date=datetime.now() ):
         try:
@@ -191,8 +215,8 @@ class ServiceDeliveryPoint(Location):
         return ServiceDeliveryPoint.objects.filter(parent_id=self.id)
     
     #Delivery
-    def child_sdps_receiving(self):
-        return self.child_sdps().filter(delivery_group__name=current_delivering_group())
+    def child_sdps_receiving(self, report_date=datetime.now() ):
+        return self.child_sdps().filter(delivery_group__name=current_delivering_group(report_date.month))
 
     def child_sdps_received_delivery_this_month(self,
                                                 report_date=datetime.now() ):
@@ -208,8 +232,8 @@ class ServiceDeliveryPoint(Location):
         return self._sdps_with_latest_status("delivery_received_reminder_sent_facility", report_date).count()
 
     #R&R
-    def child_sdps_submitting(self):
-        return self.child_sdps().filter(delivery_group__name=current_submitting_group())
+    def child_sdps_submitting(self, report_date=datetime.now() ):
+        return self.child_sdps().filter(delivery_group__name=current_submitting_group(report_date.month))
 
     def count_child_sdps_no_randr_reminder_sent(self,                                               
                                           start_time=datetime.now() + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1),
@@ -234,11 +258,11 @@ class ServiceDeliveryPoint(Location):
 
     def _sdps_with_latest_status(self, 
                                  status_short_name, 
-                                 report_date=datetime.now()):  
+                                 report_date=datetime.now()): 
         start_time=report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999, months=-1)
         end_time= report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999)
         if match('r_and_r', status_short_name):
-            sdps = self.child_sdps_submitting()
+            sdps = self.child_sdps_submitting(report_date)
             startswith = 'r_and_r'
         elif match('delivery', status_short_name):
             sdps = self.child_sdps_receiving()
@@ -269,8 +293,8 @@ class ServiceDeliveryPoint(Location):
     def count_child_sdps_submitting_no_primary_contact(self):
         return self.child_sdps_submitting().count() - self.child_sdps_submitting().filter(contactdetail__primary=True).count()
     
-    def child_sdps_processing(self):
-        return self.child_sdps().filter(delivery_group__name=current_processing_group())
+    def child_sdps_processing(self, report_date=datetime.now() ):
+        return self.child_sdps().filter(delivery_group__name=current_processing_group(report_date.month))
 
     #SOH
     def child_sdps_not_responded_soh_this_month(self,
@@ -404,7 +428,7 @@ class ServiceDeliveryPoint(Location):
             if len(consumption_list) > 0:
                 avg_consumption =  sum([i for i in consumption_list]) / float(len(consumption_list))
                 if avg_consumption > 0:
-                    print "Avg consumption for %s (%s): %s" % (self.name, sms_code, avg_consumption)
+                    #print "Avg consumption for %s (%s): %s" % (self.name, sms_code, avg_consumption)
                     return avg_consumption
                 else:
                     return None 

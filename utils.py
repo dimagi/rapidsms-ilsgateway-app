@@ -8,6 +8,16 @@ import logging
 
 def crumb(service_delivery_point):
     return "<div><a href="">this is a test | </a></div>"
+
+def get_quarter(the_date=datetime.now() ):
+    if the_date.month <= 3:
+        return 1
+    elif the_date.month <= 6:
+        return 2
+    elif the_date.month <= 9:
+        return 3
+    else:
+        return 4
     
 def end_of_month(month=datetime.now().month):
     if month == 12:

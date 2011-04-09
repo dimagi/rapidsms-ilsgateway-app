@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# vim: ai ts=4 sts=4 et sw=4
+
 import logging
 from rapidsms.models import Connection 
 from rapidsms.messages import OutgoingMessage
@@ -15,8 +18,8 @@ from django.db.models import Count, Max
 # Callback Functions #
 ######################
 
-OFFSET = relativedelta(days=+1)
-TEST_MODE = False
+OFFSET = relativedelta(days=-20)
+TEST_MODE = True
 #  Next steps: 
 #  1) collapse into a single callback method DONE
 #  2) change to a config dict
@@ -206,7 +209,7 @@ def district_delinquent_deliveries_summary(router):
 
 def facility_soh_reminder(router):
     #Reminder window: the last weekday of the month at 2pm to the last weekday of the following month at 2pm 
-    monthday=31
+    monthday=28
     
     reminder_name = "soh_reminder_sent_facility"
     

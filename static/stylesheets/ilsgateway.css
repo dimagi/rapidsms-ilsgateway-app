@@ -51,12 +51,17 @@ span.supervision_reminder_sent_facility {
 }
 
 span.exceeds_max,
-span.supervision_received_facility { 
+span.supervision_received_facility,
+span.randr_submitted_facility_to_district { 
    color: green;
 }
 
 span.under_min {
    color: red;
+}
+
+span.randr_submitted_facility_to_district_wrong_date {
+   color: orange;
 }
 
 span.not_reported,

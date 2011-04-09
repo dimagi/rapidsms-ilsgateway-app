@@ -168,6 +168,185 @@ def password_change_done(request, template_name='accounts/password_change_done.h
                               context_instance=RequestContext(request))
 
 @login_required
+def reports(request):
+    sdp = _get_current_sdp(request)
+    
+    language = ''
+    if request.LANGUAGE_CODE == 'en':
+        language = 'English'
+    elif request.LANGUAGE_CODE == 'sw':
+        language = 'Swahili'
+    elif request.LANGUAGE_CODE == 'es':
+        language = 'Spanish'        
+    breadcrumbs = [[sdp.parent.name, ''], [sdp.name, ''], [_('Reports'), ''] ]
+
+    #date filtering
+    now = datetime.now()
+    month = int(request.GET.get('month', now.month))
+    year = int(request.GET.get('year', now.year))
+    order_by = request.GET.get('order_by', 'delivery_group')
+    show_next_month = True
+    if year == now.year and month == datetime.now().month:
+        show_next_month = False    
+    report_date = date(year, month, 1)
+    month_name = report_date.strftime('%B')
+    next_month_date = report_date + relativedelta(months=+1)
+    previous_month_date = report_date + relativedelta(months=-1)
+
+    next_month_link = reverse('reports') + "?month=%d&year=%d" % (next_month_date.month, next_month_date.year)
+    previous_month_link = reverse('reports') + "?month=%d&year=%d" % (previous_month_date.month, previous_month_date.year) 
+    if order_by:
+        next_month_link += '&order_by=%s' % order_by
+        previous_month_link += '&order_by=%s' % order_by
+
+    #setup the table
+    facilities = sdp.child_sdps().filter(delivery_group__name=current_submitting_group(report_date.month) ).order_by(order_by, "name")
+    randr_data_table = [] 
+    headers = [ ['msd_code', 'MSD Code', True],
+                ['name', 'Facility Name', True] ]
+    
+    if get_quarter(report_date) == 4:
+        quarter = 1
+    else:
+        quarter = get_quarter(report_date) + 1
+    i = 1
+    while i <= 4:
+        headers.append(['', 'Q%s' % quarter, False])
+        i += 1
+        if quarter == 4:
+            quarter = 1
+        else:
+            quarter = quarter + 1
+    headers.append(['', 'Contact', False])
+    randr_header_row = []
+
+    for header, header_name, sortable in headers:
+        link = ''
+        if sortable:
+            link +='?'
+            link += 'month=%d&year=%d' % (report_date.month, report_date.year)
+            link += '&order_by=-%s' % header if (order_by == header) else '&order_by=%s' % header                    
+        randr_header_row.append({'sorted': 'sorted' if re.search(header, order_by) else None,
+                           'direction': 'desc' if re.search('-', order_by) else 'asc',
+                           'link': link,
+                           'data': header if not header_name else header_name})
+
+    for facility in facilities:
+        row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
+                'data': facility.msd_code},
+               {'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]),
+                'data': facility.name}]
+        history = ''
+        i = 3
+        while i >= 0:
+            query_date = report_date + relativedelta(months=-3 * i)
+            randr_status = facility.randr_status_by_quarter(query_date)
+            if randr_status and randr_status.status_type.short_name == 'r_and_r_submitted_facility_to_district':
+                if current_submitting_group(randr_status.status_date.month) == facility.delivery_group.name:
+                    row.append({'data': randr_status.status_date, 'cell_class': 'randr_submitted_facility_to_district'})
+                else:
+                    row.append({'data': randr_status.status_date, 'cell_class': 'randr_submitted_facility_to_district_wrong_date'})
+            else:
+                row.append({'data': 'Not reported', 'cell_class': 'r_and_r_not_submitted_facility_to_district'})
+                 
+            i-=1
+        contacts = facility.contactdetail_set.all().order_by('-role__id')
+        if contacts:
+            data = "%s (%s) %s" % (contacts[0].name, contacts[0].role, contacts[0].phone())
+            data += ' ' + contacts[0].email if contacts[0].email else ''
+            row.append({'data': data })
+        randr_data_table.append(row)
+    
+    submitting_total = sdp.child_sdps().filter(delivery_group__name=current_submitting_group(report_date.month) ).count()
+    number_submitted = sdp.child_sdps_submitted_randr_this_month(report_date)
+    
+    stock_data_table = [] 
+    headers = [ ['msd_code', 'MSD Code'],
+                ['delivery_group', 'Delivery Group'],
+                ['name', 'Facility Name'] ]
+    stock_header_row = []
+
+    for header, header_name in headers:
+        link='?'
+        link += 'month=%d&year=%d' % (report_date.month, report_date.year)
+        link += '&order_by=-%s' % header if (order_by == header) else '&order_by=%s' % header                    
+        stock_header_row.append({'sorted': 'sorted' if re.search(header, order_by) else None,
+                           'direction': 'desc' if re.search('-', order_by) else 'asc',
+                           'link': link,
+                           'data': header if not header_name else header_name})
+    
+    for product in Product.objects.all():
+        stock_header_row.append({'data': product.name})
+
+    facilities = Facility.objects.filter(parent_id=sdp.id).order_by(order_by, "name")
+    under_stocked_by_product = {}
+    over_stocked_by_product = {}
+    for facility in facilities:
+        row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
+                'data': facility.msd_code},
+               {'data': facility.delivery_group},
+               {'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]),
+                'data': facility.name}]
+        idx = 0
+        for product in Product.objects.all():
+            under_stocked_by_product[idx] = 0
+            over_stocked_by_product[idx] = 0
+            quantity = facility.months_of_stock(product.sms_code, report_date)
+            cell_class = ''
+            if quantity == None:
+                cell_class = 'insufficient_data'
+                quantity = 'Insufficient data'
+            elif quantity == 0:
+                cell_class = 'zero_count'
+            elif quantity < settings.MONTHS_OF_STOCK_MIN:
+                cell_class = 'under_min'
+                under_stocked_by_product[idx] += 1                   
+            elif quantity > settings.MONTHS_OF_STOCK_MAX:                   
+                cell_class = 'exceeds_max'
+                over_stocked_by_product[idx] += 1                   
+            row.append({'data': quantity,
+                        'cell_class': cell_class})
+            idx += 1
+
+        stock_data_table.append(row)
+    understock_row = [{},{},{'data': 'Total understocked'}]
+    overstock_row = [{},{},{'data': 'Total overstocked'}]
+    idx = 0
+    for product in Product.objects.all():
+        if facilities.count():
+            understock_percentage = float(under_stocked_by_product[idx]) / float(facilities.count()) * 100.0
+            overstock_percentage = float(over_stocked_by_product[idx]) / float(facilities.count()) * 100.0
+        else:
+            understock_percentage = 0
+            overstock_percentage = 0
+        understock_row.append({'data': '%d (%d)' % (under_stocked_by_product[idx], understock_percentage)})
+        overstock_row.append({'data': '%d (%d)' % (over_stocked_by_product[idx], overstock_percentage)})
+        idx += 1
+    stock_data_table.append(understock_row)
+    stock_data_table.append(overstock_row)
+
+    print under_stocked_by_product
+    print over_stocked_by_product
+    
+    return render_to_response('reports.html',
+                              {'language': language,
+                               'breadcrumbs': breadcrumbs,
+                               'show_next_month': show_next_month,
+                               'next_month_link': next_month_link,
+                               'previous_month_link': previous_month_link,
+                               'report_date': report_date,           
+                               'randr_header_row': randr_header_row,
+                               'stock_header_row': stock_header_row,
+                               'randr_data_table': randr_data_table,
+                               'stock_data_table': stock_data_table, 
+                               'current_submitting_group': current_submitting_group(report_date.month),
+                               'submitting_total': submitting_total,
+                               'number_submitted': number_submitted,
+                               'reporting_percentage': float(number_submitted) / float(submitting_total) * 100.0 if submitting_total else 0,                                        
+                               'sdp': sdp},
+                              context_instance=RequestContext(request))
+
+@login_required
 def supervision(request):
     sdp = _get_current_sdp(request)
     
@@ -189,7 +368,7 @@ def supervision(request):
     show_next_month = True
     if year == now.year and month == datetime.now().month:
         show_next_month = False    
-    report_date = date(year, month, now.day)
+    report_date = date(year, month, 1)
     month_name = report_date.strftime('%B')
     next_month_date = report_date + relativedelta(months=+1)
     previous_month_date = report_date + relativedelta(months=-1)
@@ -269,7 +448,7 @@ def dashboard(request):
         show_next_month = False
     else:
         show_next_month = True
-    report_date = date(year, month, now.day)
+    report_date = date(year, month, 1)
     month_name = report_date.strftime('%B')
     #this can't be right
     next_month_date = report_date + relativedelta(months=+1)
@@ -455,7 +634,7 @@ def facilities_index(request, view_type='inventory'):
     if year == now.year and month == datetime.now().month:
         show_next_month = False
         
-    report_date = date(year, month, now.day)
+    report_date = date(year, month, 1)
     month_name = report_date.strftime('%B')
     next_month_date = report_date + relativedelta(months=+1)
     previous_month_date = report_date + relativedelta(months=-1)
@@ -512,7 +691,7 @@ def facilities_index(request, view_type='inventory'):
                 'data': facility.name}]
         for product in Product.objects.all():
             if view_type=="inventory":
-                quantity = facility.stock_on_hand(product.sms_code, report_date)
+                quantity = facility.stock_on_hand(product.sms_code, report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999))
                 cell_class = ''
                 if quantity == None:
                     cell_class = 'insufficient_data'
@@ -576,7 +755,7 @@ def facilities_ordering(request):
     show_next_month = True
     if year == now.year and month == datetime.now().month:
         show_next_month = False    
-    report_date = date(year, month, now.day)
+    report_date = date(year, month, 1)
     month_name = report_date.strftime('%B')
     next_month_date = report_date + relativedelta(months=+1)
     previous_month_date = report_date + relativedelta(months=-1)
@@ -650,7 +829,7 @@ def facilities_ordering(request):
                                'next_month_link': next_month_link,
                                'previous_month_link': previous_month_link,
                                'report_date': report_date,
-                               'data_table': data_table,                                          
+                               'data_table': data_table,  
                                "header_row": header_row,                               
                                "breadcrumbs": breadcrumbs,
                                "sdp": sdp,
