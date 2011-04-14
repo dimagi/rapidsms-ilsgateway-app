@@ -238,12 +238,14 @@ def reports(request):
                 'data': facility.name}]
         history = ''
         i = 3
+        on_time_count = 0
         while i >= 0:
             query_date = report_date + relativedelta(months=-3 * i)
             randr_status = facility.randr_status_by_quarter(query_date)
             if randr_status and randr_status.status_type.short_name == 'r_and_r_submitted_facility_to_district':
                 if current_submitting_group(randr_status.status_date.month) == facility.delivery_group.name:
                     row.append({'data': randr_status.status_date, 'cell_class': 'randr_submitted_facility_to_district'})
+                    on_time_count += 1
                 else:
                     row.append({'data': randr_status.status_date, 'cell_class': 'randr_submitted_facility_to_district_wrong_date'})
             else:
@@ -276,11 +278,16 @@ def reports(request):
                            'data': header if not header_name else header_name})
     
     for product in Product.objects.all():
-        stock_header_row.append({'data': product.name})
+        stock_header_row.append({'data': product.sms_code})
 
     facilities = Facility.objects.filter(parent_id=sdp.id).order_by(order_by, "name")
     under_stocked_by_product = {}
     over_stocked_by_product = {}
+    idx = 0
+    for product in Product.objects.all():
+        under_stocked_by_product[idx] = 0
+        over_stocked_by_product[idx] = 0
+        idx += 1
     for facility in facilities:
         row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
                 'data': facility.msd_code},
@@ -289,26 +296,27 @@ def reports(request):
                 'data': facility.name}]
         idx = 0
         for product in Product.objects.all():
-            under_stocked_by_product[idx] = 0
-            over_stocked_by_product[idx] = 0
-            quantity = facility.months_of_stock(product.sms_code, report_date)
+            mos = facility.months_of_stock(product.sms_code, report_date)
             cell_class = ''
-            if quantity == None:
+            if mos == None:
                 cell_class = 'insufficient_data'
-                quantity = 'Insufficient data'
-            elif quantity == 0:
+                mos = 'Insufficient data'
+            elif mos == 0:
                 cell_class = 'zero_count'
-            elif quantity < settings.MONTHS_OF_STOCK_MIN:
+            elif mos < settings.MONTHS_OF_STOCK_MIN:
                 cell_class = 'under_min'
-                under_stocked_by_product[idx] += 1                   
-            elif quantity > settings.MONTHS_OF_STOCK_MAX:                   
+                under_stocked_by_product[idx] = under_stocked_by_product[idx] + 1
+                print under_stocked_by_product[idx] 
+            elif mos > settings.MONTHS_OF_STOCK_MAX:                   
                 cell_class = 'exceeds_max'
-                over_stocked_by_product[idx] += 1                   
-            row.append({'data': quantity,
+                over_stocked_by_product[idx] = over_stocked_by_product[idx] + 1
+                print over_stocked_by_product[idx]
+            row.append({'data': mos,
                         'cell_class': cell_class})
             idx += 1
 
         stock_data_table.append(row)
+
     understock_row = [{},{},{'data': 'Total understocked'}]
     overstock_row = [{},{},{'data': 'Total overstocked'}]
     idx = 0
@@ -319,14 +327,12 @@ def reports(request):
         else:
             understock_percentage = 0
             overstock_percentage = 0
-        understock_row.append({'data': '%d (%d)' % (under_stocked_by_product[idx], understock_percentage)})
-        overstock_row.append({'data': '%d (%d)' % (over_stocked_by_product[idx], overstock_percentage)})
+        understock_row.append({'data': '%d (%d%%)' % (under_stocked_by_product[idx], understock_percentage)})
+        overstock_row.append({'data': '%d (%d%%)' % (over_stocked_by_product[idx], overstock_percentage)})
         idx += 1
     stock_data_table.append(understock_row)
     stock_data_table.append(overstock_row)
 
-    print under_stocked_by_product
-    print over_stocked_by_product
     
     return render_to_response('reports.html',
                               {'language': language,
@@ -342,7 +348,9 @@ def reports(request):
                                'current_submitting_group': current_submitting_group(report_date.month),
                                'submitting_total': submitting_total,
                                'number_submitted': number_submitted,
-                               'reporting_percentage': float(number_submitted) / float(submitting_total) * 100.0 if submitting_total else 0,                                        
+                               'on_time': on_time_count,
+                               'reporting_percentage': float(number_submitted) / float(submitting_total) * 100.0 if submitting_total else 0,
+                               'on_time_percentage': float(on_time_count) / float(number_submitted) * 100.0 if number_submitted else 0,                                                                    
                                'sdp': sdp},
                               context_instance=RequestContext(request))
 
