@@ -20,24 +20,29 @@
         {% endfor %}
     </table>
 </div>
+{% for stock_header_row, stock_data_table in stock_data_tables %}
+    <div class="module">
+        <h2>{% trans 'Stock on hand' %} {% if not forloop.first %} (continued){% endif %}</h2>
+        <div class="toolbar">
+            {% if view_type == 'inventory' %}<a href="{{ mos_link }}">{% trans 'Show months of stock' %}</a>{% else %}<a href="{{ inv_link }}">{% trans 'Show inventory' %}</a>{% endif %}
+        </div>            
+        <table class="stock">
+            <thead><tr>{% for cell in stock_header_row %}<th class="{{ cell.sorted }} {{ cell.direction }}">{% if cell.link %}<a href="{{ cell.link }}">{% endif %}{{ cell.data }}{% if cell.link %}<span></span></a>{% endif %}</th>{% endfor %}</tr></thead>
+            {% for row in stock_data_table %}
+                <tr>
+                    {% for cell in row %}
+                        <td><span class="{{ cell.cell_class }}">{% if cell.link %}<a href="{{ cell.link }}">{% endif %}{% blocktrans with cell.data as value %}{{ value }}{% endblocktrans %}{% if cell.link %}</a>{% endif %}</span></td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endfor %}
 <div class="module">
-    <h2>{% trans 'Stock on hand' %}</h2>
-    <table class="stock">
-        <thead><tr>{% for cell in stock_header_row %}<th class="{{ cell.sorted }} {{ cell.direction }}">{% if cell.link %}<a href="{{ cell.link }}">{% endif %}{{ cell.data }}{% if cell.link %}<span></span></a>{% endif %}</th>{% endfor %}</tr></thead>
-        {% for row in stock_data_table %}
-            <tr>
-                {% for cell in row %}
-                    <td><span class="{{ cell.cell_class }}">{% if cell.link %}<a href="{{ cell.link }}">{% endif %}{% blocktrans with cell.data as value %}{{ value }}{% endblocktrans %}{% if cell.link %}</a>{% endif %}</span></td>
-                {% endfor %}
-            </tr>
-        {% endfor %}
-    </table>
-</div>
-<div class="module">
-    <h2>{% trans 'Supervision History' %} &raquo; Group {{ current_submitting_group }}: {% blocktrans with number_submitted as submitted and submitting_total as count %}{{ submitted }} of {{ count }}{% endblocktrans %} {% trans 'received supervision' %} ({{ reporting_percentage|floatformat }}%)</h2>
+    <h2>{% trans 'Supervision History' %} &raquo; {% blocktrans with number_supervised as supervised and total_number_to_supervise as count %}{{ number_supervised }} of {{ count }}{% endblocktrans %} {% trans 'received supervision' %} ({{ supervision_percentage|floatformat }}%)</h2>
     <table class="ordering">
-        <thead><tr>{% for cell in randr_header_row %}<th class="{{ cell.sorted }} {{ cell.direction }}">{% if cell.link %}<a href="{{ cell.link }}">{% endif %}{{ cell.data }}{% if cell.link %}<span></span></a>{% endif %}</th>{% endfor %}</tr></thead>
-        {% for row in randr_data_table %}
+        <thead><tr>{% for cell in supervision_header_row %}<th class="{{ cell.sorted }} {{ cell.direction }}">{% if cell.link %}<a href="{{ cell.link }}">{% endif %}{{ cell.data }}{% if cell.link %}<span></span></a>{% endif %}</th>{% endfor %}</tr></thead>
+        {% for row in supervision_data_table %}
             <tr>
                 {% for cell in row %}
                     <td><span class="{{ cell.cell_class }}">{% if cell.link %}<a href="{{ cell.link }}">{% endif %}{% blocktrans with cell.data as value %}{{ value }}{% endblocktrans %}{% if cell.link %}</a>{% endif %}</span></td>
