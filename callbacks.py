@@ -19,7 +19,7 @@ from django.db.models import Count, Max
 ######################
 
 OFFSET = relativedelta(days=-20)
-TEST_MODE = True
+TEST_MODE = False
 #  Next steps: 
 #  1) collapse into a single callback method DONE
 #  2) change to a config dict
