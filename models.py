@@ -435,8 +435,15 @@ class ServiceDeliveryPoint(Location):
             else:
                 return None
 
-    def stock_on_hand(self, sms_code, end_date=datetime.now() ):
-        reports = ServiceDeliveryPointProductReport.objects.filter(report_date__range=(end_date + relativedelta(weeks=-1), end_date + relativedelta(weeks=+1) ),
+    def stock_on_hand(self, sms_code, end_date=datetime.now() + relativedelta(months=-1) ):
+        start_time = end_date + relativedelta(months=-1, 
+                                         day=get_last_business_day_of_month((end_date + relativedelta(months=-1)).year, 
+                                                                            (end_date + relativedelta(months=-1)).month))
+    
+        end_time = end_date + relativedelta(day=get_last_business_day_of_month(end_date.year, 
+                                                                          end_date.month))
+        
+        reports = ServiceDeliveryPointProductReport.objects.filter(report_date__range=(start_time, end_time ),
                                                                    service_delivery_point__id=self.id,
                                                                    product__sms_code=sms_code,
                                                                    report_type__sms_code="soh") 

@@ -284,6 +284,14 @@ def reports(request):
         under_stocked_by_product = {}
         over_stocked_by_product = {}
         idx = 0
+        
+        start_time = report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0) + relativedelta(months=-1, 
+                                         day=get_last_business_day_of_month((report_date + relativedelta(months=-1)).year, 
+                                                                            (report_date + relativedelta(months=-1)).month))
+    
+        end_time = report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0) + relativedelta(day=get_last_business_day_of_month(report_date.year, 
+                                                                          report_date.month))
+        
         for product in products:
             under_stocked_by_product[idx] = 0
             over_stocked_by_product[idx] = 0
@@ -298,7 +306,7 @@ def reports(request):
             for product in products:
                 cell_class = ''
                 if view_type == 'inventory':
-                    mos = facility.stock_on_hand(product.sms_code, report_date)
+                    mos = facility.stock_on_hand(product.sms_code, report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0))
                     if mos == None:
                         cell_class = 'insufficient_data'
                         mos = 'No data'
@@ -312,7 +320,7 @@ def reports(request):
                         cell_class = 'exceeds_max'
                         over_stocked_by_product[idx] = over_stocked_by_product[idx] + 1
                 else:
-                    mos = facility.months_of_stock(product.sms_code, report_date)
+                    mos = facility.months_of_stock(product.sms_code, report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0))
                     if mos == None:
                         cell_class = 'insufficient_data'
                         mos = 'Insufficient data'
@@ -421,6 +429,8 @@ def reports(request):
                                'on_time': on_time_count,
                                'mos_link': mos_link,
                                'inv_link': inv_link,
+                               'start_time': start_time,
+                               'end_time': end_time,
                                'view_type': view_type,
                                'reporting_percentage': float(number_submitted) / float(submitting_total) * 100.0 if submitting_total else 0,
                                'on_time_percentage': float(on_time_count) / float(number_submitted) * 100.0 if number_submitted else 0,                                                                    
@@ -764,6 +774,12 @@ def facilities_index(request, view_type='inventory'):
         header_row.append({'data': product.name})
 
     counter = 0
+    start_time = report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0) + relativedelta(months=-1, 
+                                     day=get_last_business_day_of_month((report_date + relativedelta(months=-1)).year, 
+                                                                        (report_date + relativedelta(months=-1)).month))
+
+    end_time = report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0) + relativedelta(day=get_last_business_day_of_month(report_date.year, 
+                                                                      report_date.month))
     for facility in facilities:
         row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
                 'data': facility.msd_code},
@@ -772,7 +788,7 @@ def facilities_index(request, view_type='inventory'):
                 'data': facility.name}]
         for product in Product.objects.all():
             if view_type=="inventory":
-                quantity = facility.stock_on_hand(product.sms_code, report_date + relativedelta(day=31, minute=59, second=59, hour=23, microsecond=999999))
+                quantity = facility.stock_on_hand(product.sms_code, report_date + relativedelta(months=-1))                
                 cell_class = ''
                 if quantity == None:
                     cell_class = 'insufficient_data'
@@ -783,7 +799,7 @@ def facilities_index(request, view_type='inventory'):
                 row.append({'data': quantity,
                             'cell_class': cell_class})
             elif view_type == "months_of_stock":
-                quantity = facility.months_of_stock(product.sms_code, report_date)
+                quantity = facility.months_of_stock(product.sms_code, report_date + relativedelta(months=-1))
                 cell_class = ''
                 if quantity == None:
                     cell_class = 'insufficient_data'
@@ -810,6 +826,8 @@ def facilities_index(request, view_type='inventory'):
                                "header_row": header_row,
                                "mos_link": mos_link,
                                "inv_link": inv_link,
+                               "start_time": start_time,
+                               "end_time": end_time,
                                "data_table": data_table},
                               context_instance=RequestContext(request),)
 

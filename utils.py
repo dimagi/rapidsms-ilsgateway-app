@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from django.utils.translation import ugettext as _
 from rapidsms.messages import OutgoingMessage
+from dateutil.relativedelta import *
+from dateutil.rrule import *
 
 #temp
 import logging
@@ -91,8 +93,25 @@ def get_message(contact_detail, msg_code, **kwargs):
         m = None
     return m 
     
-    
-    
+def get_last_business_day_of_month(year, month, offset=0):
+    if offset > 0:
+        raise "Offset must be a number from -366 to 0"
+    base_time = datetime(year, month, 1, 1, 1)
+    rr1 = rrule(MONTHLY, 
+            interval=1, 
+            dtstart=base_time + relativedelta(months=-2), 
+            until=  base_time + relativedelta(months=+2), 
+            byweekday=(MO,TU,WE,TH,FR), 
+            bysetpos=offset-1)
+                    
+    return rr1.after(base_time).day
+
+def get_last_business_day_on_or_before(a_datetime):
+    while a_datetime.weekday() in [5,6]:
+        a_datetime = a_datetime + relativedelta(days=-1)
+    return a_datetime
+            
+
     
     
     

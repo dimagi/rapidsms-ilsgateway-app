@@ -22,7 +22,7 @@
 </div>
 {% for stock_header_row, stock_data_table in stock_data_tables %}
     <div class="module">
-        <h2>{% trans 'Stock on hand' %} {% if not forloop.first %} (continued){% endif %}</h2>
+        <h2>{% trans 'Stock on hand' %} {% if not forloop.first %} (continued){% endif %} (reported between {{ start_time }} and {{ end_time }})</h2>
         <div class="toolbar">
             {% if view_type == 'inventory' %}<a href="{{ mos_link }}">{% trans 'Show months of stock' %}</a>{% else %}<a href="{{ inv_link }}">{% trans 'Show inventory' %}</a>{% endif %}
         </div>            
