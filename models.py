@@ -359,8 +359,11 @@ class ServiceDeliveryPoint(Location):
     def months_of_stock(self, sms_code, report_date=datetime.now() ):
         monthly_consumption = self.calculate_monthly_consumption(sms_code)
         stock_on_hand = self.stock_on_hand(sms_code, report_date)
-        if stock_on_hand and monthly_consumption:
-            return round(stock_on_hand / monthly_consumption, 1)
+        if stock_on_hand:
+            if monthly_consumption > 0:
+                return round(stock_on_hand / monthly_consumption, 1)
+            else:
+                return 0
         else:
             return None
         
@@ -427,11 +430,7 @@ class ServiceDeliveryPoint(Location):
                     consumption_list.append(consumption)
             if len(consumption_list) > 0:
                 avg_consumption =  sum([i for i in consumption_list]) / float(len(consumption_list))
-                if avg_consumption > 0:
-                    #print "Avg consumption for %s (%s): %s" % (self.name, sms_code, avg_consumption)
-                    return avg_consumption
-                else:
-                    return None 
+                return avg_consumption
             else:
                 return None
 
