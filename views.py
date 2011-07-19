@@ -257,14 +257,16 @@ def reports(request):
     
     #stock tables
     stock_data_tables = []
-    number_of_products_to_display = 6
+    number_of_products_to_display = 5
     products = Product.objects.all()[0:number_of_products_to_display]
     i = 0
+
     while products:
         stock_data_table = [] 
         headers = [ ['msd_code', 'MSD Code'],
                     ['delivery_group', 'Delivery Group'],
-                    ['name', 'Facility Name'] ]
+                    ['name', 'Facility Name'],
+                    ['reported_at', 'Last Reported At'] ]
         stock_header_row = []
     
         for header, header_name in headers:
@@ -291,17 +293,42 @@ def reports(request):
     
         end_time = report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0) + relativedelta(day=get_last_business_day_of_month(report_date.year, 
                                                                           report_date.month))
-        
+        late_report_time = add_business_days(start_time, 5)
         for product in products:
             under_stocked_by_product[idx] = 0
             over_stocked_by_product[idx] = 0
             idx += 1
+
+        soh_on_time_count = 0
+        soh_late_count = 0
+        soh_not_reported_count = 0
+            
         for facility in facilities:
+            last_report_date = facility.stock_on_hand_last_reported(end_time)
+            if type(last_report_date) == datetime:
+                if last_report_date < start_time:
+                    last_report_date = 'No SOH reported this period'
+                    soh_not_reported_count = soh_not_reported_count + 1
+                    soh_reporting_cell_class = "soh_not_reported"
+                elif last_report_date < late_report_time:
+                    soh_on_time_count = soh_on_time_count + 1
+                    last_report_date = last_report_date.strftime("%Y/%d/%m %H:%M")
+                    soh_reporting_cell_class = "soh_reported_on_time"
+                else:
+                    soh_late_count = soh_late_count + 1
+                    last_report_date = last_report_date.strftime("%Y/%d/%m %H:%M")
+                    soh_reporting_cell_class = "soh_reported_late"
+            else:
+                soh_not_reported_count = soh_not_reported_count + 1
+                soh_reporting_cell_class = "soh_not_reported"
+                
             row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
                     'data': facility.msd_code},
                    {'data': facility.delivery_group},
                    {'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]),
-                    'data': facility.name}]
+                    'data': facility.name},
+                   {'data': last_report_date,
+                    'cell_class': soh_reporting_cell_class}]
             idx = 0
             for product in products:
                 cell_class = ''
@@ -340,8 +367,21 @@ def reports(request):
     
             stock_data_table.append(row)
     
-        understock_row = [{},{},{'data': 'Total understocked'}]
-        overstock_row = [{},{},{'data': 'Total overstocked'}]
+        understock_row = [{},{},{'data': 'Total understocked'},{}]
+        overstock_row = [{},{},{'data': 'Total overstocked'},{}]
+        reporting_on_time_row = [{},{},{'data': 'On time (reporting between %s 14:00 and %s 14:00)' % (start_time.strftime('%Y/%d/%m'), late_report_time.strftime('%Y/%d/%m')),
+                                        'cell_class': "soh_reported_on_time"},
+                                       {'data':'%d out of %d (%d%%)' % (soh_on_time_count, facilities.count(), float(soh_on_time_count) / float(facilities.count()) * 100.0),
+                                        'cell_class': "soh_reported_on_time"},
+                                       {},{},{},{},{}]
+        reporting_late_row = [{},{},{'data': 'Late (reporting after %s 14:00)' % late_report_time.strftime('%Y/%d/%m'),
+                                     'cell_class': "soh_reported_late"},
+                                    {'data':'%d out of %d (%d%%)' % (soh_late_count, facilities.count(), float(soh_late_count) / float(facilities.count()) * 100.0 ),
+                                     'cell_class': "soh_reported_late"},
+                                    {},{},{},{},{}]
+        not_reporting_row = [{},{},{'data': 'Not reported this period',
+                                    'cell_class': "soh_not_reported"},{'data':'%d out of %d (%d%%)' % (soh_not_reported_count, facilities.count(), float(soh_not_reported_count) / float(facilities.count()) * 100.0 ),
+                                    'cell_class': "soh_not_reported"},{},{},{},{},{}]
         idx = 0
         for product in products:
             if facilities.count():
@@ -356,6 +396,9 @@ def reports(request):
         if view_type == 'months_of_stock':
             stock_data_table.append(understock_row)
             stock_data_table.append(overstock_row)
+        stock_data_table.append(reporting_on_time_row)
+        stock_data_table.append(reporting_late_row)
+        stock_data_table.append(not_reporting_row)
         stock_data_tables.append([stock_header_row, stock_data_table])
         i += 1
         products = Product.objects.all()[i * number_of_products_to_display:(i + 1) * number_of_products_to_display]

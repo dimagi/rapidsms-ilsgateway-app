@@ -111,6 +111,12 @@ def get_last_business_day_on_or_before(a_datetime):
         a_datetime = a_datetime + relativedelta(days=-1)
     return a_datetime
             
+def add_business_days(a_datetime, number):
+    while number > 0:
+        a_datetime = a_datetime + relativedelta(days=+1)
+        if a_datetime.weekday() not in [5,6]:
+            number = number - 1
+    return a_datetime
 
     
     

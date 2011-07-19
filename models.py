@@ -451,9 +451,10 @@ class ServiceDeliveryPoint(Location):
         else:
             return None        
     
-    def stock_on_hand_last_reported(self):
+    def stock_on_hand_last_reported(self, date_before=datetime.now() ):
         reports = ServiceDeliveryPointProductReport.objects.filter(service_delivery_point__id=self.id,
-                                                report_type__id=1) 
+                                                                   report_type__id=1,
+                                                                   report_date__lt=date_before) 
         if reports:
             return reports[0].report_date                                 
         elif self.received_reminder_after("soh_reminder_sent_facility", 
