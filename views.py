@@ -798,66 +798,76 @@ def facilities_index(request, view_type='inventory'):
     mos_link = '/facilities/months_of_stock/' + link
     inv_link = '/facilities/inventory/' + link
 
-    data_table = [] 
-    headers = [ ['msd_code', 'MSD Code'],
-                ['delivery_group', 'Delivery Group'],
-                ['name', 'Facility Name'] ]
-    header_row = []
+    stock_data_tables = []
+    number_of_products_to_display = 6
+    products = Product.objects.all()[0:number_of_products_to_display]
+    i = 0
 
-    for header, header_name in headers:
-        link='?'
-        link += 'month=%d&year=%d' % (report_date.month, report_date.year)
-        link += '&order_by=-%s' % header if (order_by == header) else '&order_by=%s' % header                    
-        header_row.append({'sorted': 'sorted' if re.search(header, order_by) else None,
-                           'direction': 'desc' if re.search('-', order_by) else 'asc',
-                           'link': link,
-                           'data': header if not header_name else header_name})
+    while products:
+        data_table = [] 
+        headers = [ ['msd_code', 'MSD Code'],
+                    ['delivery_group', 'Delivery Group'],
+                    ['name', 'Facility Name'] ]
+        header_row = []
     
-    for product in Product.objects.all():
-        header_row.append({'data': product.name})
+        for header, header_name in headers:
+            link='?'
+            link += 'month=%d&year=%d' % (report_date.month, report_date.year)
+            link += '&order_by=-%s' % header if (order_by == header) else '&order_by=%s' % header                    
+            header_row.append({'sorted': 'sorted' if re.search(header, order_by) else None,
+                               'direction': 'desc' if re.search('-', order_by) else 'asc',
+                               'link': link,
+                               'data': header if not header_name else header_name})
+        
+        for product in products:
+            header_row.append({'data': product.name})
+    
+        counter = 0
+        start_time = report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0) + relativedelta(months=-1, 
+                                         day=get_last_business_day_of_month((report_date + relativedelta(months=-1)).year, 
+                                                                            (report_date + relativedelta(months=-1)).month))
+    
+        end_time = report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0) + relativedelta(day=get_last_business_day_of_month(report_date.year, 
+                                                                          report_date.month))
+        for facility in facilities:
+            row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
+                    'data': facility.msd_code},
+                   {'data': facility.delivery_group},
+                   {'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]),
+                    'data': facility.name}]
+            for product in products:
+                if view_type=="inventory":
+                    quantity = facility.stock_on_hand(product.sms_code, report_date + relativedelta(months=-1))                
+                    cell_class = ''
+                    if quantity == None:
+                        cell_class = 'insufficient_data'
+                        quantity = 'No data'
+                    elif quantity == 0:
+                        cell_class = 'zero_count'
+                        
+                    row.append({'data': quantity,
+                                'cell_class': cell_class})
+                elif view_type == "months_of_stock":
+                    quantity = facility.months_of_stock(product.sms_code, report_date + relativedelta(months=-1))
+                    cell_class = ''
+                    if quantity == None:
+                        cell_class = 'insufficient_data'
+                        quantity = 'Insufficient data'
+                    elif quantity == 0:
+                        cell_class = 'zero_count'
+                    elif quantity < settings.MONTHS_OF_STOCK_MIN:
+                        cell_class = 'under_min'                    
+                    elif quantity > settings.MONTHS_OF_STOCK_MAX:                   
+                        cell_class = 'exceeds_max'
+                    row.append({'data': quantity,
+                                'cell_class': cell_class})
+    
+            data_table.append(row)
+            counter += 1
+        stock_data_tables.append([header_row, data_table])
+        i += 1
+        products = Product.objects.all()[i * number_of_products_to_display:(i + 1) * number_of_products_to_display]
 
-    counter = 0
-    start_time = report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0) + relativedelta(months=-1, 
-                                     day=get_last_business_day_of_month((report_date + relativedelta(months=-1)).year, 
-                                                                        (report_date + relativedelta(months=-1)).month))
-
-    end_time = report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0) + relativedelta(day=get_last_business_day_of_month(report_date.year, 
-                                                                      report_date.month))
-    for facility in facilities:
-        row = [{'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]), 
-                'data': facility.msd_code},
-               {'data': facility.delivery_group},
-               {'link': reverse('ilsgateway.views.facilities_detail', args=[facility.id]),
-                'data': facility.name}]
-        for product in Product.objects.all():
-            if view_type=="inventory":
-                quantity = facility.stock_on_hand(product.sms_code, report_date + relativedelta(months=-1))                
-                cell_class = ''
-                if quantity == None:
-                    cell_class = 'insufficient_data'
-                    quantity = 'No data'
-                elif quantity == 0:
-                    cell_class = 'zero_count'
-                    
-                row.append({'data': quantity,
-                            'cell_class': cell_class})
-            elif view_type == "months_of_stock":
-                quantity = facility.months_of_stock(product.sms_code, report_date + relativedelta(months=-1))
-                cell_class = ''
-                if quantity == None:
-                    cell_class = 'insufficient_data'
-                    quantity = 'Insufficient data'
-                elif quantity == 0:
-                    cell_class = 'zero_count'
-                elif quantity < settings.MONTHS_OF_STOCK_MIN:
-                    cell_class = 'under_min'                    
-                elif quantity > settings.MONTHS_OF_STOCK_MAX:                   
-                    cell_class = 'exceeds_max'
-                row.append({'data': quantity,
-                            'cell_class': cell_class})
-
-        data_table.append(row)
-        counter += 1
                      
     return render_to_response("facilities_list.html", 
                               {"breadcrumbs": breadcrumbs,
@@ -871,7 +881,8 @@ def facilities_index(request, view_type='inventory'):
                                "inv_link": inv_link,
                                "start_time": start_time,
                                "end_time": end_time,
-                               "data_table": data_table},
+                               "data_table": data_table,
+                               "stock_data_tables": stock_data_tables},
                               context_instance=RequestContext(request),)
 
 @login_required
