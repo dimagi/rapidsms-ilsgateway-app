@@ -122,44 +122,22 @@
     </div>
 </div>
 
-<div class="split-3">
+<div class="two-columns">
     <div style="text-align:center;">
         <a name="charts">
         <p><a href="{{ previous_month_link }}">&laquo; previous month</a><span style="font-weight:bold;font-size:1.5em;"> {{ report_date|date:"F" }} {{ report_date|date:"Y" }} </span>{% if show_next_month %}<a href="{{ next_month_link }}">next month &raquo;</a>{% else %}<span style="color:gray;">next month &raquo;</span>{% endif %} </p>
     </div>
-    <div class="left">
+    <div class="col-1">
         <div class="module">
             <h2>{% trans 'R&amp;R Submission Summary' %}</h2>
             <!--<div class="toolbar">
                 <a href="">{% trans 'All Reports'%}</a>
             </div>-->
-            <div id="placeholder" style="width:300px;height:300px;margin-top:50px;" title="{% trans "This graph represents the R&R submission Summary for the current district." %}"></div>
+            <div id="placeholder" style="width:300px;height:300px;margin-top:50px;padding-left:75px;" title="{% trans "This graph represents the R&R submission Summary for the current district." %}"></div>
             <div id="hover" style="text-align:center;">&nbsp;</div>
         </div>
     </div>
-    <div class="mid">
-        <div class="module">
-            <h2>{% trans 'Product Availability Summary' %}</h2>
-            <!--<div class="toolbar">
-                <a href="">All Stats</a>
-            </div>-->
-            <div id="legend" style="margin-bottom: 5px;">&nbsp;</div>
-            <div>Number of Facilities</div>
-            <a href="{% url ilsgateway.views.facilities_index %}"><div id="placeholder2" style="margin-left:10px;width:300px;height:300px;" title="{% trans "This graph represents the Product Availability Summary for the current district." %}"></div></a>
-            <div style="padding:7px 0;text-align:center;">Products</div>
-            <form action="{{ form_action }}" method="post">
-                {% for field in select_product_form %}
-                    <div class="fieldWrapper">
-                        {{ field.errors }}
-                        {{ field.label_tag }}
-                        {{ field }}
-                    </div>
-                {% endfor %}
-            </form>
-            <div style="text-align:center;"><input type="submit" name="change_product" value="Update" />&nbsp;</div>
-        </div>
-    </div>
-    <div class="right">
+    <div class="col-2">
         <div class="module">
             <h2>{% trans 'District Summary' %}</h2>
             <!--<div class="toolbar">
@@ -186,6 +164,28 @@
         </div>
     </div>
 </div>
+<div style="clear:both;">&nbsp;</div>
+<div class="module">
+    <h2>{% trans 'Product Availability Summary' %}</h2>
+    <!--<div class="toolbar">
+        <a href="">All Stats</a>
+    </div>-->
+    <div id="legend" style="margin-bottom: 5px;">&nbsp;</div>
+    <div>Number of Facilities</div>
+    <a href="{% url ilsgateway.views.facilities_index %}"><div id="placeholder2" style="margin-left:10px;width:924px;height:300px;" title="{% trans "This graph represents the Product Availability Summary for the current district." %}"></div></a>
+    <div style="padding:7px 0;text-align:center;">Products</div>
+    <form action="{{ form_action }}" method="post">
+        {% for field in select_product_form %}
+            <div class="fieldWrapper">
+                {{ field.errors }}
+                {{ field.label_tag }}
+                {{ field }}
+            </div>
+        {% endfor %}
+    </form>
+    <div style="text-align:center;"><input type="submit" name="change_product" value="Update" />&nbsp;</div>
+</div>
+
 <div class="clear-hack"></div>
 {% endblock %}
 
