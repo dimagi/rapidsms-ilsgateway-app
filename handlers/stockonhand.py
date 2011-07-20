@@ -8,19 +8,33 @@ from dateutil.relativedelta import *
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 from rapidsms.messages import OutgoingMessage
+import re
 from re import sub
+from re import findall
+from string import maketrans
+
+CHARS_IN_CODE = "2, 4"
+NUMERIC_LETTERS = ("lLIoO", "11100")
 
 class StockOnHandHandler(KeywordHandler):
     """
     """
     keyword = "soh|hmk"
+
+    def parse_report(self, string):
+        return re.findall("\s*(?P<code>[A-Za-z]+)\s*(?P<quantity>\d+)\s*", string)
+    
     def help(self):
         self.respond(_("Please send in your stock on hand information in the format 'soh <product> <amount> <product> <amount>...'"))
 
     def handle(self, text):
-        product_list = text.split()
-        if len(product_list) > 0 and len(product_list) % 2 != 0:
-             self.respond(_("Sorry, invalid format.  The message should be in the format 'delivered product amount product amount'"))
+        product_list = self.parse_report(text)
+        # flatten
+        product_list =  map(str, [item for sublist in product_list for item in sublist])
+        #product_list = text.split()
+        
+        if (len(product_list) == 0) or (len(product_list) > 0 and len(product_list) % 2 != 0):
+             self.respond(_("Sorry, invalid format.  The message should be in the format 'soh <product> <amount> <product> <amount>'"))
              return
         else:    
             reported_products = []
@@ -35,7 +49,7 @@ class StockOnHandHandler(KeywordHandler):
                         product_code = quantity
                         quantity = temp
                     else:                        
-                        self.respond(_("Sorry, invalid format.  The message should be in the format 'delivered product amount product amount'"))
+                        self.respond(_("Sorry, invalid format.  The message should be in the format 'soh product amount product amount'"))
                         return
                 report_type = ProductReportType.objects.filter(sms_code='soh')[0:1].get()
                 try:
