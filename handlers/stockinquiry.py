@@ -26,7 +26,7 @@ class StockOnHandHandler(KeywordHandler):
         else:    
             sdp = self.msg.contact.contactdetail.service_delivery_point
             try:
-                product = Product.objects.filter(product_code__iexact=product_code)[0:1].get()   
+                product = Product.get_product(product_code)   
             except Product.DoesNotExist:
                 self.respond(_("Sorry, invalid product code %(code)s"), code=product_code.upper())
                 return

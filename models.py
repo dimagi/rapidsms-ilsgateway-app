@@ -62,6 +62,22 @@ class Product(models.Model):
     sms_code = models.CharField(max_length=10)
     description = models.CharField(max_length=255)
     product_code = models.CharField(max_length=100, null=True, blank=True)
+
+    @classmethod
+    def get_product(cls, product_code):
+        # wrapper for handling multiple product codes w/o db changes (temnporary transition)
+        if product_code.lower() == 'iucd':
+            product_code = 'id' 
+        elif product_code.lower() == 'depo':
+            product_code = 'dp'
+        elif product_code.lower() == 'impl':
+            product_code = 'ip'
+        elif product_code.lower() == 'coc':
+            product_code = 'cc'
+        elif product_code.lower() == 'pop':
+            product_code = 'pp'
+            
+        return Product.objects.filter(sms_code__iexact=product_code)[0:1].get()
     
     def __unicode__(self):
         return self.name

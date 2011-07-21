@@ -20,7 +20,7 @@ class StockOnHandHandler(KeywordHandler):
     """
     """
     keyword = "soh|hmk"
-
+    
     def parse_report(self, string):
         return re.findall("\s*(?P<code>[A-Za-z]+)\s*(?P<quantity>\d+)\s*", string)
     
@@ -53,7 +53,7 @@ class StockOnHandHandler(KeywordHandler):
                         return
                 report_type = ProductReportType.objects.filter(sms_code='soh')[0:1].get()
                 try:
-                    product = Product.objects.filter(sms_code__iexact=product_code)[0:1].get()   
+                    product = Product.get_product(product_code)   
                 except Product.DoesNotExist:
                     self.respond(_("Sorry, invalid product code %(code)s"), code=product_code.upper())
                     return
