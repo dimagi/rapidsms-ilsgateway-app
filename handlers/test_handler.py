@@ -18,7 +18,13 @@ class TestReminder(KeywordHandler):
         self.respond(_("To test a reminder, send \"test [remindername] [msd code]\"; valid tests are soh, delivery, randr. Remember to setup your contact details!"))
 
     def handle(self, text):
-        command, msd_code = text.lower().split()
+        result = text.lower().split()
+        command = result.pop(0)
+        msd_code = result.pop(0)
+        extra = ''
+        while len(result) > 0:
+            extra = extra + ' ' + result.pop(0)
+            
         if command != 'send_inquiry_message':
             try:
                 sdp = ServiceDeliveryPoint.objects.get(msd_code=msd_code.upper())
@@ -37,6 +43,13 @@ class TestReminder(KeywordHandler):
                     ns = ServiceDeliveryPointStatus(service_delivery_point=contact_detail.service_delivery_point, status_type=st, status_date=datetime.now())
                     ns.save()
             self.respond("Sent")
+        if command in ['fw']:
+            for contact_detail in contact_details_to_remind:
+                default_connection = contact_detail.default_connection
+                if default_connection:
+                    m = OutgoingMessage(default_connection, _(extra))
+                    m.send() 
+            self.respond("Sent '%s'" % _(extra))
         if command in ['supervision']:
             for contact_detail in contact_details_to_remind:
                 default_connection = contact_detail.default_connection

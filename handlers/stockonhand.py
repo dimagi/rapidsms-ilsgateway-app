@@ -71,7 +71,7 @@ class StockOnHandHandler(KeywordHandler):
             if missing_product_list:
                 kwargs = {'contact_name': self.msg.contact.name,
                           'facility_name': sdp.name,
-                          'product_list': ', '.join(missing_product_list)}
+                          'product_list': ' '.join(missing_product_list)}
                 self.respond(_('Thank you %(contact_name)s for reporting your stock on hand for %(facility_name)s.  Still missing %(product_list)s.'), **kwargs)
             else:    
                 self.respond(_('Thank you, you reported you have %(reply_list)s. If incorrect, please resend.'), reply_list=','.join(reply_list))
