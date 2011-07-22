@@ -58,7 +58,7 @@ class StockOnHandHandler(KeywordHandler):
                     self.respond(_("Sorry, invalid product code %(code)s"), code=product_code.upper())
                     return
                 reported_products.append(product.sms_code)
-                reply_list.append('%s %s' % (product.sms_code, quantity) )
+                reply_list.append('%s' % (product.sms_code) )
                 sdp.report_product_status(product=product,report_type=report_type,quantity=quantity, message=self.msg.logger_msg)
             now = datetime.now()
             all_products = []
