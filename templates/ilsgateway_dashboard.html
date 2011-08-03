@@ -173,17 +173,6 @@
     <div id="legend" style="margin-bottom: 5px;">&nbsp;</div>
     <div>Number of Facilities</div>
     <a href="{% url ilsgateway.views.facilities_index %}"><div id="placeholder2" style="margin-left:10px;width:924px;height:300px;" title="{% trans "This graph represents the Product Availability Summary for the current district." %}"></div></a>
-    <div style="padding:7px 0;text-align:center;">Products</div>
-    <form action="{{ form_action }}" method="post">
-        {% for field in select_product_form %}
-            <div class="fieldWrapper">
-                {{ field.errors }}
-                {{ field.label_tag }}
-                {{ field }}
-            </div>
-        {% endfor %}
-    </form>
-    <div style="text-align:center;"><input type="submit" name="change_product" value="Update" />&nbsp;</div>
 </div>
 
 <div class="clear-hack"></div>

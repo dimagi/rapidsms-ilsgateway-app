@@ -71,15 +71,31 @@ def _send_reminders(router,
     
     #create a date rule (for business day logic) - last weekday prior to monthday
     if monthday:
-        start_time = get_last_business_day_on_or_before(now + relativedelta(months=-1, hour = byhour, minute = byminute, microsecond=0))
-        end_time = get_last_business_day_on_or_before(now + relativedelta(hour = byhour, minute = byminute, microsecond=0))
+        rr1 = rrule(MONTHLY, 
+                    interval=1, 
+                    dtstart=now + relativedelta(months=-2), 
+                    until=  now + relativedelta(months=+2), 
+                    byweekday=(MO,TU,WE,TH,FR), 
+                    byhour=byhour, 
+                    bysetpos=bysetpos,
+                    byminute=byminute,
+                    bysecond=0,
+                    bymonthday=(monthday-2, monthday-1, monthday))
     else:
-        start_time = now + relativedelta(months=-1, 
-                                         day=get_last_business_day_of_month((now + relativedelta(months=-1)).year, 
-                                                                            (now + relativedelta(months=-1)).month))
+        #Date rule for business days prior to the end of the month - can't use a monthday or we crash
+        rr1 = rrule(MONTHLY, 
+                    interval=1, 
+                    dtstart=now + relativedelta(months=-2), 
+                    until=  now + relativedelta(months=+2), 
+                    byweekday=(MO,TU,WE,TH,FR), 
+                    byhour=byhour, 
+                    bysetpos=bysetpos,
+                    byminute=byminute,
+                    bysecond=0)
+        
+    start_time = rr1.before(now)
+    end_time = rr1.after(now)
     
-        end_time = now + relativedelta(day=get_last_business_day_of_month(now.year, 
-                                                                          now.month))
 
     # query for sdps with no reminders sent 
     q_no_reminders = default_query.exclude(servicedeliverypointstatus__status_date__range=(start_time, end_time),
@@ -98,7 +114,6 @@ def _send_reminders(router,
     logging.debug("Sending Reminders for %s:" % reminder_name)
     logging.debug("  Reminder start window: %s" % start_time)
     logging.debug("  Reminder end window: %s" % end_time)
-    
     if send_initial:
         logging.debug("  Sending initial reminders:")
         for sdp in q_no_reminders:
@@ -194,6 +209,8 @@ def district_delinquent_deliveries_summary(router):
 
 def facility_soh_reminder(router):
     #Reminder window: the last weekday of the month at 2pm to the last weekday of the following month at 2pm 
+    monthday=28
+    
     reminder_name = "soh_reminder_sent_facility"
     
     # 2pm
@@ -207,7 +224,7 @@ def facility_soh_reminder(router):
     #send them out
     _send_reminders(router,
                     reminder_name,
-                    None,
+                    monthday,
                     byhour,
                     byminute,                    
                     additional_reminders_to_send,
