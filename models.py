@@ -129,7 +129,7 @@ class ServiceDeliveryPoint(Location):
                 soh_value = "No data"
             mos_value = self.months_of_stock(product.sms_code)
             if mos_value == None:
-                mos_value = "Insufficient data"
+                mos_value = "N/A"
             soh_array.append([product.sms_code, soh_value, mos_value])
         return soh_array
             
