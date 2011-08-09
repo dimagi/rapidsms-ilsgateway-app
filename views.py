@@ -257,7 +257,7 @@ def reports(request):
     
     #stock tables
     stock_data_tables = []
-    number_of_products_to_display = 5
+    number_of_products_to_display = 15
     products = Product.objects.all()[0:number_of_products_to_display]
     i = 0
 
@@ -350,7 +350,7 @@ def reports(request):
                     mos = facility.months_of_stock(product.sms_code, report_date + relativedelta(months=-1, hour=14, minute=0, second=0, microsecond=0))
                     if mos == None:
                         cell_class = 'insufficient_data'
-                        mos = 'Insufficient data'
+                        mos = 'N/A'
                     elif mos == 0:
                         cell_class = 'zero_count'
                     elif mos < settings.MONTHS_OF_STOCK_MIN:
@@ -852,7 +852,7 @@ def facilities_index(request, view_type='inventory'):
                     cell_class = ''
                     if quantity == None:
                         cell_class = 'insufficient_data'
-                        quantity = 'Insufficient data'
+                        quantity = 'N/A'
                     elif quantity == 0:
                         cell_class = 'zero_count'
                     elif quantity < settings.MONTHS_OF_STOCK_MIN:
